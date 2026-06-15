@@ -1,0 +1,206 @@
+"use client";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, Suspense } from "react";
+
+const RESULTS = [
+  {
+    id: "coll1",
+    href: "/article",
+    seed: "saudimag-s1",
+    size: "1000/600",
+    alt: "Vision 2030 architecture",
+    eyebrow: "Vision 2030 Architecture",
+    h3: "Transforming Landscapes",
+    type: "collection",
+  },
+  {
+    id: "coll2",
+    href: "/culture",
+    seed: "saudimag-s2",
+    size: "600/500",
+    alt: "Contemporary Gulf portrait",
+    eyebrow: "Creative Lives",
+    h3: "Regional Makers",
+    type: "collection",
+  },
+  {
+    id: "coll3",
+    href: "/culture",
+    seed: "saudimag-s3",
+    size: "600/500",
+    alt: "Culinary art",
+    eyebrow: "Culinary Arts",
+    h3: "Gulf Taste",
+    type: "collection",
+  },
+  {
+    id: "iss1",
+    href: "/article",
+    seed: "saudimag-iss1",
+    eyebrow: "Issue No. 42 · Dec 2023",
+    h3: "The Art of Desert Hospitality",
+    deck: "Desert resorts and community retreats redefining hospitality through tradition, climate, and contemporary design.",
+    type: "issue",
+  },
+  {
+    id: "iss2",
+    href: "/article",
+    seed: "saudimag-iss2",
+    eyebrow: "Issue No. 41 · Nov 2023",
+    h3: "Urban Metamorphosis",
+    deck: "Documenting Riyadh's skyline and the architects shaping the future form of the city.",
+    type: "issue",
+  },
+  {
+    id: "iss3",
+    href: "/culture",
+    seed: "saudimag-iss3",
+    eyebrow: "Issue No. 40 · Oct 2023",
+    h3: "Threads of Heritage",
+    deck: "The revival of traditional craftsmanship in contemporary Saudi homes, objects, and cultural spaces.",
+    type: "issue",
+  },
+];
+
+function SearchContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialQ = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(initialQ);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.value = initialQ;
+    setQuery(initialQ);
+  }, [initialQ]);
+
+  const visible = RESULTS.filter(
+    (r) => !query.trim() || r.h3.toLowerCase().includes(query.toLowerCase()) || r.eyebrow.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  };
+
+  const applyChip = (value: string) => {
+    setQuery(value);
+    router.push(`/search?q=${encodeURIComponent(value)}`);
+  };
+
+  const collections = visible.filter((r) => r.type === "collection");
+  const issues = visible.filter((r) => r.type === "issue");
+
+  return (
+    <main className="page" id="main-content">
+      <section className="section container">
+        <div className="search-panel reveal">
+          <h1>Search &amp; Archive</h1>
+          <p className="deck">Explore editorial collections by topic, issue, or keyword.</p>
+          <form className="search-field" onSubmit={handleSubmit}>
+            <span className="material-symbols-outlined">search</span>
+            <input
+              ref={inputRef}
+              type="search"
+              placeholder="Search the archives..."
+              aria-label="Search archive"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </form>
+          <div className="chips" aria-label="Popular searches">
+            <span className="meta" style={{ alignSelf: "center" }}>Popular</span>
+            {["Vision 2030", "Riyadh Art", "Fashion", "Architecture"].map((chip) => (
+              <button
+                key={chip}
+                className={`chip${query === chip ? " active" : ""}`}
+                type="button"
+                onClick={() => applyChip(chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {collections.length > 0 && (
+        <section className="section soft">
+          <div className="container">
+            <div className="section-header reveal">
+              <div>
+                <span className="label eyebrow">Curated Collections</span>
+                <h2>Editorial Sets</h2>
+              </div>
+            </div>
+            <div className="collection-grid">
+              <Link className="collection-card large reveal" href={collections[0].href}>
+                <img src={`https://picsum.photos/seed/${collections[0].seed}/${collections[0].size}`} alt={collections[0].alt} loading="lazy" />
+                <div className="collection-copy">
+                  <span className="label eyebrow">{collections[0].eyebrow}</span>
+                  <h3>{collections[0].h3}</h3>
+                </div>
+              </Link>
+              {collections.length > 1 && (
+                <div className="collection-stack">
+                  {collections.slice(1).map((c) => (
+                    <Link key={c.id} className="collection-card reveal" href={c.href}>
+                      <img src={`https://picsum.photos/seed/${c.seed}/${c.size}`} alt={c.alt} loading="lazy" />
+                      <div className="collection-copy">
+                        <span className="label eyebrow">{c.eyebrow}</span>
+                        <h3>{c.h3}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="section container">
+        <div className="section-header reveal">
+          <div>
+            <span className="label eyebrow">Archive Directory</span>
+            <h2>Recent Issues</h2>
+          </div>
+          <select aria-label="Sort archive">
+            <option>Sort by Year</option>
+            <option>Sort by Issue</option>
+          </select>
+        </div>
+        <div className="issue-list">
+          {issues.map((item) => (
+            <article key={item.id} className="issue reveal">
+              <Link className="image-frame" href={item.href}>
+                <img src={`https://picsum.photos/seed/${item.seed}/480/640`} alt="Magazine issue cover" loading="lazy" />
+              </Link>
+              <div className="issue-copy">
+                <span className="label eyebrow">{item.eyebrow}</span>
+                <h3>{item.h3}</h3>
+                <p className="deck">{item.deck}</p>
+                <p className="mt-lg">
+                  <Link className="button secondary" href={item.href}>Read issue</Link>
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+        {visible.length === 0 && (
+          <p className="deck">No matching archive entries found.</p>
+        )}
+      </section>
+    </main>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense>
+      <SearchContent />
+    </Suspense>
+  );
+}
