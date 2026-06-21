@@ -171,7 +171,7 @@ export default function Header() {
         </button>
         <form className="search-dialog search-field" onSubmit={handleSearchSubmit}>
           <span className="material-symbols-outlined">search</span>
-          <input ref={searchInputRef} type="search" placeholder="Search the archive..." />
+          <input ref={searchInputRef} type="search" placeholder="Search the archive..." data-placeholder-en="Search the archive..." data-placeholder-ar="ابحث في الأرشيف..." />
         </form>
       </div>
     </>

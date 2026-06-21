@@ -37,18 +37,18 @@ export default function SubscribePage() {
           <div className="benefits">
             <div className="benefit reveal">
               <span className="material-symbols-outlined">auto_stories</span>
-              <h3>Unrestricted Access</h3>
-              <p>Unlimited reading across our digital archive, featuring long-form journalism and cultural commentary.</p>
+              <h3 data-en="Unrestricted Access" data-ar="وصول غير محدود">Unrestricted Access</h3>
+              <p data-en="Unlimited reading across our digital archive, featuring long-form journalism and cultural commentary." data-ar="قراءة غير محدودة عبر أرشيفنا الرقمي، يتضمن الصحافة المطوّلة والتعليق الثقافي.">Unlimited reading across our digital archive, featuring long-form journalism and cultural commentary.</p>
             </div>
             <div className="benefit reveal">
               <span className="material-symbols-outlined">workspace_premium</span>
-              <h3>Print Edition</h3>
-              <p>A meticulously crafted print magazine delivered quarterly as a collectible editorial object.</p>
+              <h3 data-en="Print Edition" data-ar="النسخة المطبوعة">Print Edition</h3>
+              <p data-en="A meticulously crafted print magazine delivered quarterly as a collectible editorial object." data-ar="مجلة مطبوعة مصنوعة بعناية تُسلَّم فصلياً كقطعة تحريرية للاقتناء.">A meticulously crafted print magazine delivered quarterly as a collectible editorial object.</p>
             </div>
             <div className="benefit reveal">
               <span className="material-symbols-outlined">confirmation_number</span>
-              <h3>Curated Events</h3>
-              <p>Priority invitations to private talks, cultural salons, and editorial gatherings.</p>
+              <h3 data-en="Curated Events" data-ar="فعاليات منتقاة">Curated Events</h3>
+              <p data-en="Priority invitations to private talks, cultural salons, and editorial gatherings." data-ar="دعوات ذات أولوية إلى المحادثات الخاصة والصالونات الثقافية والتجمعات التحريرية.">Priority invitations to private talks, cultural salons, and editorial gatherings.</p>
             </div>
           </div>
         </section>
@@ -58,15 +58,15 @@ export default function SubscribePage() {
             <div className="stats-row reveal">
               <div className="stat-item">
                 <span className="stat-number">200+</span>
-                <span className="stat-label">Stories Published</span>
+                <span className="stat-label" data-en="Stories Published" data-ar="قصة منشورة">Stories Published</span>
               </div>
               <div className="stat-item">
                 <span className="stat-number">12K+</span>
-                <span className="stat-label">Active Readers</span>
+                <span className="stat-label" data-en="Active Readers" data-ar="قارئ نشط">Active Readers</span>
               </div>
               <div className="stat-item">
                 <span className="stat-number">4×</span>
-                <span className="stat-label">Issues Per Year</span>
+                <span className="stat-label" data-en="Issues Per Year" data-ar="عدد سنوياً">Issues Per Year</span>
               </div>
             </div>
             <div className="section-header reveal">
@@ -79,12 +79,12 @@ export default function SubscribePage() {
               <article className="tier reveal">
                 <div>
                   <span className="meta" data-en="Essential" data-ar="أساسي">Essential</span>
-                  <h3>Digital</h3>
+                  <h3 data-en="Digital" data-ar="رقمي">Digital</h3>
                   <span className="price">$15/month</span>
                   <ul>
-                    <li>Unlimited digital articles</li>
-                    <li>Daily briefing newsletter</li>
-                    <li>Ad-free reading experience</li>
+                    <li data-en="Unlimited digital articles" data-ar="مقالات رقمية غير محدودة">Unlimited digital articles</li>
+                    <li data-en="Daily briefing newsletter" data-ar="نشرة إخبارية يومية">Daily briefing newsletter</li>
+                    <li data-en="Ad-free reading experience" data-ar="تجربة قراءة بدون إعلانات">Ad-free reading experience</li>
                   </ul>
                 </div>
                 <button
@@ -100,13 +100,13 @@ export default function SubscribePage() {
               <article className="tier featured reveal">
                 <div>
                   <span className="meta" data-en="Complete" data-ar="شامل">Complete</span>
-                  <h3>Print &amp; Digital</h3>
+                  <h3 data-en="Print & Digital" data-ar="مطبوع ورقمي">Print &amp; Digital</h3>
                   <span className="price">$45/month</span>
                   <ul>
-                    <li>Everything in Digital</li>
-                    <li>Quarterly print edition delivered</li>
-                    <li>Exclusive digital supplements</li>
-                    <li>Archival print access</li>
+                    <li data-en="Everything in Digital" data-ar="كل ما في الرقمي">Everything in Digital</li>
+                    <li data-en="Quarterly print edition delivered" data-ar="النسخة المطبوعة الفصلية تُسلَّم">Quarterly print edition delivered</li>
+                    <li data-en="Exclusive digital supplements" data-ar="ملاحق رقمية حصرية">Exclusive digital supplements</li>
+                    <li data-en="Archival print access" data-ar="الوصول إلى الأرشيف المطبوع">Archival print access</li>
                   </ul>
                 </div>
                 <button
@@ -122,13 +122,13 @@ export default function SubscribePage() {
               <article className="tier reveal">
                 <div>
                   <span className="meta" data-en="Community" data-ar="مجتمع">Community</span>
-                  <h3>Majlis</h3>
-                  <span className="price">Inquire</span>
+                  <h3 data-en="Majlis" data-ar="مجلس">Majlis</h3>
+                  <span className="price" data-en="Inquire" data-ar="استفسر">Inquire</span>
                   <ul>
-                    <li>Everything in Print &amp; Digital</li>
-                    <li>Small-group editorial gatherings</li>
-                    <li>Research notes and city briefings</li>
-                    <li>Invitations to cultural dinners</li>
+                    <li data-en="Everything in Print & Digital" data-ar="كل ما في المطبوع والرقمي">Everything in Print &amp; Digital</li>
+                    <li data-en="Small-group editorial gatherings" data-ar="تجمعات تحريرية في مجموعات صغيرة">Small-group editorial gatherings</li>
+                    <li data-en="Research notes and city briefings" data-ar="ملاحظات البحث وإحاطات المدن">Research notes and city briefings</li>
+                    <li data-en="Invitations to cultural dinners" data-ar="دعوات لحفلات العشاء الثقافية">Invitations to cultural dinners</li>
                   </ul>
                 </div>
                 <Link className="button secondary" href="/contact" data-en="Request invitation" data-ar="طلب دعوة">
@@ -140,10 +140,10 @@ export default function SubscribePage() {
         </section>
 
         <section className="section container text-center">
-          <blockquote className="pullquote reveal">
+          <blockquote className="pullquote reveal" data-en="&ldquo;SAUDI MAG has redefined what it means to document our cultural renaissance. The print edition is a collector's item.&rdquo;" data-ar="&ldquo;أعادت SAUDI MAG تعريف معنى توثيق نهضتنا الثقافية. النسخة المطبوعة قطعة للاقتناء.&rdquo;">
             &ldquo;SAUDI MAG has redefined what it means to document our cultural renaissance. The print edition is a collector&apos;s item.&rdquo;
           </blockquote>
-          <span className="label eyebrow">Nouf Al-Saud · Creative Director</span>
+          <span className="label eyebrow" data-en="Nouf Al-Saud · Creative Director" data-ar="نوف آل سعود · المديرة الإبداعية">Nouf Al-Saud · Creative Director</span>
         </section>
       </main>
 

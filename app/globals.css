@@ -3018,3 +3018,139 @@ dialog.membership-dialog::backdrop {
 .border-top-sm { border-top: 1px solid var(--color-line); padding-top: 28px; }
 .gap-sm        { gap: 22px; }
 .mt-sm-top     { margin-top: 24px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARABIC / RTL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --font-arabic: "Cairo", "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* Switch font family for entire page in RTL */
+[dir="rtl"] body {
+  font-family: var(--font-arabic);
+  font-size: 17px;
+  line-height: 1.8;
+  text-align: right;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4 {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+
+/* Reset Latin letter-spacing for Arabic */
+[dir="rtl"] .label,
+[dir="rtl"] .meta,
+[dir="rtl"] .eyebrow,
+[dir="rtl"] .button,
+[dir="rtl"] .chip,
+[dir="rtl"] .site-nav a,
+[dir="rtl"] .footer-nav a {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+
+/* Ticker */
+[dir="rtl"] .ticker-track {
+  animation-direction: reverse;
+}
+
+/* Hero copy — mirror the negative margin */
+[dir="rtl"] .hero-copy,
+[dir="rtl"] .membership-card {
+  margin-inline-start: 0;
+  margin-inline-end: clamp(-120px, -7vw, -48px);
+  border-left: 0;
+  border-right: 3px solid var(--color-gold);
+}
+
+/* Drop cap — float right in RTL */
+[dir="rtl"] .drop-cap::first-letter {
+  float: right;
+  margin: 0.1em 0 0 0.12em;
+}
+
+/* Mobile sheet — slide from right */
+[dir="rtl"] .mobile-sheet {
+  margin-inline-start: auto;
+  transform: translateX(100%);
+}
+
+[dir="rtl"] .menu-open .mobile-sheet {
+  transform: translateX(0);
+}
+
+/* Interview pull quote — border on right */
+[dir="rtl"] .interview-pullquote {
+  border-left: 0;
+  border-right: 2px solid var(--color-gold);
+  padding-left: 0;
+  padding-right: 12px;
+}
+
+/* Article sidebar — mirror border */
+[dir="rtl"] .article-sidebar {
+  border-left: 0;
+  border-right: 1px solid var(--color-line);
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+/* Membership success + form success — mirror border */
+[dir="rtl"] .membership-success,
+[dir="rtl"] .form-success,
+[dir="rtl"] .demo-toast {
+  border-left: 0;
+  border-right: 3px solid var(--color-gold);
+}
+
+/* News row list — already uses logical grid, no change needed */
+
+/* Category strip — border direction */
+[dir="rtl"] .category-strip a {
+  border-right: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+[dir="rtl"] .category-strip a:last-child {
+  border-left: 0;
+}
+
+/* Sport badge — spacing */
+[dir="rtl"] .sport-badge {
+  letter-spacing: 0;
+}
+
+/* Section header button — already uses margin-top on mobile; no change */
+
+/* Footer social icons — direction neutral */
+
+/* Search field icon — mirror position */
+[dir="rtl"] .search-field .material-symbols-outlined {
+  inset-inline-start: auto;
+  inset-inline-end: 16px;
+}
+[dir="rtl"] .search-field input {
+  padding-inline: 10px 56px;
+}
+
+/* Reading progress stays on left */
+[dir="rtl"] .reading-progress {
+  left: auto;
+  right: 0;
+}
+
+/* Issue number badge */
+[dir="rtl"] .most-read li {
+  grid-template-columns: 1fr 42px;
+  direction: rtl;
+}
+
+[dir="rtl"] .most-read.landscape li::before {
+  order: 2;
+}

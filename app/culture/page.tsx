@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function CulturePage() {
   return (
     <main className="page" id="main-content">
-      {/* Warm editorial banner */}
       <div className="page-header page-header--warm">
         <div className="container">
           <div className="section-header reveal">
@@ -25,62 +24,60 @@ export default function CulturePage() {
         </div>
       </div>
 
-      {/* Full-width cinematic feature */}
       <div className="container" style={{ paddingTop: "clamp(24px,4vw,48px)" }}>
         <article className="main-lead reveal" style={{ minHeight: 540, marginBottom: "var(--stack-md)" }}>
           <Link className="main-lead-media" href="/article">
             <img src="https://picsum.photos/seed/saudimag-cat-hero/1400/900" alt="Gulf cultural district" />
           </Link>
           <div className="main-lead-copy">
-            <span className="label eyebrow">Heritage &amp; Style</span>
-            <h1><Link href="/article">Public Space, Heritage, and the New Gulf City</Link></h1>
-            <p>Architects, makers, and cultural organizers are drawing from the region&apos;s landscapes to build places that feel contemporary without losing memory.</p>
-            <span className="meta">By Laila Al-Fayed · 12 min read</span>
+            <span className="label eyebrow" data-en="Heritage & Style" data-ar="التراث والأسلوب">Heritage &amp; Style</span>
+            <h1><Link href="/article" data-en="Public Space, Heritage, and the New Gulf City" data-ar="الفضاء العام والتراث والمدينة الخليجية الجديدة">Public Space, Heritage, and the New Gulf City</Link></h1>
+            <p data-en="Architects, makers, and cultural organizers are drawing from the region's landscapes to build places that feel contemporary without losing memory." data-ar="المعماريون والصانعون والمنظمون الثقافيون يستوحون من مشاهد المنطقة لبناء أماكن تبدو معاصرة دون أن تفقد ذاكرتها.">Architects, makers, and cultural organizers are drawing from the region&apos;s landscapes to build places that feel contemporary without losing memory.</p>
+            <span className="meta" data-en="By Laila Al-Fayed · 12 min read" data-ar="بقلم ليلى الفايد · 12 دقائق قراءة">By Laila Al-Fayed · 12 min read</span>
           </div>
         </article>
       </div>
 
-      {/* Asymmetric editorial grid */}
       <section className="section container">
         <div className="editorial-grid reveal">
           <article className="article-card span-4">
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-cat1/600/450" alt="Artist in studio" loading="lazy" />
             </Link>
-            <span className="label eyebrow">Contemporary Art</span>
-            <h3><Link href="/article">The New Wave of Abstract Calligraphy</Link></h3>
-            <p>Young artists deconstruct classical scripts to create internationally recognized work.</p>
-            <span className="meta">By Sarah Al-Mutairi · 5 min read</span>
+            <span className="label eyebrow" data-en="Contemporary Art" data-ar="الفن المعاصر">Contemporary Art</span>
+            <h3><Link href="/article" data-en="The New Wave of Abstract Calligraphy" data-ar="موجة الخط التجريدي الجديدة">The New Wave of Abstract Calligraphy</Link></h3>
+            <p data-en="Young artists deconstruct classical scripts to create internationally recognized work." data-ar="فنانون شباب يفككون الخطوط الكلاسيكية لإنتاج أعمال تلقى اعترافاً دولياً.">Young artists deconstruct classical scripts to create internationally recognized work.</p>
+            <span className="meta" data-en="By Sarah Al-Mutairi · 5 min read" data-ar="بقلم سارة المطيري · 5 دقائق قراءة">By Sarah Al-Mutairi · 5 min read</span>
           </article>
 
           <article className="article-card span-8">
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-cat2/900/500" alt="Museum facade" loading="lazy" />
             </Link>
-            <span className="label eyebrow">Architecture</span>
-            <h3><Link href="/article">Designing the Future: The Architecture of Tomorrow&apos;s Museums</Link></h3>
-            <p>Visionary firms shape cultural infrastructure with sustainability, geometry, and localized design language.</p>
-            <span className="meta">By Tariq Fayed · 12 min read</span>
+            <span className="label eyebrow" data-en="Architecture" data-ar="العمارة">Architecture</span>
+            <h3><Link href="/article" data-en="Designing the Future: The Architecture of Tomorrow's Museums" data-ar="تصميم المستقبل: عمارة متاحف الغد">Designing the Future: The Architecture of Tomorrow&apos;s Museums</Link></h3>
+            <p data-en="Visionary firms shape cultural infrastructure with sustainability, geometry, and localized design language." data-ar="شركات رائدة تُشكّل البنية الثقافية باستدامة وهندسة ولغة تصميم محلية.">Visionary firms shape cultural infrastructure with sustainability, geometry, and localized design language.</p>
+            <span className="meta" data-en="By Tariq Fayed · 12 min read" data-ar="بقلم طارق فايد · 12 دقائق قراءة">By Tariq Fayed · 12 min read</span>
           </article>
 
           <article className="article-card span-6 divider-top">
             <Link className="card-media square" href="/search?q=Craftsmanship">
               <img src="https://picsum.photos/seed/saudimag-cat3/600/600" alt="Woven textiles" loading="lazy" />
             </Link>
-            <span className="label eyebrow">Craftsmanship</span>
-            <h3><Link href="/search?q=Craftsmanship">Reviving the Loom</Link></h3>
-            <p>The artisans bringing ancient textile techniques into the 21st century.</p>
-            <span className="meta">By Laila Hassan · 7 min read</span>
+            <span className="label eyebrow" data-en="Craftsmanship" data-ar="الحرفية">Craftsmanship</span>
+            <h3><Link href="/search?q=Craftsmanship" data-en="Reviving the Loom" data-ar="إحياء النول">Reviving the Loom</Link></h3>
+            <p data-en="The artisans bringing ancient textile techniques into the 21st century." data-ar="الحرفيون يُعيدون تقنيات النسيج القديمة إلى القرن الحادي والعشرين.">The artisans bringing ancient textile techniques into the 21st century.</p>
+            <span className="meta" data-en="By Laila Hassan · 7 min read" data-ar="بقلم ليلى حسن · 7 دقائق قراءة">By Laila Hassan · 7 min read</span>
           </article>
 
           <article className="article-card span-6 divider-top">
             <Link className="card-media square" href="/search?q=Performing+Arts">
               <img src="https://picsum.photos/seed/saudimag-cat4/600/600" alt="Theater stage" loading="lazy" />
             </Link>
-            <span className="label eyebrow">Performing Arts</span>
-            <h3><Link href="/search?q=Performing+Arts">The Spotlight Shifts</Link></h3>
-            <p>Independent theater troupes are finding new stages and eager audiences across the capital.</p>
-            <span className="meta">By Omar Zayed · 8 min read</span>
+            <span className="label eyebrow" data-en="Performing Arts" data-ar="الفنون الأدائية">Performing Arts</span>
+            <h3><Link href="/search?q=Performing+Arts" data-en="The Spotlight Shifts" data-ar="تحول الأضواء">The Spotlight Shifts</Link></h3>
+            <p data-en="Independent theater troupes are finding new stages and eager audiences across the capital." data-ar="فرق المسرح المستقلة تجد خشبات عرض جديدة وجماهير متحمسة في العاصمة.">Independent theater troupes are finding new stages and eager audiences across the capital.</p>
+            <span className="meta" data-en="By Omar Zayed · 8 min read" data-ar="بقلم عمر زايد · 8 دقائق قراءة">By Omar Zayed · 8 min read</span>
           </article>
         </div>
       </section>

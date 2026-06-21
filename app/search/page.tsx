@@ -121,21 +121,25 @@ function SearchContent() {
     <main className="page" id="main-content">
       <section className="section container">
         <div className="search-panel reveal">
-          <h1>Search &amp; Archive</h1>
-          <p className="deck">Explore editorial collections by topic, issue, or keyword.</p>
+          <h1 data-en="Search & Archive" data-ar="البحث والأرشيف">Search &amp; Archive</h1>
+          <p className="deck" data-en="Explore editorial collections by topic, issue, or keyword." data-ar="استكشف المجموعات التحريرية حسب الموضوع أو العدد أو الكلمة المفتاحية.">Explore editorial collections by topic, issue, or keyword.</p>
           <form className="search-field" onSubmit={handleSubmit}>
             <span className="material-symbols-outlined">search</span>
             <input
               ref={inputRef}
               type="search"
               placeholder="Search the archives..."
+              data-placeholder-en="Search the archives..."
+              data-placeholder-ar="ابحث في الأرشيف..."
               aria-label="Search archive"
+              data-label-en="Search archive"
+              data-label-ar="البحث في الأرشيف"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </form>
           <div className="chips" aria-label="Popular searches">
-            <span className="meta" style={{ alignSelf: "center" }}>Popular</span>
+            <span className="meta" style={{ alignSelf: "center" }} data-en="Popular" data-ar="شائع">Popular</span>
             {["Vision 2030", "Riyadh Art", "Fashion", "Architecture"].map((chip) => (
               <button
                 key={chip}
@@ -155,8 +159,8 @@ function SearchContent() {
           <div className="container">
             <div className="section-header reveal">
               <div>
-                <span className="label eyebrow">Curated Collections</span>
-                <h2>Editorial Sets</h2>
+                <span className="label eyebrow" data-en="Curated Collections" data-ar="مجموعات منتقاة">Curated Collections</span>
+                <h2 data-en="Editorial Sets" data-ar="مجموعات تحريرية">Editorial Sets</h2>
               </div>
             </div>
             <div className="collection-grid">
@@ -188,8 +192,8 @@ function SearchContent() {
       <section className="section container">
         <div className="section-header reveal">
           <div>
-            <span className="label eyebrow">Archive Directory</span>
-            <h2>Recent Issues</h2>
+            <span className="label eyebrow" data-en="Archive Directory" data-ar="دليل الأرشيف">Archive Directory</span>
+            <h2 data-en="Recent Issues" data-ar="أعداد حديثة">Recent Issues</h2>
           </div>
           <select
             aria-label="Sort archive"
@@ -212,14 +216,14 @@ function SearchContent() {
                 <h3>{item.h3}</h3>
                 <p className="deck">{item.deck}</p>
                 <p className="mt-lg">
-                  <Link className="button secondary" href={item.href}>Read issue</Link>
+                  <Link className="button secondary" href={item.href} data-en="Read issue" data-ar="اقرأ العدد">Read issue</Link>
                 </p>
               </div>
             </article>
           ))}
         </div>
         {visible.length === 0 && (
-          <p className="deck">No matching archive entries found.</p>
+          <p className="deck" data-en="No matching archive entries found." data-ar="لم يتم العثور على نتائج مطابقة في الأرشيف.">No matching archive entries found.</p>
         )}
       </section>
     </main>
