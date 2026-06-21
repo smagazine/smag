@@ -178,6 +178,30 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <section className="section soft">
+        <div className="container newsletter-strip reveal">
+          <div>
+            <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
+            <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
+            <p className="deck" data-en="The morning read for people following the region's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة المنطقة ومدنها وأفكارها. مجاني، كل يوم عمل.">The morning read for people following the region&apos;s culture, cities, and ideas. Free, every weekday.</p>
+          </div>
+          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); (e.currentTarget.querySelector("input") as HTMLInputElement).value = ""; (e.currentTarget.closest(".newsletter-strip") as HTMLElement)?.setAttribute("data-sent", "true"); }}>
+            <input
+              type="email"
+              required
+              placeholder="Your email address"
+              data-placeholder-en="Your email address"
+              data-placeholder-ar="عنوان بريدك الإلكتروني"
+              aria-label="Email address for newsletter"
+              data-label-en="Email address for newsletter"
+              data-label-ar="البريد الإلكتروني للنشرة"
+            />
+            <button className="button" type="submit" data-en="Subscribe free" data-ar="اشترك مجاناً">Subscribe free</button>
+          </form>
+          <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
+        </div>
+      </section>
     </main>
   );
 }

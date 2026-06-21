@@ -44,7 +44,7 @@ export default function EventsPage() {
         </article>
 
         <div className="events-grid reveal">
-          <article className="event-card article-card">
+          <article className="event-card article-card" data-category-card data-category-order="1" data-category-rank="2" data-category-editors-choice>
             <div className="event-badge"><span className="day">18</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-ev1/600/380" alt="MDL Beast" loading="lazy" />
@@ -55,7 +55,7 @@ export default function EventsPage() {
             <span className="meta" data-en="6 min read" data-ar="6 دقائق قراءة">6 min read</span>
           </article>
 
-          <article className="event-card article-card">
+          <article className="event-card article-card" data-category-card data-category-order="2" data-category-rank="1">
             <div className="event-badge"><span className="day">22</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-ev2/600/380" alt="Noor Riyadh" loading="lazy" />
@@ -66,7 +66,7 @@ export default function EventsPage() {
             <span className="meta" data-en="5 min read" data-ar="5 دقائق قراءة">5 min read</span>
           </article>
 
-          <article className="event-card article-card">
+          <article className="event-card article-card" data-category-card data-category-order="3" data-category-rank="3" data-category-editors-choice>
             <div className="event-badge"><span className="day">28</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-ev3/600/380" alt="Red Sea Film Festival" loading="lazy" />
@@ -77,7 +77,7 @@ export default function EventsPage() {
             <span className="meta" data-en="7 min read" data-ar="7 دقائق قراءة">7 min read</span>
           </article>
 
-          <article className="event-card article-card">
+          <article className="event-card article-card" data-category-card data-category-order="4" data-category-rank="5">
             <div className="event-badge"><span className="day">3</span><span className="month" data-en="Jul" data-ar="يول">Jul</span></div>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-ev4/600/380" alt="Arab Fashion Week" loading="lazy" />
@@ -88,7 +88,7 @@ export default function EventsPage() {
             <span className="meta" data-en="4 min read" data-ar="4 دقائق قراءة">4 min read</span>
           </article>
 
-          <article className="event-card article-card">
+          <article className="event-card article-card" data-category-card data-category-order="5" data-category-rank="4">
             <div className="event-badge"><span className="day">9</span><span className="month" data-en="Jul" data-ar="يول">Jul</span></div>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-ev5/600/380" alt="Cultural salon" loading="lazy" />

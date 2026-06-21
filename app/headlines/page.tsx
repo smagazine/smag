@@ -40,7 +40,7 @@ export default function HeadlinesPage() {
 
       <section className="section container">
         <div className="newsrow-list reveal">
-          <a className="newsrow" href="/article">
+          <a className="newsrow" href="/article" data-category-card data-category-order="1" data-category-rank="2">
             <div className="newsrow-thumb">
               <img src="https://picsum.photos/seed/saudimag-hl1/400/300" alt="Gulf trade" loading="lazy" />
             </div>
@@ -51,7 +51,7 @@ export default function HeadlinesPage() {
               <span className="meta" data-en="4 min read" data-ar="4 دقائق قراءة">4 min read</span>
             </div>
           </a>
-          <a className="newsrow" href="/article">
+          <a className="newsrow" href="/article" data-category-card data-category-order="2" data-category-rank="1" data-category-editors-choice>
             <div className="newsrow-thumb">
               <img src="https://picsum.photos/seed/saudimag-hl2/400/300" alt="Tourism numbers" loading="lazy" />
             </div>
@@ -62,7 +62,7 @@ export default function HeadlinesPage() {
               <span className="meta" data-en="5 min read" data-ar="5 دقائق قراءة">5 min read</span>
             </div>
           </a>
-          <a className="newsrow" href="/article">
+          <a className="newsrow" href="/article" data-category-card data-category-order="3" data-category-rank="3">
             <div className="newsrow-thumb">
               <img src="https://picsum.photos/seed/saudimag-hl3/400/300" alt="NEOM" loading="lazy" />
             </div>
@@ -73,7 +73,7 @@ export default function HeadlinesPage() {
               <span className="meta" data-en="6 min read" data-ar="6 دقائق قراءة">6 min read</span>
             </div>
           </a>
-          <a className="newsrow" href="/article">
+          <a className="newsrow" href="/article" data-category-card data-category-order="4" data-category-rank="4" data-category-editors-choice>
             <div className="newsrow-thumb">
               <img src="https://picsum.photos/seed/saudimag-hl4/400/300" alt="Heritage law" loading="lazy" />
             </div>
@@ -84,7 +84,7 @@ export default function HeadlinesPage() {
               <span className="meta" data-en="7 min read" data-ar="7 دقائق قراءة">7 min read</span>
             </div>
           </a>
-          <a className="newsrow" href="/article">
+          <a className="newsrow" href="/article" data-category-card data-category-order="5" data-category-rank="5">
             <div className="newsrow-thumb">
               <img src="https://picsum.photos/seed/saudimag-hl5/400/300" alt="Green initiative" loading="lazy" />
             </div>

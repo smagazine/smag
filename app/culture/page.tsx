@@ -40,7 +40,7 @@ export default function CulturePage() {
 
       <section className="section container">
         <div className="editorial-grid reveal">
-          <article className="article-card span-4">
+          <article className="article-card span-4" data-category-card data-category-order="1" data-category-rank="3" data-category-editors-choice>
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-cat1/600/450" alt="Artist in studio" loading="lazy" />
             </Link>
@@ -50,7 +50,7 @@ export default function CulturePage() {
             <span className="meta" data-en="By Sarah Al-Mutairi · 5 min read" data-ar="بقلم سارة المطيري · 5 دقائق قراءة">By Sarah Al-Mutairi · 5 min read</span>
           </article>
 
-          <article className="article-card span-8">
+          <article className="article-card span-8" data-category-card data-category-order="2" data-category-rank="1">
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-cat2/900/500" alt="Museum facade" loading="lazy" />
             </Link>
@@ -60,7 +60,7 @@ export default function CulturePage() {
             <span className="meta" data-en="By Tariq Fayed · 12 min read" data-ar="بقلم طارق فايد · 12 دقائق قراءة">By Tariq Fayed · 12 min read</span>
           </article>
 
-          <article className="article-card span-6 divider-top">
+          <article className="article-card span-6 divider-top" data-category-card data-category-order="3" data-category-rank="4" data-category-editors-choice>
             <Link className="card-media square" href="/search?q=Craftsmanship">
               <img src="https://picsum.photos/seed/saudimag-cat3/600/600" alt="Woven textiles" loading="lazy" />
             </Link>
@@ -70,7 +70,7 @@ export default function CulturePage() {
             <span className="meta" data-en="By Laila Hassan · 7 min read" data-ar="بقلم ليلى حسن · 7 دقائق قراءة">By Laila Hassan · 7 min read</span>
           </article>
 
-          <article className="article-card span-6 divider-top">
+          <article className="article-card span-6 divider-top" data-category-card data-category-order="4" data-category-rank="2">
             <Link className="card-media square" href="/search?q=Performing+Arts">
               <img src="https://picsum.photos/seed/saudimag-cat4/600/600" alt="Theater stage" loading="lazy" />
             </Link>

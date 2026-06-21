@@ -5,6 +5,7 @@ import { LangProvider } from "@/contexts/LangContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RevealObserver from "@/components/RevealObserver";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const FAVICON =
   "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23000'/><rect x='2' y='2' width='60' height='60' fill='none' stroke='%23a6d61f' stroke-width='3'/><text x='32' y='44' font-size='34' font-weight='bold' text-anchor='middle' fill='%23a6d61f' font-family='Arial,sans-serif'>S</text></svg>";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <Footer />
             <RevealObserver />
+            <ScrollToTop />
           </LangProvider>
         </ThemeProvider>
       </body>

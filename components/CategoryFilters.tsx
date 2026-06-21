@@ -9,23 +9,20 @@ export default function CategoryFilters() {
 
   const apply = (filter: Filter) => {
     setActive(filter);
-    document.querySelectorAll("[data-category-card]").forEach((card) => {
-      const el = card as HTMLElement;
-      el.hidden =
-        filter === "editors-choice" && !card.hasAttribute("data-category-editors-choice");
+    const cards = [...document.querySelectorAll<HTMLElement>("[data-category-card]")];
+
+    cards.forEach((el) => {
+      el.hidden = filter === "editors-choice" && !el.hasAttribute("data-category-editors-choice");
     });
-    if (filter === "most-read") {
-      const grid = document.querySelector(".editorial-grid");
-      if (grid) {
-        [...grid.querySelectorAll("[data-category-card]")]
-          .sort(
-            (a, b) =>
-              Number((a as HTMLElement).dataset.categoryRank) -
-              Number((b as HTMLElement).dataset.categoryRank)
-          )
-          .forEach((card) => grid.append(card));
-      }
+
+    const grid = cards[0]?.parentElement;
+    if (grid && filter !== "editors-choice") {
+      const key = filter === "most-read" ? "categoryRank" : "categoryOrder";
+      [...grid.querySelectorAll<HTMLElement>("[data-category-card]")]
+        .sort((a, b) => Number(a.dataset[key]) - Number(b.dataset[key]))
+        .forEach((card) => grid.append(card));
     }
+
     showDemoToast(
       filter === "latest"
         ? "Showing the latest stories."

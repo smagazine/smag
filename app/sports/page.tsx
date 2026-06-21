@@ -54,7 +54,7 @@ export default function SportsPage() {
 
       <section className="section container">
         <div className="sports-grid reveal">
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="1" data-category-rank="1" data-category-editors-choice>
             <span className="sport-badge" data-en="Football" data-ar="كرة القدم">Football</span>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-sp1/600/380" alt="Football match" loading="lazy" />
@@ -64,7 +64,7 @@ export default function SportsPage() {
             <span className="meta" data-en="7 min read" data-ar="7 دقائق قراءة">7 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="2" data-category-rank="3">
             <span className="sport-badge" data-en="Motorsport" data-ar="رياضات المحركات">Motorsport</span>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-sp2/600/380" alt="Formula 1" loading="lazy" />
@@ -74,7 +74,7 @@ export default function SportsPage() {
             <span className="meta" data-en="5 min read" data-ar="5 دقائق قراءة">5 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="3" data-category-rank="2" data-category-editors-choice>
             <span className="sport-badge" data-en="Golf" data-ar="غولف">Golf</span>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-sp3/600/380" alt="Golf course" loading="lazy" />
@@ -84,7 +84,7 @@ export default function SportsPage() {
             <span className="meta" data-en="8 min read" data-ar="8 دقائق قراءة">8 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="4" data-category-rank="4">
             <span className="sport-badge" data-en="Combat Sports" data-ar="الفنون القتالية">Combat Sports</span>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-sp4/600/380" alt="Boxing event" loading="lazy" />
@@ -94,7 +94,7 @@ export default function SportsPage() {
             <span className="meta" data-en="6 min read" data-ar="6 دقائق قراءة">6 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="5" data-category-rank="5">
             <span className="sport-badge" data-en="Wellness" data-ar="عافية">Wellness</span>
             <Link className="card-media landscape" href="/article">
               <img src="https://picsum.photos/seed/saudimag-sp5/600/380" alt="Wellness" loading="lazy" />

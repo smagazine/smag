@@ -38,7 +38,7 @@ export default function FAndBPage() {
         </article>
 
         <div className="fnb-grid reveal">
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="1" data-category-rank="1" data-category-editors-choice>
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb1/500/500" alt="Restaurant interior" loading="lazy" />
             </Link>
@@ -47,7 +47,7 @@ export default function FAndBPage() {
             <span className="meta" data-en="5 min read" data-ar="5 دقائق قراءة">5 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="2" data-category-rank="3">
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb2/500/500" alt="Artisan coffee" loading="lazy" />
             </Link>
@@ -56,7 +56,7 @@ export default function FAndBPage() {
             <span className="meta" data-en="4 min read" data-ar="4 دقائق قراءة">4 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="3" data-category-rank="2">
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb3/500/500" alt="Fine dining" loading="lazy" />
             </Link>
@@ -65,7 +65,7 @@ export default function FAndBPage() {
             <span className="meta" data-en="6 min read" data-ar="6 دقائق قراءة">6 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="4" data-category-rank="5">
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb4/500/500" alt="Food festival" loading="lazy" />
             </Link>
@@ -74,7 +74,7 @@ export default function FAndBPage() {
             <span className="meta" data-en="3 min read" data-ar="3 دقائق قراءة">3 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="5" data-category-rank="4" data-category-editors-choice>
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb5/500/500" alt="Pastry" loading="lazy" />
             </Link>
@@ -83,7 +83,7 @@ export default function FAndBPage() {
             <span className="meta" data-en="5 min read" data-ar="5 دقائق قراءة">5 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="6" data-category-rank="6">
             <Link className="card-media square" href="/article">
               <img src="https://picsum.photos/seed/saudimag-fb6/500/500" alt="Spice market" loading="lazy" />
             </Link>

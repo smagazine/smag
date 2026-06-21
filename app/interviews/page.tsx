@@ -41,7 +41,7 @@ export default function InterviewsPage() {
         </article>
 
         <div className="interview-grid reveal">
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="1" data-category-rank="2" data-category-editors-choice>
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-int1/400/533" alt="Chef portrait" loading="lazy" />
             </Link>
@@ -51,7 +51,7 @@ export default function InterviewsPage() {
             <span className="meta" data-en="8 min read" data-ar="8 دقائق قراءة">8 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="2" data-category-rank="1" data-category-editors-choice>
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-int2/400/533" alt="Artist portrait" loading="lazy" />
             </Link>
@@ -61,7 +61,7 @@ export default function InterviewsPage() {
             <span className="meta" data-en="9 min read" data-ar="9 دقائق قراءة">9 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="3" data-category-rank="4">
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-int3/400/533" alt="Entrepreneur portrait" loading="lazy" />
             </Link>
@@ -71,7 +71,7 @@ export default function InterviewsPage() {
             <span className="meta" data-en="7 min read" data-ar="7 دقائق قراءة">7 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="4" data-category-rank="3">
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-int4/400/533" alt="Director portrait" loading="lazy" />
             </Link>
@@ -81,7 +81,7 @@ export default function InterviewsPage() {
             <span className="meta" data-en="10 min read" data-ar="10 دقائق قراءة">10 min read</span>
           </article>
 
-          <article className="article-card">
+          <article className="article-card" data-category-card data-category-order="5" data-category-rank="5">
             <Link className="card-media" href="/article">
               <img src="https://picsum.photos/seed/saudimag-int5/400/533" alt="Designer portrait" loading="lazy" />
             </Link>
