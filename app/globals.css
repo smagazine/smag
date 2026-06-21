@@ -1576,10 +1576,6 @@ dialog.membership-dialog::backdrop {
     order: -1;
   }
 
-  .lead-stack {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .most-read {
     position: static;
     border-left: 0;
@@ -1723,8 +1719,28 @@ dialog.membership-dialog::backdrop {
     font-size: 0.85rem;
   }
 
-  /* Mini-leads stay 2-col on phones — saves vertical space */
+  /* Sidebar collapses to 1-col on phones; restore lead-stack as a 2-col grid */
+  .lead-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .lead-sidebar > .most-read {
+    grid-column: 1;
+  }
+
+  .most-read.landscape ol {
+    grid-template-columns: 1fr;
+  }
+
+  .most-read.landscape li {
+    border-left: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 14px 0;
+    grid-template-columns: 42px 1fr;
+  }
+
   .lead-stack {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
@@ -2106,19 +2122,52 @@ dialog.membership-dialog::backdrop {
    LAYOUT REDESIGN
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ─── 2-column lead layout ────────────────────────────────────────────── */
+/* ─── Full-width lead + horizontal below row ──────────────────────────── */
 
 .lead-layout {
-  grid-template-columns: 1fr minmax(300px, 0.44fr);
-  grid-template-rows: auto;
+  grid-template-columns: 1fr;
 }
 
 .lead-sidebar {
   display: grid;
-  gap: 28px;
-  position: sticky;
-  top: 148px;
-  align-self: start;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 3vw, 36px);
+  position: static;
+  align-self: auto;
+}
+
+/* Most Read spans full width as landscape header */
+.lead-sidebar > .most-read {
+  grid-column: 1 / -1;
+}
+
+/* Mini-leads flow directly into the 2-col grid below most-read */
+.lead-stack {
+  display: contents;
+}
+
+/* Most Read landscape: items in a horizontal row */
+.most-read.landscape ol {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(16px, 2.5vw, 28px);
+}
+
+.most-read.landscape li {
+  border-bottom: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 0 0 0 clamp(14px, 2vw, 22px);
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.most-read.landscape li:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.most-read.landscape li::before {
+  font-size: 1.6rem;
 }
 
 /* Cinematic overlay hero */
@@ -2322,15 +2371,10 @@ dialog.membership-dialog::backdrop {
 /* ─── Responsive overrides (layout redesign) ──────────────────────────── */
 
 @media (max-width: 980px) {
-  .lead-layout {
-    grid-template-columns: 1fr;
+  .most-read.landscape ol {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .lead-sidebar {
-    position: static;
-  }
-
-  /* main-lead is first in DOM so no order needed */
   .main-lead {
     order: 0;
     min-height: 480px;
@@ -2680,3 +2724,297 @@ dialog.membership-dialog::backdrop {
     font-size: 0.62rem;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CATEGORY PAGE IDENTITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Shared page header ─────────────────────────────────────────────────── */
+
+.page-header {
+  padding-block: clamp(40px, 6vw, 76px) clamp(28px, 4vw, 48px);
+}
+
+.page-header--dark {
+  background: var(--color-charcoal);
+  color: #fff;
+}
+
+.page-header--dark h1 { color: #fff; }
+.page-header--dark .deck { color: rgba(255, 255, 255, 0.68); }
+.page-header--dark .section-header { border-bottom-color: rgba(255, 255, 255, 0.12); }
+
+.page-header--warm {
+  background: #faf8f2;
+}
+
+.page-header--cream {
+  background: #fdf9f0;
+}
+
+/* ─── Headlines: newspaper list ─────────────────────────────────────────── */
+
+.newsrow-list {
+  display: grid;
+  gap: 0;
+}
+
+.newsrow {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 22px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--color-line);
+  align-items: start;
+  text-decoration: none;
+}
+
+.newsrow-thumb {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-soft);
+  flex-shrink: 0;
+}
+
+.newsrow-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms ease;
+}
+
+.newsrow:hover .newsrow-thumb img {
+  transform: scale(1.035);
+}
+
+.newsrow-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.newsrow h3 {
+  margin-top: 5px;
+  font-size: clamp(1.05rem, 1.8vw, 1.42rem);
+  line-height: 1.22;
+  transition: color var(--ease);
+}
+
+.newsrow:hover h3 {
+  color: var(--color-gold);
+}
+
+.newsrow p {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin-top: 4px;
+}
+
+/* ─── Events: date badge ─────────────────────────────────────────────────── */
+
+.event-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: var(--color-gold);
+  color: #000;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.event-badge .day {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.event-badge .month {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.event-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-venue {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 34px);
+}
+
+/* ─── F&B: square food grid ──────────────────────────────────────────────── */
+
+.fnb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(16px, 2.5vw, 28px);
+}
+
+/* ─── Interviews: portrait-first ─────────────────────────────────────────── */
+
+.interview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 36px);
+}
+
+.interview-grid .card-media {
+  aspect-ratio: 3 / 4;
+}
+
+.interview-pullquote {
+  margin-top: 10px;
+  padding-left: 12px;
+  border-left: 2px solid var(--color-gold);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.48;
+  color: var(--color-muted);
+}
+
+/* ─── Sports: cinematic feature + badges ─────────────────────────────────── */
+
+.sport-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  background: var(--color-gold);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.sports-feature {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-charcoal);
+  color: #fff;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--stack-md);
+}
+
+.sports-feature .sports-feature-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sports-feature .sports-feature-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.48);
+  transition: transform 800ms ease;
+}
+
+.sports-feature:hover .sports-feature-media img {
+  transform: scale(1.03);
+}
+
+.sports-feature-copy {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding: clamp(28px, 5vw, 56px);
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.32) 60%, transparent 100%);
+}
+
+.sports-feature-copy h2,
+.sports-feature-copy h2 a { color: #fff; font-size: clamp(2rem, 4vw, 3.8rem); }
+.sports-feature-copy h2 a:hover { color: var(--color-gold-soft); }
+.sports-feature-copy .deck { color: rgba(255,255,255,0.72); margin-top: 14px; }
+
+.sports-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 34px);
+}
+
+.sports-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
+  margin-top: 28px;
+}
+
+.sports-stat {
+  background: var(--color-charcoal);
+  padding: 18px 20px;
+  text-align: center;
+}
+
+.sports-stat-num {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--color-gold-soft);
+  line-height: 1;
+}
+
+.sports-stat-label {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.48);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .newsrow { grid-template-columns: 110px 1fr; gap: 16px; }
+  .events-grid { grid-template-columns: repeat(2, 1fr); }
+  .fnb-grid { grid-template-columns: repeat(2, 1fr); }
+  .interview-grid { grid-template-columns: repeat(2, 1fr); }
+  .sports-grid { grid-template-columns: repeat(2, 1fr); }
+  .sports-stats-strip { grid-template-columns: repeat(3, 1fr); }
+  .sports-feature { min-height: 380px; }
+}
+
+@media (max-width: 620px) {
+  .newsrow { grid-template-columns: 84px 1fr; gap: 12px; padding: 16px 0; }
+  .newsrow h3 { font-size: 0.98rem; }
+  .events-grid { grid-template-columns: 1fr; }
+  .fnb-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .interview-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .sports-grid { grid-template-columns: 1fr; }
+  .sports-stats-strip { grid-template-columns: 1fr; }
+  .sports-feature { min-height: 300px; }
+  .sports-feature-copy h2 { font-size: clamp(1.65rem, 8vw, 2.4rem); }
+}
+
+/* ─── Utility: replace scattered inline styles ───────────────────────────── */
+.d-grid        { display: grid; }
+.border-top-sm { border-top: 1px solid var(--color-line); padding-top: 28px; }
+.gap-sm        { gap: 22px; }
+.mt-sm-top     { margin-top: 24px; }

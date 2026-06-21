@@ -53,7 +53,7 @@ export default function HomePage() {
         </article>
 
         <div className="lead-sidebar">
-          <aside className="most-read reveal">
+          <aside className="most-read landscape reveal">
             <div className="block-heading">
               <h2 data-en="Most Read" data-ar="الأكثر قراءة">Most Read</h2>
               <span className="meta" data-en="For this month" data-ar="هذا الشهر">For this month</span>

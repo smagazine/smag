@@ -105,8 +105,10 @@ export default function Header() {
                   {isDark ? "light_mode" : "dark_mode"}
                 </span>
               </button>
-              <button className="language-toggle" type="button" onClick={toggleLang}>
-                {lang === "en" ? "EN / AR" : "AR / EN"}
+              <button className="language-toggle" type="button" onClick={toggleLang} aria-label={`Switch to ${lang === "en" ? "Arabic" : "English"}`}>
+                <span style={{ color: lang === "en" ? "var(--color-gold)" : "rgba(255,255,255,0.4)" }}>EN</span>
+                <span style={{ color: "rgba(255,255,255,0.25)", margin: "0 3px" }}>/</span>
+                <span style={{ color: lang === "ar" ? "var(--color-gold)" : "rgba(255,255,255,0.4)" }}>AR</span>
               </button>
               <Link className="button" href="/subscribe" data-en="Subscribe" data-ar="اشترك">
                 Subscribe
@@ -143,13 +145,18 @@ export default function Header() {
           </button>
           <nav aria-label="Mobile navigation">
             {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} data-en={link.en} data-ar={link.ar}>
+              <Link key={link.href} href={link.href} className={pathname === link.href ? "active" : undefined} data-en={link.en} data-ar={link.ar}>
                 {link.en}
               </Link>
             ))}
-            <Link href="/about" data-en="About" data-ar="عن المجلة">About</Link>
-            <Link href="/contact" data-en="Contact" data-ar="تواصل">Contact</Link>
+            <Link href="/search" className={pathname === "/search" ? "active" : undefined} data-en="Archive" data-ar="الأرشيف">Archive</Link>
+            <Link href="/subscribe" className={pathname === "/subscribe" ? "active" : undefined} data-en="Subscribe" data-ar="اشترك">Subscribe</Link>
+            <Link href="/about" className={pathname === "/about" ? "active" : undefined} data-en="About" data-ar="عن المجلة">About</Link>
+            <Link href="/contact" className={pathname === "/contact" ? "active" : undefined} data-en="Contact" data-ar="تواصل">Contact</Link>
           </nav>
+          <Link className="button" href="/subscribe" style={{ marginTop: 28, width: "100%", justifyContent: "center" }} data-en="Subscribe" data-ar="اشترك">
+            Subscribe
+          </Link>
         </div>
       </div>
 

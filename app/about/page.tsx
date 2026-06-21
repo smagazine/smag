@@ -25,9 +25,9 @@ export default function AboutPage() {
               editorial interactions.
             </p>
           </div>
-          <aside className="reveal" style={{ borderTop: "1px solid var(--color-line)", paddingTop: "28px" }}>
+          <aside className="reveal border-top-sm">
             <span className="label eyebrow">Editorial Pillars</span>
-            <div className="issue-list" style={{ gap: "22px", marginTop: "24px" }}>
+            <div className="issue-list gap-sm mt-sm-top">
               <p>
                 <strong>Culture</strong>
                 <br />

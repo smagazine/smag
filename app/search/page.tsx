@@ -38,28 +38,45 @@ const RESULTS = [
     id: "iss1",
     href: "/article",
     seed: "saudimag-iss1",
-    eyebrow: "Issue No. 42 · Dec 2023",
-    h3: "The Art of Desert Hospitality",
-    deck: "Desert resorts and community retreats redefining hospitality through tradition, climate, and contemporary design.",
+    eyebrow: "Issue No. 12 · Jun 2026",
+    h3: "Cities & Culture",
+    deck: "How the Gulf's cultural districts are shaping how people gather, learn, and belong.",
     type: "issue",
+    issueNum: 12,
+    year: 2026,
   },
   {
     id: "iss2",
     href: "/article",
     seed: "saudimag-iss2",
-    eyebrow: "Issue No. 41 · Nov 2023",
-    h3: "Urban Metamorphosis",
-    deck: "Documenting Riyadh's skyline and the architects shaping the future form of the city.",
+    eyebrow: "Issue No. 11 · Mar 2026",
+    h3: "The Art of Desert Hospitality",
+    deck: "Desert resorts and community retreats redefining hospitality through tradition, climate, and contemporary design.",
     type: "issue",
+    issueNum: 11,
+    year: 2026,
   },
   {
     id: "iss3",
-    href: "/culture",
+    href: "/article",
     seed: "saudimag-iss3",
-    eyebrow: "Issue No. 40 · Oct 2023",
+    eyebrow: "Issue No. 10 · Dec 2025",
+    h3: "Urban Metamorphosis",
+    deck: "Documenting Riyadh's skyline and the architects shaping the future form of the city.",
+    type: "issue",
+    issueNum: 10,
+    year: 2025,
+  },
+  {
+    id: "iss4",
+    href: "/culture",
+    seed: "saudimag-iss4",
+    eyebrow: "Issue No. 9 · Sep 2025",
     h3: "Threads of Heritage",
     deck: "The revival of traditional craftsmanship in contemporary Saudi homes, objects, and cultural spaces.",
     type: "issue",
+    issueNum: 9,
+    year: 2025,
   },
 ];
 
@@ -68,6 +85,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQ);
+  const [sort, setSort] = useState<"issue" | "year">("issue");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -91,7 +109,13 @@ function SearchContent() {
   };
 
   const collections = visible.filter((r) => r.type === "collection");
-  const issues = visible.filter((r) => r.type === "issue");
+  const issues = visible
+    .filter((r) => r.type === "issue")
+    .sort((a, b) =>
+      sort === "year"
+        ? (b.year ?? 0) - (a.year ?? 0) || (b.issueNum ?? 0) - (a.issueNum ?? 0)
+        : (b.issueNum ?? 0) - (a.issueNum ?? 0)
+    );
 
   return (
     <main className="page" id="main-content">
@@ -167,9 +191,14 @@ function SearchContent() {
             <span className="label eyebrow">Archive Directory</span>
             <h2>Recent Issues</h2>
           </div>
-          <select aria-label="Sort archive">
-            <option>Sort by Year</option>
-            <option>Sort by Issue</option>
+          <select
+            aria-label="Sort archive"
+            value={sort}
+            onChange={(e) => setSort(e.target.value as "issue" | "year")}
+            style={{ font: "inherit", fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", border: "1px solid var(--color-line)", background: "transparent", color: "var(--color-ink)", padding: "8px 12px", cursor: "pointer" }}
+          >
+            <option value="issue">Sort by Issue</option>
+            <option value="year">Sort by Year</option>
           </select>
         </div>
         <div className="issue-list">

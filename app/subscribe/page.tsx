@@ -15,7 +15,7 @@ export default function SubscribePage() {
           <div className="image-frame reveal">
             <img src="https://picsum.photos/seed/saudimag-member/1200/800" alt="Editorial membership visual" />
           </div>
-          <div className="container" style={{ display: "grid" }}>
+          <div className="container d-grid">
             <div className="membership-card reveal">
               <span className="label eyebrow" data-en="Membership" data-ar="العضوية">Membership</span>
               <h1 data-en="Join the Reader's Majlis." data-ar="انضم إلى مجلس القراء.">
