@@ -461,8 +461,8 @@ p {
 
 .mini-lead h3 {
   margin-top: 8px;
-  font-size: clamp(1.18rem, 2vw, 1.55rem);
-  line-height: 1.18;
+  font-size: clamp(1.02rem, 1.6vw, 1.32rem);
+  line-height: 1.2;
 }
 
 .main-lead {
@@ -692,7 +692,7 @@ p {
 
 .video-list h3 {
   margin-top: 6px;
-  font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+  font-size: clamp(1.08rem, 1.8vw, 1.45rem);
 }
 
 .issue-tags {
@@ -785,8 +785,16 @@ p {
 }
 
 .article-card h3 {
-  margin-top: 14px;
+  margin-top: 12px;
+  font-size: clamp(1.02rem, 1.5vw, 1.38rem);
+  line-height: 1.22;
   transition: color var(--ease);
+}
+
+/* Wider span cards earn proportionally larger headings */
+.article-card.span-8 h3,
+.article-card.span-12 h3 {
+  font-size: clamp(1.25rem, 2vw, 1.72rem);
 }
 
 .article-card:hover h3 {
@@ -794,13 +802,15 @@ p {
 }
 
 .article-card p {
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.58;
 }
 
 .article-card .meta {
   display: block;
-  margin-top: 18px;
+  margin-top: 10px;
   color: var(--color-subdued);
 }
 
@@ -2858,7 +2868,7 @@ dialog.membership-dialog::backdrop {
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: clamp(20px, 3vw, 34px);
 }
 
@@ -2951,7 +2961,7 @@ dialog.membership-dialog::backdrop {
 
 .sports-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: clamp(20px, 3vw, 34px);
 }
 
@@ -3007,10 +3017,11 @@ dialog.membership-dialog::backdrop {
   .events-grid { grid-template-columns: 1fr; }
   .fnb-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .interview-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .sports-grid { grid-template-columns: 1fr; }
+  .sports-grid { grid-template-columns: repeat(2, 1fr); }
   .sports-stats-strip { grid-template-columns: 1fr; }
   .sports-feature { min-height: 300px; }
   .sports-feature-copy h2 { font-size: clamp(1.65rem, 8vw, 2.4rem); }
+  .article-card h3 { font-size: clamp(0.98rem, 4.5vw, 1.18rem); }
 }
 
 /* ─── Utility: replace scattered inline styles ───────────────────────────── */
