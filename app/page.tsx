@@ -42,7 +42,7 @@ export default function HomePage() {
       <section className="container lead-layout">
         <article className="main-lead reveal">
           <Link className="main-lead-media" href="/article">
-            <img src="https://picsum.photos/seed/saudimag-hero/1400/900" alt="Modern Saudi architectural landmark at dusk" />
+            <img src="https://loremflickr.com/1400/900/architecture,city?lock=42" alt="Modern Saudi architectural landmark at dusk" />
           </Link>
           <div className="main-lead-copy">
             <span className="label eyebrow" data-en="Architecture · Culture · Public Life" data-ar="العمارة · الثقافة · الحياة العامة">Architecture · Culture · Public Life</span>
@@ -68,14 +68,14 @@ export default function HomePage() {
           <div className="lead-stack reveal">
             <article className="mini-lead">
               <Link className="mini-media" href="/article">
-                <img src="https://picsum.photos/seed/saudimag-museum/600/400" alt="Modern museum facade" loading="lazy" />
+                <img src="https://loremflickr.com/600/400/architecture,city?lock=43" alt="Modern museum facade" loading="lazy" />
               </Link>
               <span className="label eyebrow" data-en="Cities" data-ar="المدن">Cities</span>
               <h3><Link href="/article" data-en="Museum Districts Are Becoming the Gulf's New Public Squares" data-ar="أحياء المتاحف تصبح الساحات العامة الجديدة في الخليج">Museum Districts Are Becoming the Gulf&apos;s New Public Squares</Link></h3>
             </article>
             <article className="mini-lead">
               <Link className="mini-media" href="/search?q=Book+Fair">
-                <img src="https://picsum.photos/seed/saudimag-theater/600/400" alt="Minimal theater stage" loading="lazy" />
+                <img src="https://loremflickr.com/600/400/architecture,city?lock=44" alt="Minimal theater stage" loading="lazy" />
               </Link>
               <span className="label eyebrow" data-en="Reading Culture" data-ar="ثقافة القراءة">Reading Culture</span>
               <h3><Link href="/search?q=Book+Fair" data-en="Book Fairs Are Rewriting the Region's Cultural Calendar" data-ar="معارض الكتاب تُعيد كتابة التقويم الثقافي للمنطقة">Book Fairs Are Rewriting the Region&apos;s Cultural Calendar</Link></h3>
@@ -96,7 +96,7 @@ export default function HomePage() {
           <div className="news-grid news-list reveal">
             <article className="news-card">
               <Link className="news-card-media" href="/article">
-                <img src="https://picsum.photos/seed/saudimag-news1/800/500" alt="Modern architectural development" loading="lazy" />
+                <img src="https://loremflickr.com/800/500/architecture,city?lock=45" alt="Modern architectural development" loading="lazy" />
               </Link>
               <span className="label eyebrow" data-en="Business" data-ar="أعمال">Business</span>
               <h3><Link href="/article" data-en="Real Estate Advisors Reframe Growth Around Culture and Community" data-ar="مستشارو العقارات يُعيدون صياغة مفهوم النمو حول الثقافة والمجتمع">Real Estate Advisors Reframe Growth Around Culture and Community</Link></h3>
@@ -104,7 +104,7 @@ export default function HomePage() {
             </article>
             <article className="news-card">
               <Link className="news-card-media" href="/culture">
-                <img src="https://picsum.photos/seed/saudimag-news2/800/500" alt="Artist in studio" loading="lazy" />
+                <img src="https://loremflickr.com/800/500/architecture,city?lock=46" alt="Artist in studio" loading="lazy" />
               </Link>
               <span className="label eyebrow" data-en="Urban Life" data-ar="الحياة الحضرية">Urban Life</span>
               <h3><Link href="/culture" data-en="Expo City Dubai Opens a Walk Through the City's Future Story" data-ar="إكسبو سيتي دبي تفتح مساراً عبر قصة مستقبل المدينة">Expo City Dubai Opens a Walk Through the City&apos;s Future Story</Link></h3>
@@ -112,7 +112,7 @@ export default function HomePage() {
             </article>
             <article className="news-card">
               <Link className="news-card-media" href="/search?q=Aviation">
-                <img src="https://picsum.photos/seed/saudimag-news3/800/500" alt="Fine dining detail" loading="lazy" />
+                <img src="https://loremflickr.com/800/500/architecture,city?lock=47" alt="Fine dining detail" loading="lazy" />
               </Link>
               <span className="label eyebrow" data-en="Travel" data-ar="السفر">Travel</span>
               <h3><Link href="/search?q=Aviation" data-en="Connected Flight Is Changing the Region's Travel Expectations" data-ar="الرحلات المتصلة تغير توقعات السفر في المنطقة">Connected Flight Is Changing the Region&apos;s Travel Expectations</Link></h3>
@@ -138,7 +138,7 @@ export default function HomePage() {
           <div className="video-layout">
             <article className="video-feature reveal">
               <a className="video-media" href="/article" onClick={(e) => { e.preventDefault(); showDemoToast("Video playback is available in the full production edition."); }}>
-                <img src="https://picsum.photos/seed/saudimag-video/900/560" alt="Fashion editorial portrait" loading="lazy" />
+                <img src="https://loremflickr.com/900/560/architecture,city?lock=48" alt="Fashion editorial portrait" loading="lazy" />
                 <span className="play-dot"><span className="material-symbols-outlined">play_arrow</span></span>
               </a>
               <span className="label eyebrow" data-en="Field Notes" data-ar="ملاحظات ميدانية">Field Notes</span>

@@ -13,7 +13,7 @@ export default function SubscribePage() {
       <main className="page" id="main-content">
         <section className="subscription-hero">
           <div className="image-frame reveal">
-            <img src="https://picsum.photos/seed/saudimag-member/1200/800" alt="Editorial membership visual" />
+            <img src="https://loremflickr.com/1200/800/architecture,city?lock=56" alt="Editorial membership visual" />
           </div>
           <div className="container d-grid">
             <div className="membership-card reveal">

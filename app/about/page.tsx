@@ -51,7 +51,7 @@ export default function AboutPage() {
       <section className="feature-band reveal">
         <div className="image-frame">
           <img
-            src="https://picsum.photos/seed/saudimag-about/1400/800"
+            src="https://loremflickr.com/1400/800/architecture,city?lock=1"
             alt="SAUDI MAG editorial studio"
             loading="lazy"
           />

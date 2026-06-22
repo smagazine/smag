@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CategoryFilters from "@/components/CategoryFilters";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Culture | SAUDI MAG",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function CulturePage() {
   return (
     <main className="page" id="main-content">
+      <Breadcrumb crumbs={[{ label: "Home", href: "/", labelAr: "الرئيسية" }, { label: "Culture", labelAr: "الثقافة" }]} />
       <div className="page-header page-header--warm">
         <div className="container">
           <div className="section-header reveal">
@@ -27,7 +29,7 @@ export default function CulturePage() {
       <div className="container" style={{ paddingTop: "clamp(24px,4vw,48px)" }}>
         <article className="main-lead reveal" style={{ minHeight: 540, marginBottom: "var(--stack-md)" }}>
           <Link className="main-lead-media" href="/article">
-            <img src="https://picsum.photos/seed/saudimag-cat-hero/1400/900" alt="Gulf cultural district" />
+            <img src="https://loremflickr.com/1400/900/culture,art?lock=12" alt="Gulf cultural district" />
           </Link>
           <div className="main-lead-copy">
             <span className="label eyebrow" data-en="Heritage & Style" data-ar="التراث والأسلوب">Heritage &amp; Style</span>
@@ -42,7 +44,7 @@ export default function CulturePage() {
         <div className="editorial-grid reveal">
           <article className="article-card span-4" data-category-card data-category-order="1" data-category-rank="3" data-category-editors-choice>
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-cat1/600/450" alt="Artist in studio" loading="lazy" />
+              <img src="https://loremflickr.com/600/450/culture,art?lock=13" alt="Artist in studio" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Contemporary Art" data-ar="الفن المعاصر">Contemporary Art</span>
             <h3><Link href="/article" data-en="The New Wave of Abstract Calligraphy" data-ar="موجة الخط التجريدي الجديدة">The New Wave of Abstract Calligraphy</Link></h3>
@@ -52,7 +54,7 @@ export default function CulturePage() {
 
           <article className="article-card span-8" data-category-card data-category-order="2" data-category-rank="1">
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-cat2/900/500" alt="Museum facade" loading="lazy" />
+              <img src="https://loremflickr.com/900/500/culture,art?lock=14" alt="Museum facade" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Architecture" data-ar="العمارة">Architecture</span>
             <h3><Link href="/article" data-en="Designing the Future: The Architecture of Tomorrow's Museums" data-ar="تصميم المستقبل: عمارة متاحف الغد">Designing the Future: The Architecture of Tomorrow&apos;s Museums</Link></h3>
@@ -62,7 +64,7 @@ export default function CulturePage() {
 
           <article className="article-card span-6 divider-top" data-category-card data-category-order="3" data-category-rank="4" data-category-editors-choice>
             <Link className="card-media square" href="/search?q=Craftsmanship">
-              <img src="https://picsum.photos/seed/saudimag-cat3/600/600" alt="Woven textiles" loading="lazy" />
+              <img src="https://loremflickr.com/600/600/culture,art?lock=15" alt="Woven textiles" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Craftsmanship" data-ar="الحرفية">Craftsmanship</span>
             <h3><Link href="/search?q=Craftsmanship" data-en="Reviving the Loom" data-ar="إحياء النول">Reviving the Loom</Link></h3>
@@ -72,7 +74,7 @@ export default function CulturePage() {
 
           <article className="article-card span-6 divider-top" data-category-card data-category-order="4" data-category-rank="2">
             <Link className="card-media square" href="/search?q=Performing+Arts">
-              <img src="https://picsum.photos/seed/saudimag-cat4/600/600" alt="Theater stage" loading="lazy" />
+              <img src="https://loremflickr.com/600/600/culture,art?lock=16" alt="Theater stage" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Performing Arts" data-ar="الفنون الأدائية">Performing Arts</span>
             <h3><Link href="/search?q=Performing+Arts" data-en="The Spotlight Shifts" data-ar="تحول الأضواء">The Spotlight Shifts</Link></h3>

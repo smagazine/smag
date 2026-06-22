@@ -165,7 +165,7 @@ function SearchContent() {
             </div>
             <div className="collection-grid">
               <Link className="collection-card large reveal" href={collections[0].href}>
-                <img src={`https://picsum.photos/seed/${collections[0].seed}/${collections[0].size}`} alt={collections[0].alt} loading="lazy" />
+                <img src={`https://loremflickr.com/${collections[0].size}/architecture,city`} alt={collections[0].alt} loading="lazy" />
                 <div className="collection-copy">
                   <span className="label eyebrow">{collections[0].eyebrow}</span>
                   <h3>{collections[0].h3}</h3>
@@ -175,7 +175,7 @@ function SearchContent() {
                 <div className="collection-stack">
                   {collections.slice(1).map((c) => (
                     <Link key={c.id} className="collection-card reveal" href={c.href}>
-                      <img src={`https://picsum.photos/seed/${c.seed}/${c.size}`} alt={c.alt} loading="lazy" />
+                      <img src={`https://loremflickr.com/${c.size}/architecture,city`} alt={c.alt} loading="lazy" />
                       <div className="collection-copy">
                         <span className="label eyebrow">{c.eyebrow}</span>
                         <h3>{c.h3}</h3>
@@ -209,7 +209,7 @@ function SearchContent() {
           {issues.map((item) => (
             <article key={item.id} className="issue reveal">
               <Link className="image-frame" href={item.href}>
-                <img src={`https://picsum.photos/seed/${item.seed}/480/640`} alt="Magazine issue cover" loading="lazy" />
+                <img src="https://loremflickr.com/480/640/architecture,city?lock=49" alt="Magazine issue cover" loading="lazy" />
               </Link>
               <div className="issue-copy">
                 <span className="label eyebrow">{item.eyebrow}</span>

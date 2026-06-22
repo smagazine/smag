@@ -3299,3 +3299,120 @@ dialog.membership-dialog::backdrop {
 
 /* Newsletter strip — input RTL already added; form button order stays logical */
 [dir="rtl"] .newsletter-form { flex-direction: row-reverse; }
+
+/* ─── Breadcrumb ─────────────────────────────────────────── */
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding-top: clamp(12px, 2vw, 20px);
+  padding-bottom: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.breadcrumb a { color: var(--color-ink-muted); text-decoration: none; }
+.breadcrumb a:hover { color: var(--color-gold); }
+.breadcrumb-item:last-child span { color: var(--color-ink); }
+.breadcrumb-sep { margin: 0 2px; opacity: 0.4; }
+[dir="rtl"] .breadcrumb { direction: rtl; }
+
+/* ─── Skeleton shimmer ───────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+[data-theme=""] .skeleton,
+:root:not([data-theme="dark"]) .skeleton {
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.06) 25%,
+    rgba(0,0,0,0.12) 50%,
+    rgba(0,0,0,0.06) 75%);
+  background-size: 800px 100%;
+}
+.img-wrap { position: relative; display: block; }
+.img-wrap .skeleton-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.10) 50%,
+    rgba(255,255,255,0.04) 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  transition: opacity 0.3s;
+}
+.img-wrap.loaded .skeleton-overlay { opacity: 0; pointer-events: none; }
+
+/* ─── Share bar ──────────────────────────────────────────── */
+.share-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-line);
+  flex-wrap: wrap;
+}
+.share-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin-right: 4px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  padding: 0;
+}
+.share-btn:hover { background: var(--color-gold); color: #000; border-color: var(--color-gold); }
+.share-btn--x:hover { background: #000; color: #fff; border-color: #000; }
+.share-btn--linkedin:hover { background: #0a66c2; color: #fff; border-color: #0a66c2; }
+.share-btn--whatsapp:hover { background: #25d366; color: #fff; border-color: #25d366; }
+
+/* ─── Article video embed ────────────────────────────────── */
+.article-video {
+  margin: 32px 0;
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+.article-video iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* ─── Load-more button ───────────────────────────────────── */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(24px, 4vw, 48px);
+}
+.load-more-wrap .button { min-width: 180px; justify-content: center; }

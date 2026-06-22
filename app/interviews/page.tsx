@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CategoryFilters from "@/components/CategoryFilters";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Interviews | SAUDI MAG",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function InterviewsPage() {
   return (
     <main className="page" id="main-content">
+      <Breadcrumb crumbs={[{ label: "Home", href: "/", labelAr: "الرئيسية" }, { label: "Interviews", labelAr: "مقابلات" }]} />
       <div className="page-header">
         <div className="container">
           <div className="section-header reveal">
@@ -27,7 +29,7 @@ export default function InterviewsPage() {
       <section className="section container">
         <article className="article-card feature-row reveal mb-stack-lg">
           <Link className="card-media" href="/article">
-            <img src="https://picsum.photos/seed/saudimag-int-feat/800/1000" alt="Architect interview portrait" />
+            <img src="https://loremflickr.com/800/1000/portrait,people?lock=36" alt="Architect interview portrait" />
           </Link>
           <div>
             <span className="label eyebrow" data-en="Long Read" data-ar="قراءة مطوّلة">Long Read</span>
@@ -43,7 +45,7 @@ export default function InterviewsPage() {
         <div className="interview-grid reveal">
           <article className="article-card" data-category-card data-category-order="1" data-category-rank="2" data-category-editors-choice>
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-int1/400/533" alt="Chef portrait" loading="lazy" />
+              <img src="https://loremflickr.com/400/533/portrait,people?lock=37" alt="Chef portrait" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Food & Culture" data-ar="طعام وثقافة">Food &amp; Culture</span>
             <h3><Link href="/article" data-en="Bader Al-Rashed: 'Saudi Cuisine Doesn't Need to Explain Itself Anymore'" data-ar="بدر الراشد: 'المطبخ السعودي لم يعد بحاجة إلى تفسير نفسه'">Bader Al-Rashed: &lsquo;Saudi Cuisine Doesn&apos;t Need to Explain Itself Anymore&rsquo;</Link></h3>
@@ -53,7 +55,7 @@ export default function InterviewsPage() {
 
           <article className="article-card" data-category-card data-category-order="2" data-category-rank="1" data-category-editors-choice>
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-int2/400/533" alt="Artist portrait" loading="lazy" />
+              <img src="https://loremflickr.com/400/533/portrait,people?lock=38" alt="Artist portrait" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Contemporary Art" data-ar="الفن المعاصر">Contemporary Art</span>
             <h3><Link href="/article" data-en="Maha Al-Dosari on Abstraction, Arabic Script, and Going Global" data-ar="مها الدوسري عن التجريد والخط العربي والانتشار العالمي">Maha Al-Dosari on Abstraction, Arabic Script, and Going Global</Link></h3>
@@ -63,7 +65,7 @@ export default function InterviewsPage() {
 
           <article className="article-card" data-category-card data-category-order="3" data-category-rank="4">
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-int3/400/533" alt="Entrepreneur portrait" loading="lazy" />
+              <img src="https://loremflickr.com/400/533/portrait,people?lock=39" alt="Entrepreneur portrait" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Business" data-ar="أعمال">Business</span>
             <h3><Link href="/article" data-en="Nora Al-Qassim on Building a Quiet Gulf Brand with Global Reach" data-ar="نورة القاسم عن بناء علامة خليجية هادئة ذات وصول عالمي">Nora Al-Qassim on Building a Quiet Gulf Brand with Global Reach</Link></h3>
@@ -73,7 +75,7 @@ export default function InterviewsPage() {
 
           <article className="article-card" data-category-card data-category-order="4" data-category-rank="3">
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-int4/400/533" alt="Director portrait" loading="lazy" />
+              <img src="https://loremflickr.com/400/533/portrait,people?lock=40" alt="Director portrait" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Film" data-ar="سينما">Film</span>
             <h3><Link href="/article" data-en="Omar Al-Farsi: 'Arab Cinema Has Found Its Moment'" data-ar="عمر الفارسي: 'السينما العربية وجدت لحظتها'">Omar Al-Farsi: &lsquo;Arab Cinema Has Found Its Moment&rsquo;</Link></h3>
@@ -83,7 +85,7 @@ export default function InterviewsPage() {
 
           <article className="article-card" data-category-card data-category-order="5" data-category-rank="5">
             <Link className="card-media" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-int5/400/533" alt="Designer portrait" loading="lazy" />
+              <img src="https://loremflickr.com/400/533/portrait,people?lock=41" alt="Designer portrait" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Style" data-ar="أسلوب">Style</span>
             <h3><Link href="/article" data-en="Hessa Al-Suwaidi: Designing Modest Fashion for a World Audience" data-ar="حصة السويدي: تصميم الأزياء المحتشمة لجمهور عالمي">Hessa Al-Suwaidi: Designing Modest Fashion for a World Audience</Link></h3>

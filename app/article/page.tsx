@@ -27,7 +27,7 @@ export default function ArticlePage() {
         <article>
           <figure className="article-hero reveal">
             <img
-              src="https://picsum.photos/seed/saudimag-article/1920/1080"
+              src="https://loremflickr.com/1920/1080/architecture,city?lock=6"
               alt="Modern Saudi architectural landmark at dusk with cinematic lighting"
               data-article-hero=""
             />
@@ -47,7 +47,7 @@ export default function ArticlePage() {
             <div className="byline">
               <div className="author">
                 <img
-                  src="https://picsum.photos/seed/saudimag-author/200/200"
+                  src="https://loremflickr.com/200/200/architecture,city?lock=7"
                   alt="Author portrait"
                   loading="lazy"
                 />
@@ -141,7 +141,7 @@ export default function ArticlePage() {
               <div className="author-bio">
                 <div className="author-bio-avatar">
                   <img
-                    src="https://picsum.photos/seed/saudimag-author/200/200"
+                    src="https://loremflickr.com/200/200/architecture,city?lock=8"
                     alt="Laila Al-Fayed"
                     loading="lazy"
                   />
@@ -179,21 +179,21 @@ export default function ArticlePage() {
             <div className="editorial-grid">
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/culture">
-                  <img src="https://picsum.photos/seed/saudimag-next1/600/400" alt="Artist studio" loading="lazy" />
+                  <img src="https://loremflickr.com/600/400/architecture,city?lock=9" alt="Artist studio" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Art</span>
                 <h3><Link href="/culture">The New Wave of Abstract Calligraphy</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Makers">
-                  <img src="https://picsum.photos/seed/saudimag-next2/600/400" alt="Contemporary Gulf portrait" loading="lazy" />
+                  <img src="https://loremflickr.com/600/400/architecture,city?lock=10" alt="Contemporary Gulf portrait" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Makers</span>
                 <h3><Link href="/search?q=Makers">Regional Makers Finding a Wider Audience</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Culinary">
-                  <img src="https://picsum.photos/seed/saudimag-next3/600/400" alt="Fine dining plate" loading="lazy" />
+                  <img src="https://loremflickr.com/600/400/architecture,city?lock=11" alt="Fine dining plate" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Taste</span>
                 <h3><Link href="/search?q=Culinary">Culinary Arts Across the Gulf</Link></h3>

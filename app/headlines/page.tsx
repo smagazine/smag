@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CategoryFilters from "@/components/CategoryFilters";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Headlines | SAUDI MAG",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function HeadlinesPage() {
   return (
     <main className="page" id="main-content">
+      <Breadcrumb crumbs={[{ label: "Home", href: "/", labelAr: "الرئيسية" }, { label: "Headlines", labelAr: "الأخبار" }]} />
       <div className="page-header page-header--dark">
         <div className="container">
           <div className="section-header reveal">
@@ -27,7 +29,7 @@ export default function HeadlinesPage() {
       <div className="container">
         <article className="main-lead reveal" style={{ minHeight: 480, marginBottom: "var(--stack-md)", marginTop: "clamp(24px,4vw,48px)" }}>
           <Link className="main-lead-media" href="/article">
-            <img src="https://picsum.photos/seed/saudimag-hl-feat/1400/800" alt="Vision 2030 milestones" />
+            <img src="https://loremflickr.com/1400/800/newspaper,media?lock=30" alt="Vision 2030 milestones" />
           </Link>
           <div className="main-lead-copy">
             <span className="label eyebrow" data-en="Top Story" data-ar="القصة الرئيسية">Top Story</span>
@@ -42,7 +44,7 @@ export default function HeadlinesPage() {
         <div className="newsrow-list reveal">
           <a className="newsrow" href="/article" data-category-card data-category-order="1" data-category-rank="2">
             <div className="newsrow-thumb">
-              <img src="https://picsum.photos/seed/saudimag-hl1/400/300" alt="Gulf trade" loading="lazy" />
+              <img src="https://loremflickr.com/400/300/newspaper,media?lock=31" alt="Gulf trade" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Politics" data-ar="سياسة">Politics</span>
@@ -53,7 +55,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="2" data-category-rank="1" data-category-editors-choice>
             <div className="newsrow-thumb">
-              <img src="https://picsum.photos/seed/saudimag-hl2/400/300" alt="Tourism numbers" loading="lazy" />
+              <img src="https://loremflickr.com/400/300/newspaper,media?lock=32" alt="Tourism numbers" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Economy" data-ar="اقتصاد">Economy</span>
@@ -64,7 +66,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="3" data-category-rank="3">
             <div className="newsrow-thumb">
-              <img src="https://picsum.photos/seed/saudimag-hl3/400/300" alt="NEOM" loading="lazy" />
+              <img src="https://loremflickr.com/400/300/newspaper,media?lock=33" alt="NEOM" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Tech" data-ar="تقنية">Tech</span>
@@ -75,7 +77,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="4" data-category-rank="4" data-category-editors-choice>
             <div className="newsrow-thumb">
-              <img src="https://picsum.photos/seed/saudimag-hl4/400/300" alt="Heritage law" loading="lazy" />
+              <img src="https://loremflickr.com/400/300/newspaper,media?lock=34" alt="Heritage law" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Society" data-ar="مجتمع">Society</span>
@@ -86,7 +88,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="5" data-category-rank="5">
             <div className="newsrow-thumb">
-              <img src="https://picsum.photos/seed/saudimag-hl5/400/300" alt="Green initiative" loading="lazy" />
+              <img src="https://loremflickr.com/400/300/newspaper,media?lock=35" alt="Green initiative" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Energy" data-ar="طاقة">Energy</span>

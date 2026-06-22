@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import CategoryFilters from "@/components/CategoryFilters";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Sports | SAUDI MAG",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function SportsPage() {
   return (
     <main className="page" id="main-content">
+      <Breadcrumb crumbs={[{ label: "Home", href: "/", labelAr: "الرئيسية" }, { label: "Sports", labelAr: "الرياضة" }]} />
       <div className="page-header page-header--dark">
         <div className="container">
           <div className="section-header reveal">
@@ -41,7 +43,7 @@ export default function SportsPage() {
       <div className="container" style={{ paddingTop: "clamp(24px,4vw,48px)" }}>
         <article className="sports-feature reveal">
           <div className="sports-feature-media">
-            <img src="https://picsum.photos/seed/saudimag-sp-feat/1400/800" alt="Gulf sports" />
+            <img src="https://loremflickr.com/1400/800/sports,stadium?lock=50" alt="Gulf sports" />
           </div>
           <div className="sports-feature-copy">
             <span className="sport-badge" data-en="Deep Dive" data-ar="تغطية معمّقة">Deep Dive</span>
@@ -57,7 +59,7 @@ export default function SportsPage() {
           <article className="article-card" data-category-card data-category-order="1" data-category-rank="1" data-category-editors-choice>
             <span className="sport-badge" data-en="Football" data-ar="كرة القدم">Football</span>
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-sp1/600/380" alt="Football match" loading="lazy" />
+              <img src="https://loremflickr.com/600/380/sports,stadium?lock=51" alt="Football match" loading="lazy" />
             </Link>
             <h3><Link href="/article" data-en="The Saudi Pro League's Global Moment Is Just Beginning" data-ar="اللحظة العالمية لدوري روشن للمحترفين بدأت للتو">The Saudi Pro League&apos;s Global Moment Is Just Beginning</Link></h3>
             <p data-en="Attendances are up, broadcast deals are growing, and the talent pipeline is delivering results." data-ar="الحضور في ارتفاع، وعقود البث تتوسع، والمواهب تُثمر نتائج.">Attendances are up, broadcast deals are growing, and the talent pipeline is delivering results.</p>
@@ -67,7 +69,7 @@ export default function SportsPage() {
           <article className="article-card" data-category-card data-category-order="2" data-category-rank="3">
             <span className="sport-badge" data-en="Motorsport" data-ar="رياضات المحركات">Motorsport</span>
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-sp2/600/380" alt="Formula 1" loading="lazy" />
+              <img src="https://loremflickr.com/600/380/sports,stadium?lock=52" alt="Formula 1" loading="lazy" />
             </Link>
             <h3><Link href="/article" data-en="Jeddah Corniche Circuit: More Than a Race, a City Statement" data-ar="حلبة كورنيش جدة: أكثر من سباق، إنها بيان مدينة">Jeddah Corniche Circuit: More Than a Race, a City Statement</Link></h3>
             <p data-en="The street circuit beside the Red Sea has become one of the most dramatic venues on the F1 calendar." data-ar="حلبة الشوارع بجانب البحر الأحمر أصبحت من أكثر مضامير الفورمولا 1 إثارة.">The street circuit beside the Red Sea has become one of the most dramatic venues on the F1 calendar.</p>
@@ -77,7 +79,7 @@ export default function SportsPage() {
           <article className="article-card" data-category-card data-category-order="3" data-category-rank="2" data-category-editors-choice>
             <span className="sport-badge" data-en="Golf" data-ar="غولف">Golf</span>
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-sp3/600/380" alt="Golf course" loading="lazy" />
+              <img src="https://loremflickr.com/600/380/sports,stadium?lock=53" alt="Golf course" loading="lazy" />
             </Link>
             <h3><Link href="/article" data-en="LIV Golf One Year On: What It Changed and What It Didn't" data-ar="LIV غولف بعد عام: ما الذي تغيّر وما الذي لم يتغيّر">LIV Golf One Year On: What It Changed and What It Didn&apos;t</Link></h3>
             <p data-en="An honest accounting of the tour's first full season — the wins, the controversies, what's next." data-ar="تقييم صريح للموسم الأول الكامل للجولة — الانتصارات والجدل وما هو قادم.">An honest accounting of the tour&apos;s first full season — the wins, the controversies, what&apos;s next.</p>
@@ -87,7 +89,7 @@ export default function SportsPage() {
           <article className="article-card" data-category-card data-category-order="4" data-category-rank="4">
             <span className="sport-badge" data-en="Combat Sports" data-ar="الفنون القتالية">Combat Sports</span>
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-sp4/600/380" alt="Boxing event" loading="lazy" />
+              <img src="https://loremflickr.com/600/380/sports,stadium?lock=54" alt="Boxing event" loading="lazy" />
             </Link>
             <h3><Link href="/article" data-en="Riyadh Season's Fight Nights Are Rewriting Boxing's World Order" data-ar="ليالي الملاكمة في موسم الرياض تُعيد كتابة النظام الملاكمي العالمي">Riyadh Season&apos;s Fight Nights Are Rewriting Boxing&apos;s World Order</Link></h3>
             <p data-en="Unprecedented purses and neutral ground have made Saudi Arabia the new home of boxing's biggest bouts." data-ar="جوائز غير مسبوقة وأرضية محايدة جعلت المملكة العربية السعودية الوطن الجديد لأكبر نزالات الملاكمة.">Unprecedented purses and neutral ground have made Saudi Arabia the new home of boxing&apos;s biggest bouts.</p>
@@ -97,7 +99,7 @@ export default function SportsPage() {
           <article className="article-card" data-category-card data-category-order="5" data-category-rank="5">
             <span className="sport-badge" data-en="Wellness" data-ar="عافية">Wellness</span>
             <Link className="card-media landscape" href="/article">
-              <img src="https://picsum.photos/seed/saudimag-sp5/600/380" alt="Wellness" loading="lazy" />
+              <img src="https://loremflickr.com/600/380/sports,stadium?lock=55" alt="Wellness" loading="lazy" />
             </Link>
             <h3><Link href="/article" data-en="The Wellness Economy Is Reshaping Gulf Urban Life" data-ar="اقتصاد العافية يُعيد تشكيل الحياة الحضرية في الخليج">The Wellness Economy Is Reshaping Gulf Urban Life</Link></h3>
             <p data-en="From rooftop yoga to al-fresco running clubs, a generation is redefining healthy living in the Gulf." data-ar="من يوغا الأسطح إلى أندية الجري في الهواء الطلق، يُعيد جيل تعريف الحياة الصحية في الخليج.">From rooftop yoga to al-fresco running clubs, a generation is redefining healthy living in the Gulf.</p>
