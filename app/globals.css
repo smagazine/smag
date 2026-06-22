@@ -2268,24 +2268,31 @@ dialog.membership-dialog::backdrop {
   display: contents;
 }
 
-/* Most Read landscape: items in a horizontal row */
+/* Most Read landscape: 2×2 grid with aligned borders */
 .most-read.landscape ol {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(16px, 2.5vw, 28px);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
 }
 
 .most-read.landscape li {
   border-bottom: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 0 0 0 clamp(14px, 2vw, 22px);
+  border-left: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  padding: clamp(16px, 2vw, 24px);
   grid-template-columns: 1fr;
   gap: 8px;
 }
 
-.most-read.landscape li:first-child {
-  border-left: 0;
-  padding-left: 0;
+/* First row — no top border */
+.most-read.landscape li:nth-child(-n+2) {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Right column — left border */
+.most-read.landscape li:nth-child(even) {
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .most-read.landscape li::before {
@@ -3276,6 +3283,12 @@ dialog.membership-dialog::backdrop {
 
 [dir="rtl"] .most-read.landscape li::before {
   order: 2;
+}
+
+/* In RTL the even item is now the left column, so flip border to right */
+[dir="rtl"] .most-read.landscape li:nth-child(even) {
+  border-left: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 /* Footer compact grid — copyright flips to start of its cell in RTL */
