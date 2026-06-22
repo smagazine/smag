@@ -257,7 +257,7 @@ export default function ArticleSlugPage() {
         <article>
           <figure className="article-hero reveal">
             <img
-              src={`https://loremflickr.com/1920/1080/${article.heroKeyword}?lock=99`}
+              src={`https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&h=1080&fit=crop&auto=format`}
               alt={article.title}
               data-article-hero=""
             />
@@ -270,7 +270,7 @@ export default function ArticleSlugPage() {
             <div className="byline">
               <div className="author">
                 <img
-                  src="https://loremflickr.com/200/200/portrait,professional?lock=100"
+                  src="https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=200&h=200&fit=crop&auto=format"
                   alt={article.author}
                   loading="lazy"
                 />
@@ -320,7 +320,7 @@ export default function ArticleSlugPage() {
 
               <div className="author-bio">
                 <div className="author-bio-avatar">
-                  <img src="https://loremflickr.com/200/200/portrait,professional?lock=101" alt={article.author} loading="lazy" />
+                  <img src="https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?w=200&h=200&fit=crop&auto=format" alt={article.author} loading="lazy" />
                 </div>
                 <div>
                   <span className="author-bio-role">{article.authorRole}</span>
@@ -347,7 +347,7 @@ export default function ArticleSlugPage() {
               {["next1", "next2", "next3"].map((seed, i) => (
                 <article key={seed} className="article-card span-4 reveal">
                   <Link className="card-media" href="/article">
-                    <img src={`https://loremflickr.com/600/400/${article.heroKeyword}?lock=${i + 20}`} alt="Related article" loading="lazy" />
+                    <img src={`https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop&auto=format + 20}`} alt="Related article" loading="lazy" />
                   </Link>
                   <span className="label eyebrow">{article.category}</span>
                   <h3><Link href="/article">Related story {i + 1}</Link></h3>

@@ -209,7 +209,7 @@ function SearchContent() {
           {issues.map((item) => (
             <article key={item.id} className="issue reveal">
               <Link className="image-frame" href={item.href}>
-                <img src="https://loremflickr.com/480/640/architecture,city?lock=49" alt="Magazine issue cover" loading="lazy" />
+                <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=480&h=640&fit=crop&auto=format" alt="Magazine issue cover" loading="lazy" />
               </Link>
               <div className="issue-copy">
                 <span className="label eyebrow">{item.eyebrow}</span>

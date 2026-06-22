@@ -30,7 +30,7 @@ export default function EventsPage() {
       <section className="section container">
         <article className="article-card feature-row reveal mb-stack-lg">
           <Link className="card-media landscape" href="/article">
-            <img src="https://loremflickr.com/1200/700/festival,concert?lock=17" alt="Riyadh Season" />
+            <img src="https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=1200&h=700&fit=crop&auto=format" alt="Riyadh Season" />
           </Link>
           <div>
             <div className="event-badge">
@@ -49,7 +49,7 @@ export default function EventsPage() {
           <article className="event-card article-card" data-category-card data-category-order="1" data-category-rank="2" data-category-editors-choice>
             <div className="event-badge"><span className="day">18</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
-              <img src="https://loremflickr.com/600/380/festival,concert?lock=18" alt="MDL Beast" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=380&fit=crop&auto=format" alt="MDL Beast" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Music" data-ar="موسيقى">Music</span>
             <h3><Link href="/article" data-en="MDL Beast Becomes a Global Benchmark for Festival Design" data-ar="MDL Beast يصبح معياراً عالمياً لتصميم المهرجانات">MDL Beast Becomes a Global Benchmark for Festival Design</Link></h3>
@@ -60,7 +60,7 @@ export default function EventsPage() {
           <article className="event-card article-card" data-category-card data-category-order="2" data-category-rank="1">
             <div className="event-badge"><span className="day">22</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
-              <img src="https://loremflickr.com/600/380/festival,concert?lock=19" alt="Noor Riyadh" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=380&fit=crop&auto=format" alt="Noor Riyadh" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Art" data-ar="فن">Art</span>
             <h3><Link href="/article" data-en="Noor Riyadh Illuminates the City for Its Biggest Edition Yet" data-ar="نور الرياض يُضيء المدينة في أكبر نسخة حتى الآن">Noor Riyadh Illuminates the City for Its Biggest Edition Yet</Link></h3>
@@ -71,7 +71,7 @@ export default function EventsPage() {
           <article className="event-card article-card" data-category-card data-category-order="3" data-category-rank="3" data-category-editors-choice>
             <div className="event-badge"><span className="day">28</span><span className="month" data-en="Jun" data-ar="يون">Jun</span></div>
             <Link className="card-media landscape" href="/article">
-              <img src="https://loremflickr.com/600/380/festival,concert?lock=20" alt="Red Sea Film Festival" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=380&fit=crop&auto=format" alt="Red Sea Film Festival" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Film" data-ar="سينما">Film</span>
             <h3><Link href="/article" data-en="Red Sea International Film Festival Cements Its Global Reputation" data-ar="مهرجان البحر الأحمر السينمائي يرسّخ سمعته العالمية">Red Sea International Film Festival Cements Its Global Reputation</Link></h3>
@@ -82,7 +82,7 @@ export default function EventsPage() {
           <article className="event-card article-card" data-category-card data-category-order="4" data-category-rank="5">
             <div className="event-badge"><span className="day">3</span><span className="month" data-en="Jul" data-ar="يول">Jul</span></div>
             <Link className="card-media landscape" href="/article">
-              <img src="https://loremflickr.com/600/380/festival,concert?lock=21" alt="Arab Fashion Week" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&h=380&fit=crop&auto=format" alt="Arab Fashion Week" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Fashion" data-ar="أزياء">Fashion</span>
             <h3><Link href="/article" data-en="Arab Fashion Week Moves Its Centrepiece Show to AlUla" data-ar="أسبوع الموضة العربي ينقل عرضه الرئيسي إلى العُلا">Arab Fashion Week Moves Its Centrepiece Show to AlUla</Link></h3>
@@ -93,7 +93,7 @@ export default function EventsPage() {
           <article className="event-card article-card" data-category-card data-category-order="5" data-category-rank="4">
             <div className="event-badge"><span className="day">9</span><span className="month" data-en="Jul" data-ar="يول">Jul</span></div>
             <Link className="card-media landscape" href="/article">
-              <img src="https://loremflickr.com/600/380/festival,concert?lock=22" alt="Cultural salon" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&h=380&fit=crop&auto=format" alt="Cultural salon" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Culture" data-ar="ثقافة">Culture</span>
             <h3><Link href="/article" data-en="The Salon Circuit: Private Cultural Gatherings Shaping Gulf Ideas" data-ar="دائرة الصالونات: التجمعات الثقافية الخاصة التي تصوغ أفكار الخليج">The Salon Circuit: Private Cultural Gatherings Shaping Gulf Ideas</Link></h3>

@@ -27,7 +27,7 @@ export default function ArticlePage() {
         <article>
           <figure className="article-hero reveal">
             <img
-              src="https://loremflickr.com/1920/1080/architecture,city?lock=6"
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop&auto=format"
               alt="Modern Saudi architectural landmark at dusk with cinematic lighting"
               data-article-hero=""
             />
@@ -47,7 +47,7 @@ export default function ArticlePage() {
             <div className="byline">
               <div className="author">
                 <img
-                  src="https://loremflickr.com/200/200/architecture,city?lock=7"
+                  src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=200&h=200&fit=crop&auto=format"
                   alt="Author portrait"
                   loading="lazy"
                 />
@@ -141,7 +141,7 @@ export default function ArticlePage() {
               <div className="author-bio">
                 <div className="author-bio-avatar">
                   <img
-                    src="https://loremflickr.com/200/200/architecture,city?lock=8"
+                    src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&auto=format"
                     alt="Laila Al-Fayed"
                     loading="lazy"
                   />
@@ -179,21 +179,21 @@ export default function ArticlePage() {
             <div className="editorial-grid">
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/culture">
-                  <img src="https://loremflickr.com/600/400/architecture,city?lock=9" alt="Artist studio" loading="lazy" />
+                  <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&auto=format" alt="Artist studio" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Art</span>
                 <h3><Link href="/culture">The New Wave of Abstract Calligraphy</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Makers">
-                  <img src="https://loremflickr.com/600/400/architecture,city?lock=10" alt="Contemporary Gulf portrait" loading="lazy" />
+                  <img src="https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=600&h=400&fit=crop&auto=format" alt="Contemporary Gulf portrait" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Makers</span>
                 <h3><Link href="/search?q=Makers">Regional Makers Finding a Wider Audience</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Culinary">
-                  <img src="https://loremflickr.com/600/400/architecture,city?lock=11" alt="Fine dining plate" loading="lazy" />
+                  <img src="https://images.unsplash.com/photo-1510519138101-570d1dca3d66?w=600&h=400&fit=crop&auto=format" alt="Fine dining plate" loading="lazy" />
                 </Link>
                 <span className="label eyebrow">Taste</span>
                 <h3><Link href="/search?q=Culinary">Culinary Arts Across the Gulf</Link></h3>

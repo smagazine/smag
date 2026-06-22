@@ -29,7 +29,7 @@ export default function HeadlinesPage() {
       <div className="container">
         <article className="main-lead reveal" style={{ minHeight: 480, marginBottom: "var(--stack-md)", marginTop: "clamp(24px,4vw,48px)" }}>
           <Link className="main-lead-media" href="/article">
-            <img src="https://loremflickr.com/1400/800/newspaper,media?lock=30" alt="Vision 2030 milestones" />
+            <img src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1400&h=800&fit=crop&auto=format" alt="Vision 2030 milestones" />
           </Link>
           <div className="main-lead-copy">
             <span className="label eyebrow" data-en="Top Story" data-ar="القصة الرئيسية">Top Story</span>
@@ -44,7 +44,7 @@ export default function HeadlinesPage() {
         <div className="newsrow-list reveal">
           <a className="newsrow" href="/article" data-category-card data-category-order="1" data-category-rank="2">
             <div className="newsrow-thumb">
-              <img src="https://loremflickr.com/400/300/newspaper,media?lock=31" alt="Gulf trade" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&h=300&fit=crop&auto=format" alt="Gulf trade" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Politics" data-ar="سياسة">Politics</span>
@@ -55,7 +55,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="2" data-category-rank="1" data-category-editors-choice>
             <div className="newsrow-thumb">
-              <img src="https://loremflickr.com/400/300/newspaper,media?lock=32" alt="Tourism numbers" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=300&fit=crop&auto=format" alt="Tourism numbers" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Economy" data-ar="اقتصاد">Economy</span>
@@ -66,7 +66,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="3" data-category-rank="3">
             <div className="newsrow-thumb">
-              <img src="https://loremflickr.com/400/300/newspaper,media?lock=33" alt="NEOM" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&auto=format" alt="NEOM" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Tech" data-ar="تقنية">Tech</span>
@@ -77,7 +77,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="4" data-category-rank="4" data-category-editors-choice>
             <div className="newsrow-thumb">
-              <img src="https://loremflickr.com/400/300/newspaper,media?lock=34" alt="Heritage law" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=300&fit=crop&auto=format" alt="Heritage law" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Society" data-ar="مجتمع">Society</span>
@@ -88,7 +88,7 @@ export default function HeadlinesPage() {
           </a>
           <a className="newsrow" href="/article" data-category-card data-category-order="5" data-category-rank="5">
             <div className="newsrow-thumb">
-              <img src="https://loremflickr.com/400/300/newspaper,media?lock=35" alt="Green initiative" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=300&fit=crop&auto=format" alt="Green initiative" loading="lazy" />
             </div>
             <div className="newsrow-body">
               <span className="label eyebrow" data-en="Energy" data-ar="طاقة">Energy</span>
