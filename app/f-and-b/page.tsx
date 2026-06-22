@@ -35,14 +35,14 @@ export default function FAndBPage() {
             <p className="mt-lg"><Link className="button secondary" href="/article" data-en="Read story" data-ar="اقرأ القصة">Read story</Link></p>
           </div>
           <Link className="card-media" href="/article">
-            <img src="https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=800&h=1000&fit=crop&auto=format" alt="Chef portrait" />
+            <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=1000&fit=crop&auto=format" alt="Chef portrait" />
           </Link>
         </article>
 
         <div className="fnb-grid reveal">
           <article className="article-card" data-category-card data-category-order="1" data-category-rank="1" data-category-editors-choice>
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&h=500&fit=crop&auto=format" alt="Restaurant interior" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=500&h=500&fit=crop&auto=format" alt="Restaurant interior" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Opening" data-ar="افتتاح">Opening</span>
             <h3><Link href="/article" data-en="Bait Al-Kaif: Riyadh's Most Anticipated Opening of the Year" data-ar="بيت الكيف: أكثر افتتاح منتظر في الرياض هذا العام">Bait Al-Kaif: Riyadh&apos;s Most Anticipated Opening of the Year</Link></h3>
@@ -51,7 +51,7 @@ export default function FAndBPage() {
 
           <article className="article-card" data-category-card data-category-order="2" data-category-rank="3">
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&h=500&fit=crop&auto=format" alt="Artisan coffee" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&h=500&fit=crop&auto=format" alt="Artisan coffee" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Café Culture" data-ar="ثقافة المقاهي">Café Culture</span>
             <h3><Link href="/article" data-en="Third Wave Coffee Takes Root Across the Kingdom" data-ar="موجة القهوة الثالثة تترسخ في أرجاء المملكة">Third Wave Coffee Takes Root Across the Kingdom</Link></h3>
@@ -60,7 +60,7 @@ export default function FAndBPage() {
 
           <article className="article-card" data-category-card data-category-order="3" data-category-rank="2">
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop&auto=format" alt="Fine dining" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&h=500&fit=crop&auto=format" alt="Fine dining" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Fine Dining" data-ar="مطاعم راقية">Fine Dining</span>
             <h3><Link href="/article" data-en="Jeddah's Corniche Dining Scene Is Growing Up Fast" data-ar="مشهد المطاعم على كورنيش جدة ينضج بسرعة">Jeddah&apos;s Corniche Dining Scene Is Growing Up Fast</Link></h3>
@@ -69,7 +69,7 @@ export default function FAndBPage() {
 
           <article className="article-card" data-category-card data-category-order="4" data-category-rank="5">
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=500&h=500&fit=crop&auto=format" alt="Food festival" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&h=500&fit=crop&auto=format" alt="Food festival" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Events" data-ar="فعاليات">Events</span>
             <h3><Link href="/article" data-en="Taste of Diriyah Returns With 40 Saudi Concepts" data-ar="طعم الدرعية يعود بـ40 مفهوماً سعودياً">Taste of Diriyah Returns With 40 Saudi Concepts</Link></h3>
@@ -78,7 +78,7 @@ export default function FAndBPage() {
 
           <article className="article-card" data-category-card data-category-order="5" data-category-rank="4" data-category-editors-choice>
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=500&fit=crop&auto=format" alt="Pastry" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=500&fit=crop&auto=format" alt="Pastry" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Craft" data-ar="حرفة">Craft</span>
             <h3><Link href="/article" data-en="The Bakers Reviving Gulf Pastry Traditions" data-ar="الخبازون يُحيون تقاليد المعجنات الخليجية">The Bakers Reviving Gulf Pastry Traditions</Link></h3>
@@ -87,7 +87,7 @@ export default function FAndBPage() {
 
           <article className="article-card" data-category-card data-category-order="6" data-category-rank="6">
             <Link className="card-media square" href="/article">
-              <img src="https://images.unsplash.com/photo-1439337153520-7082a56a81f4?w=500&h=500&fit=crop&auto=format" alt="Spice market" loading="lazy" />
+              <img src="https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=500&h=500&fit=crop&auto=format" alt="Spice market" loading="lazy" />
             </Link>
             <span className="label eyebrow" data-en="Ingredients" data-ar="مكونات">Ingredients</span>
             <h3><Link href="/article" data-en="The Spice Route Revival: Old Ingredients, New Kitchens" data-ar="إحياء طريق التوابل: مكونات قديمة ومطابخ جديدة">The Spice Route Revival: Old Ingredients, New Kitchens</Link></h3>

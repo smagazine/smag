@@ -4,6 +4,9 @@ import { useParams } from "next/navigation";
 import ReadingProgress from "@/components/ReadingProgress";
 import { showDemoToast } from "@/components/DemoToast";
 
+const U = (id: string, w: number, h: number) =>
+  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+
 const ARTICLES: Record<string, {
   category: string;
   title: string;
@@ -11,7 +14,9 @@ const ARTICLES: Record<string, {
   author: string;
   authorRole: string;
   meta: string;
-  heroKeyword: string;
+  heroPhoto: string;
+  authorPhoto: string;
+  relatedPhotos: [string, string, string];
   body: { id: string; type: "p" | "h2" | "blockquote" | "video"; text: string; videoUrl?: string }[];
   tags: string[];
   relatedCategory: string;
@@ -23,7 +28,9 @@ const ARTICLES: Record<string, {
     author: "Laila Al-Fayed",
     authorRole: "Architecture Editor",
     meta: "October 24, 2024 · 8 min read",
-    heroKeyword: "architecture,city",
+    heroPhoto: "photo-1486325212027-8081e485255e",
+    authorPhoto: "photo-1494790108377-be9c29b29330",
+    relatedPhotos: ["photo-1545569341-9eb8b30979d9", "photo-1524230572899-a752b3835840", "photo-1462826303086-329426d1aef5"],
     tags: ["Architecture", "Design", "Riyadh", "Culture"],
     relatedCategory: "culture",
     body: [
@@ -42,7 +49,9 @@ const ARTICLES: Record<string, {
     author: "Khalid Al-Rasheed",
     authorRole: "Sports Correspondent",
     meta: "March 12, 2025 · 10 min read",
-    heroKeyword: "sports,stadium",
+    heroPhoto: "photo-1461896836934-ffe607ba8211",
+    authorPhoto: "photo-1507003211169-0a1dd7228f2d",
+    relatedPhotos: ["photo-1579952363873-27f3bade9f55", "photo-1541534741688-6078c6bfb5c5", "photo-1583121274602-3e2820c69888"],
     tags: ["Sports", "Formula 1", "Golf", "Riyadh"],
     relatedCategory: "sports",
     body: [
@@ -60,7 +69,9 @@ const ARTICLES: Record<string, {
     author: "Nour Al-Saud",
     authorRole: "Culture & Events Editor",
     meta: "June 14, 2026 · 7 min read",
-    heroKeyword: "festival,concert",
+    heroPhoto: "photo-1501281668745-f7f57925c3b4",
+    authorPhoto: "photo-1531746020798-e6953c6e8e04",
+    relatedPhotos: ["photo-1540575467063-178a50c2df87", "photo-1470225620780-dba8ba36b745", "photo-1511795409834-ef04bbd61622"],
     tags: ["Events", "Riyadh", "Culture", "Entertainment"],
     relatedCategory: "events",
     body: [
@@ -78,7 +89,9 @@ const ARTICLES: Record<string, {
     author: "Reem Al-Jabri",
     authorRole: "Food & Culture Writer",
     meta: "April 3, 2026 · 9 min read",
-    heroKeyword: "food,restaurant",
+    heroPhoto: "photo-1547592166-23ac45744acd",
+    authorPhoto: "photo-1517841905240-472988babdf9",
+    relatedPhotos: ["photo-1565299624946-b28f40a0ae38", "photo-1567620905732-2d1ec7ab7445", "photo-1504674900247-0877df9cc836"],
     tags: ["Food", "Culture", "Saudi", "Chefs"],
     relatedCategory: "f-and-b",
     body: [
@@ -97,7 +110,9 @@ const ARTICLES: Record<string, {
     author: "Laila Al-Fayed",
     authorRole: "Architecture Editor",
     meta: "January 18, 2026 · 11 min read",
-    heroKeyword: "desert,landscape",
+    heroPhoto: "photo-1529516548873-9ce57c8f155e",
+    authorPhoto: "photo-1494790108377-be9c29b29330",
+    relatedPhotos: ["photo-1469796466635-455ede028aca", "photo-1506905925346-21bda4d32df4", "photo-1519681393784-d120267933ba"],
     tags: ["AlUla", "Heritage", "Culture", "Tourism"],
     relatedCategory: "culture",
     body: [
@@ -116,7 +131,9 @@ const ARTICLES: Record<string, {
     author: "Tariq Al-Mansouri",
     authorRole: "Senior Correspondent",
     meta: "May 5, 2026 · 12 min read",
-    heroKeyword: "city,future",
+    heroPhoto: "photo-1477959858617-67f85cf4f1df",
+    authorPhoto: "photo-1534528741775-53994a69daeb",
+    relatedPhotos: ["photo-1486325212027-8081e485255e", "photo-1510519138101-570d1dca3d66", "photo-1497366216548-37526070297c"],
     tags: ["NEOM", "Vision 2030", "Architecture", "Cities"],
     relatedCategory: "headlines",
     body: [
@@ -135,7 +152,9 @@ const ARTICLES: Record<string, {
     author: "Sara Al-Mutairi",
     authorRole: "Style Editor",
     meta: "February 28, 2026 · 6 min read",
-    heroKeyword: "fashion,design",
+    heroPhoto: "photo-1558618666-fcd25c85cd64",
+    authorPhoto: "photo-1517841905240-472988babdf9",
+    relatedPhotos: ["photo-1515886657613-9f3515b0c78f", "photo-1559027615-cd4628902d4a", "photo-1601924994987-69e26d50dc26"],
     tags: ["Fashion", "Design", "Interviews", "Gulf"],
     relatedCategory: "interviews",
     body: [
@@ -154,7 +173,9 @@ const ARTICLES: Record<string, {
     author: "Nour Al-Saud",
     authorRole: "Culture & Events Editor",
     meta: "December 10, 2025 · 8 min read",
-    heroKeyword: "festival,music",
+    heroPhoto: "photo-1470225620780-dba8ba36b745",
+    authorPhoto: "photo-1531746020798-e6953c6e8e04",
+    relatedPhotos: ["photo-1514320291840-2e0a9bf2a9ae", "photo-1511795409834-ef04bbd61622", "photo-1501281668745-f7f57925c3b4"],
     tags: ["Music", "MDL Beast", "Events", "Riyadh"],
     relatedCategory: "events",
     body: [
@@ -173,7 +194,9 @@ const ARTICLES: Record<string, {
     author: "Omar Al-Zayed",
     authorRole: "Film & Arts Correspondent",
     meta: "November 22, 2025 · 7 min read",
-    heroKeyword: "cinema,film",
+    heroPhoto: "photo-1514320291840-2e0a9bf2a9ae",
+    authorPhoto: "photo-1507003211169-0a1dd7228f2d",
+    relatedPhotos: ["photo-1540575467063-178a50c2df87", "photo-1439337153520-7082a56a81f4", "photo-1528360983277-13d401cdc186"],
     tags: ["Film", "Culture", "Jeddah", "Cinema"],
     relatedCategory: "culture",
     body: [
@@ -257,7 +280,7 @@ export default function ArticleSlugPage() {
         <article>
           <figure className="article-hero reveal">
             <img
-              src={`https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1920&h=1080&fit=crop&auto=format`}
+              src={U(article.heroPhoto, 1920, 1080)}
               alt={article.title}
               data-article-hero=""
             />
@@ -270,7 +293,7 @@ export default function ArticleSlugPage() {
             <div className="byline">
               <div className="author">
                 <img
-                  src="https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=200&h=200&fit=crop&auto=format"
+                  src={U(article.authorPhoto, 200, 200)}
                   alt={article.author}
                   loading="lazy"
                 />
@@ -320,7 +343,7 @@ export default function ArticleSlugPage() {
 
               <div className="author-bio">
                 <div className="author-bio-avatar">
-                  <img src="https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?w=200&h=200&fit=crop&auto=format" alt={article.author} loading="lazy" />
+                  <img src={U(article.authorPhoto, 200, 200)} alt={article.author} loading="lazy" />
                 </div>
                 <div>
                   <span className="author-bio-role">{article.authorRole}</span>
@@ -344,10 +367,10 @@ export default function ArticleSlugPage() {
               <Link className="button secondary" href={`/${article.relatedCategory}`} data-en="View all" data-ar="عرض الكل">View all</Link>
             </div>
             <div className="editorial-grid">
-              {["next1", "next2", "next3"].map((seed, i) => (
-                <article key={seed} className="article-card span-4 reveal">
+              {article.relatedPhotos.map((photoId, i) => (
+                <article key={photoId} className="article-card span-4 reveal">
                   <Link className="card-media" href="/article">
-                    <img src={`https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop&auto=format + 20}`} alt="Related article" loading="lazy" />
+                    <img src={U(photoId, 600, 400)} alt="Related article" loading="lazy" />
                   </Link>
                   <span className="label eyebrow">{article.category}</span>
                   <h3><Link href="/article">Related story {i + 1}</Link></h3>
