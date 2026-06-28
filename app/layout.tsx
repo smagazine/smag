@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LangProvider } from "@/contexts/LangContext";
@@ -16,7 +17,11 @@ export const metadata: Metadata = {
     "An independent editorial platform covering Gulf culture, cities, architecture, business, design, and contemporary life.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <html lang="en" dir="ltr">
       <head>
@@ -36,14 +41,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <LangProvider>
-            <a className="skip-link" href="#main-content">
-              Skip to content
-            </a>
-            <Header />
-            {children}
-            <Footer />
-            <RevealObserver />
-            <ScrollToTop />
+            {isAdmin ? (
+              children
+            ) : (
+              <>
+                <a className="skip-link" href="#main-content">
+                  Skip to content
+                </a>
+                <Header />
+                {children}
+                <Footer />
+                <RevealObserver />
+                <ScrollToTop />
+              </>
+            )}
           </LangProvider>
         </ThemeProvider>
       </body>
