@@ -2162,7 +2162,7 @@ dialog.membership-dialog::backdrop {
   width: 44px;
   height: 44px;
   background: var(--color-ink);
-  color: var(--color-bg);
+  color: var(--color-gold);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -2284,6 +2284,7 @@ dialog.membership-dialog::backdrop {
 .most-read.landscape ol {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  align-items: start;
   gap: 0;
 }
 
