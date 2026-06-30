@@ -144,7 +144,7 @@ export default function HomePage() {
           <div className="video-layout">
             <article className="video-feature reveal">
               <VideoMediaLink href="/article/gulf-fashion-identity">
-                <Image fill src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=560&fit=crop&auto=format" alt="Fashion editorial portrait" sizes="(min-width: 1280px) 900px, 100vw" />
+                <Image fill src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&h=560&fit=crop&auto=format" alt="Gulf design studio interior" sizes="(min-width: 1280px) 900px, 100vw" />
                 <span className="play-dot"><span className="material-symbols-outlined">play_arrow</span></span>
               </VideoMediaLink>
               <span className="label eyebrow" data-en="Field Notes" data-ar="ملاحظات ميدانية">Field Notes</span>
