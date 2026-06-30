@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, Suspense } from "react";
 
@@ -7,7 +8,7 @@ const RESULTS = [
   {
     id: "coll1",
     href: "/article",
-    seed: "saudimag-s1",
+    photo: "photo-1486325212027-8081e485255e",
     size: "1000/600",
     alt: "Vision 2030 architecture",
     eyebrow: "Vision 2030 Architecture",
@@ -17,7 +18,7 @@ const RESULTS = [
   {
     id: "coll2",
     href: "/culture",
-    seed: "saudimag-s2",
+    photo: "photo-1507003211169-0a1dd7228f2d",
     size: "600/500",
     alt: "Contemporary Gulf portrait",
     eyebrow: "Creative Lives",
@@ -27,7 +28,7 @@ const RESULTS = [
   {
     id: "coll3",
     href: "/culture",
-    seed: "saudimag-s3",
+    photo: "photo-1567620905732-2d1ec7ab7445",
     size: "600/500",
     alt: "Culinary art",
     eyebrow: "Culinary Arts",
@@ -165,7 +166,7 @@ function SearchContent() {
             </div>
             <div className="collection-grid">
               <Link className="collection-card large reveal" href={collections[0].href}>
-                <img src={`https://loremflickr.com/${collections[0].size}/architecture,city`} alt={collections[0].alt} loading="lazy" />
+                <Image fill src={`https://images.unsplash.com/${collections[0].photo ?? ""}?w=1000&h=600&fit=crop&auto=format`} alt={collections[0].alt ?? ""} sizes="(min-width: 1280px) 800px, 100vw" />
                 <div className="collection-copy">
                   <span className="label eyebrow">{collections[0].eyebrow}</span>
                   <h3>{collections[0].h3}</h3>
@@ -175,7 +176,7 @@ function SearchContent() {
                 <div className="collection-stack">
                   {collections.slice(1).map((c) => (
                     <Link key={c.id} className="collection-card reveal" href={c.href}>
-                      <img src={`https://loremflickr.com/${c.size}/architecture,city`} alt={c.alt} loading="lazy" />
+                      <Image fill src={`https://images.unsplash.com/${c.photo ?? ""}?w=600&h=500&fit=crop&auto=format`} alt={c.alt ?? ""} sizes="(min-width: 1280px) 400px, 50vw" />
                       <div className="collection-copy">
                         <span className="label eyebrow">{c.eyebrow}</span>
                         <h3>{c.h3}</h3>
@@ -209,7 +210,7 @@ function SearchContent() {
           {issues.map((item) => (
             <article key={item.id} className="issue reveal">
               <Link className="image-frame" href={item.href}>
-                <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=480&h=640&fit=crop&auto=format" alt="Magazine issue cover" loading="lazy" />
+                <Image fill src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=480&h=640&fit=crop&auto=format" alt="Magazine issue cover" sizes="(min-width: 768px) 240px, 180px" />
               </Link>
               <div className="issue-copy">
                 <span className="label eyebrow">{item.eyebrow}</span>

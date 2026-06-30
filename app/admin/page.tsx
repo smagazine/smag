@@ -25,6 +25,8 @@ interface Article {
   body: BodyBlock[];
   tags: string[];
   relatedCategory: string;
+  status?: "draft" | "published";
+  featured?: boolean;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -86,9 +88,19 @@ const BLANK_ARTICLE: Article = {
   body: [{ id: uid(), type: "p", text: "" }],
   tags: [],
   relatedCategory: "culture",
+  status: "published",
+  featured: false,
 };
 
 // ── Sub-components ─────────────────────────────────────────────────────────
+
+function extractPhotoId(raw: string): string {
+  const urlMatch = raw.match(/unsplash\.com\/(photo-[\w-]+)/);
+  if (urlMatch) return urlMatch[1];
+  if (raw.startsWith("photo-")) return raw;
+  if (/^[\da-z]+-[\da-z-]+$/.test(raw)) return `photo-${raw}`;
+  return raw;
+}
 
 function PhotoField({
   label,
@@ -109,8 +121,8 @@ function PhotoField({
         <input
           style={{ ...inputStyle, flex: 1 }}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="photo-1486325212027-8081e485255e"
+          onChange={(e) => onChange(extractPhotoId(e.target.value))}
+          placeholder="photo-xxx… or paste full Unsplash URL"
         />
         {previewSrc && (
           <div style={{ width: 80, height: 54, borderRadius: 6, overflow: "hidden", flexShrink: 0, border: "1px solid #333" }}>
@@ -199,6 +211,11 @@ function BlockEditor({
         style={{ ...textareaStyle, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
       />
 
+      {block.type === "p" && (
+        <p style={{ fontSize: 10, color: "#444", marginTop: 6, lineHeight: 1.5 }}>
+          Markdown: <code style={{ color: "#666" }}>**bold**</code> · <code style={{ color: "#666" }}>*italic*</code> · <code style={{ color: "#666" }}>[link](url)</code>
+        </p>
+      )}
       {block.type === "video" && (
         <input
           value={block.videoUrl ?? ""}
@@ -351,6 +368,21 @@ export default function AdminPage() {
       showToast("Save failed", "err");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function toggleFeatured(article: Article) {
+    const updated = { ...article, featured: !article.featured };
+    try {
+      await fetch(`/api/articles/${article.slug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      await fetchArticles();
+      showToast(updated.featured ? "Set as featured story" : "Removed from featured");
+    } catch {
+      showToast("Failed to update", "err");
     }
   }
 
@@ -545,12 +577,23 @@ export default function AdminPage() {
                           <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 3, background: `${CAT_COLOR[article.category] ?? "#888"}18`, color: CAT_COLOR[article.category] ?? "#888" }}>
                             {article.category}
                           </span>
+                          {(article.status ?? "published") === "draft" && (
+                            <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 3, background: "#f59e0b20", color: "#f59e0b", letterSpacing: "0.08em" }}>DRAFT</span>
+                          )}
                           <span style={{ fontSize: 11, color: "#555" }}>{article.author}</span>
                           <span style={{ fontSize: 11, color: "#444" }}>·</span>
                           <span style={{ fontSize: 11, color: "#555" }}>{article.meta.split("·")[0]?.trim()}</span>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          type="button"
+                          onClick={() => toggleFeatured(article)}
+                          title={article.featured ? "Featured homepage hero" : "Set as featured"}
+                          style={{ fontSize: 16, color: article.featured ? "#c8ff00" : "#444", background: "none", border: "1px solid #2a2a2a", borderRadius: 5, padding: "4px 9px", cursor: "pointer", lineHeight: 1 }}
+                        >
+                          {article.featured ? "★" : "☆"}
+                        </button>
                         <Link
                           href={`/article/${article.slug}`}
                           target="_blank"
@@ -619,7 +662,7 @@ export default function AdminPage() {
                     disabled={saving}
                     style={{ fontSize: 12, fontWeight: 800, color: "#000", background: saving ? "#888" : "#c8ff00", border: "none", borderRadius: 7, padding: "8px 18px", cursor: saving ? "not-allowed" : "pointer" }}
                   >
-                    {saving ? "Saving…" : isNew ? "Publish" : "Save changes"}
+                    {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? (isNew ? "Save draft" : "Save draft") : (isNew ? "Publish" : "Save changes")}
                   </button>
                 </div>
               </div>
@@ -654,6 +697,30 @@ export default function AdminPage() {
                     <select style={{ ...selectStyle, width: "100%" }} value={draft.category} onChange={S("category")}>
                       {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                     </select>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+                  <div>
+                    <label style={labelStyle}>Status</label>
+                    <select
+                      style={{ ...selectStyle, width: "100%", color: (draft.status ?? "published") === "draft" ? "#f59e0b" : "#c8ff00" }}
+                      value={draft.status ?? "published"}
+                      onChange={(e) => setDraft(d => ({ ...d, status: e.target.value as "draft" | "published" }))}
+                    >
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 2 }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, color: draft.featured ? "#c8ff00" : "#888", userSelect: "none" }}>
+                      <input
+                        type="checkbox"
+                        checked={draft.featured ?? false}
+                        onChange={(e) => setDraft(d => ({ ...d, featured: e.target.checked }))}
+                        style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#c8ff00" }}
+                      />
+                      Featured (homepage hero)
+                    </label>
                   </div>
                 </div>
               </div>
@@ -786,7 +853,7 @@ export default function AdminPage() {
                   disabled={saving}
                   style={{ fontSize: 13, fontWeight: 800, color: "#000", background: saving ? "#888" : "#c8ff00", border: "none", borderRadius: 7, padding: "10px 24px", cursor: saving ? "not-allowed" : "pointer" }}
                 >
-                  {saving ? "Saving…" : isNew ? "Publish article" : "Save changes"}
+                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? (isNew ? "Save draft" : "Save draft") : (isNew ? "Publish article" : "Save changes")}
                 </button>
               </div>
             </div>

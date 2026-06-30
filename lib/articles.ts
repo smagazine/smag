@@ -22,6 +22,8 @@ export interface Article {
   body: BodyBlock[];
   tags: string[];
   relatedCategory: string;
+  status?: "draft" | "published";
+  featured?: boolean;
 }
 
 const DATA_PATH = path.join(process.cwd(), "data", "articles.json");
@@ -38,12 +40,20 @@ export function getArticle(slug: string): Article | null {
   return getArticles().find((a) => a.slug === slug) ?? null;
 }
 
+export function getPublishedArticles(): Article[] {
+  return getArticles().filter((a) => (a.status ?? "published") !== "draft");
+}
+
 export function saveArticles(articles: Article[]): void {
   fs.writeFileSync(DATA_PATH, JSON.stringify(articles, null, 2), "utf-8");
 }
 
 export function upsertArticle(article: Article): void {
-  const articles = getArticles();
+  let articles = getArticles();
+  // Only one article can be featured at a time
+  if (article.featured) {
+    articles = articles.map((a) => a.slug !== article.slug ? { ...a, featured: false } : a);
+  }
   const idx = articles.findIndex((a) => a.slug === article.slug);
   if (idx >= 0) {
     articles[idx] = article;

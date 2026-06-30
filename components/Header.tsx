@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "/headlines", en: "Headlines", ar: "الأخبار" },
   { href: "/f-and-b", en: "F&B", ar: "طعام وشراب" },
   { href: "/events", en: "Events", ar: "الفعاليات" },
+  { href: "/culture", en: "Culture", ar: "الثقافة" },
   { href: "/interviews", en: "Interviews", ar: "مقابلات" },
   { href: "/sports", en: "Sports", ar: "الرياضة" },
   { href: "/search", en: "Archive", ar: "الأرشيف" },

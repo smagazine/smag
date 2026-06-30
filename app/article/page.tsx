@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import ReadingProgress from "@/components/ReadingProgress";
 import { showDemoToast } from "@/components/DemoToast";
@@ -26,11 +27,7 @@ export default function ArticlePage() {
       <main className="page" id="main-content">
         <article>
           <figure className="article-hero reveal">
-            <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop&auto=format"
-              alt="Modern Saudi architectural landmark at dusk with cinematic lighting"
-              data-article-hero=""
-            />
+            <Image fill priority src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop&auto=format" alt="Modern Saudi architectural landmark at dusk with cinematic lighting" data-article-hero="" sizes="100vw" />
           </figure>
 
           <header className="article-header container reveal">
@@ -46,11 +43,7 @@ export default function ArticlePage() {
             </p>
             <div className="byline">
               <div className="author">
-                <img
-                  src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=200&h=200&fit=crop&auto=format"
-                  alt="Author portrait"
-                  loading="lazy"
-                />
+                <Image src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=200&h=200&fit=crop&auto=format" alt="Author portrait" width={54} height={54} />
                 <div>
                   <span className="meta" data-article-author="">
                     By Laila Al-Fayed
@@ -140,11 +133,7 @@ export default function ArticlePage() {
 
               <div className="author-bio">
                 <div className="author-bio-avatar">
-                  <img
-                    src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&auto=format"
-                    alt="Laila Al-Fayed"
-                    loading="lazy"
-                  />
+                  <Image fill src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&auto=format" alt="Laila Al-Fayed" sizes="72px" />
                 </div>
                 <div>
                   <span className="author-bio-role">Contributing Editor</span>
@@ -179,21 +168,21 @@ export default function ArticlePage() {
             <div className="editorial-grid">
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/culture">
-                  <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&auto=format" alt="Artist studio" loading="lazy" />
+                  <Image fill src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=600&h=400&fit=crop&auto=format" alt="Artist studio" sizes="(min-width: 1280px) 400px, 33vw" />
                 </Link>
                 <span className="label eyebrow">Art</span>
                 <h3><Link href="/culture">The New Wave of Abstract Calligraphy</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Makers">
-                  <img src="https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=600&h=400&fit=crop&auto=format" alt="Contemporary Gulf portrait" loading="lazy" />
+                  <Image fill src="https://images.unsplash.com/photo-1486754735734-325b5831c3ad?w=600&h=400&fit=crop&auto=format" alt="Contemporary Gulf portrait" sizes="(min-width: 1280px) 400px, 33vw" />
                 </Link>
                 <span className="label eyebrow">Makers</span>
                 <h3><Link href="/search?q=Makers">Regional Makers Finding a Wider Audience</Link></h3>
               </article>
               <article className="article-card span-4 reveal">
                 <Link className="card-media" href="/search?q=Culinary">
-                  <img src="https://images.unsplash.com/photo-1510519138101-570d1dca3d66?w=600&h=400&fit=crop&auto=format" alt="Fine dining plate" loading="lazy" />
+                  <Image fill src="https://images.unsplash.com/photo-1510519138101-570d1dca3d66?w=600&h=400&fit=crop&auto=format" alt="Fine dining plate" sizes="(min-width: 1280px) 400px, 33vw" />
                 </Link>
                 <span className="label eyebrow">Taste</span>
                 <h3><Link href="/search?q=Culinary">Culinary Arts Across the Gulf</Link></h3>

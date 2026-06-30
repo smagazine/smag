@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { showDemoToast } from "./DemoToast";
 
 type Filter = "latest" | "most-read" | "editors-choice";
 
@@ -22,14 +21,6 @@ export default function CategoryFilters() {
         .sort((a, b) => Number(a.dataset[key]) - Number(b.dataset[key]))
         .forEach((card) => grid.append(card));
     }
-
-    showDemoToast(
-      filter === "latest"
-        ? "Showing the latest stories."
-        : filter === "most-read"
-        ? "Stories sorted by readership."
-        : "Showing editor's selected stories."
-    );
   };
 
   return (

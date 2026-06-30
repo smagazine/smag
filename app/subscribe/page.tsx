@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useRef } from "react";
 import MembershipDialog, { type MembershipDialogHandle } from "@/components/MembershipDialog";
 
@@ -13,7 +14,7 @@ export default function SubscribePage() {
       <main className="page" id="main-content">
         <section className="subscription-hero">
           <div className="image-frame reveal">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop&auto=format" alt="Editorial membership visual" />
+            <Image fill priority src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop&auto=format" alt="Editorial membership visual" sizes="100vw" />
           </div>
           <div className="container d-grid">
             <div className="membership-card reveal">

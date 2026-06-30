@@ -1,8 +1,15 @@
-"use client";
 import Link from "next/link";
-import { showDemoToast } from "@/components/DemoToast";
+import Image from "next/image";
+import VideoMediaLink from "@/components/VideoMediaLink";
+import NewsletterForm from "@/components/NewsletterForm";
+import { getPublishedArticles } from "@/lib/articles";
 
 export default function HomePage() {
+  const articles = getPublishedArticles();
+  const hero = articles.find((a) => a.featured) ?? articles[0];
+  const tickerArticles = articles.slice(0, 3);
+  const mostRead = articles.slice(0, 4);
+
   return (
     <main className="page home-portal" id="main-content">
       <div className="issue-strip">
@@ -19,20 +26,20 @@ export default function HomePage() {
             <span className="label" data-en="Top Stories" data-ar="أبرز القصص">Top Stories</span>
             <div className="ticker-wrap">
               <div className="ticker-track">
-                <Link href="/article" data-en="New museum districts turn heritage into a public city experience" data-ar="أحياء المتاحف الجديدة تحوّل التراث إلى تجربة مدنية">New museum districts turn heritage into a public city experience</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
-                <Link href="/search?q=Riyadh" data-en="Riyadh's creative season brings design, food, and civic life together" data-ar="موسم الرياض الإبداعي يجمع التصميم والطعام والحياة المدنية">Riyadh&apos;s creative season brings design, food, and civic life together</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
-                <Link href="/search?q=Architecture" data-en="The minimalist shift reshaping Gulf architectural identity" data-ar="التحول نحو البساطة يُعيد تشكيل الهوية المعمارية الخليجية">The minimalist shift reshaping Gulf architectural identity</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
+                {tickerArticles.map((a) => (
+                  <>
+                    <Link key={a.slug} href={`/article/${a.slug}`}>{a.title}</Link>
+                    <span className="ticker-sep" aria-hidden="true">·</span>
+                  </>
+                ))}
               </div>
               <div className="ticker-track" aria-hidden="true">
-                <Link href="/article">New museum districts turn heritage into a public city experience</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
-                <Link href="/search?q=Riyadh">Riyadh&apos;s creative season brings design, food, and civic life together</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
-                <Link href="/search?q=Architecture">The minimalist shift reshaping Gulf architectural identity</Link>
-                <span className="ticker-sep" aria-hidden="true">·</span>
+                {tickerArticles.map((a) => (
+                  <>
+                    <Link key={a.slug} href={`/article/${a.slug}`}>{a.title}</Link>
+                    <span className="ticker-sep" aria-hidden="true">·</span>
+                  </>
+                ))}
               </div>
             </div>
           </div>
@@ -41,14 +48,14 @@ export default function HomePage() {
 
       <section className="container lead-layout">
         <article className="main-lead reveal">
-          <Link className="main-lead-media" href="/article">
-            <img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=1400&h=900&fit=crop&auto=format" alt="Modern Saudi architectural landmark at dusk" />
+          <Link className="main-lead-media" href={`/article/${hero.slug}`}>
+            <Image fill priority src={`https://images.unsplash.com/${hero.heroPhoto}?w=1400&h=900&fit=crop&auto=format`} alt={hero.title} sizes="(min-width: 1280px) 900px, 100vw" />
           </Link>
           <div className="main-lead-copy">
-            <span className="label eyebrow" data-en="Architecture · Culture · Public Life" data-ar="العمارة · الثقافة · الحياة العامة">Architecture · Culture · Public Life</span>
-            <h1><Link href="/article" data-en="The Gulf Is Designing a New Language for Public Space" data-ar="الخليج يبتكر لغة جديدة للفضاء العام">The Gulf Is Designing a New Language for Public Space</Link></h1>
-            <p data-en="From shaded plazas to quiet museums, the region's cultural districts are shaping how people gather, learn, and belong." data-ar="من الساحات المظللة إلى المتاحف الهادئة، تُشكّل الأحياء الثقافية في المنطقة طريقة تجمّع الناس وتعلّمهم وانتمائهم.">From shaded plazas to quiet museums, the region&apos;s cultural districts are shaping how people gather, learn, and belong.</p>
-            <span className="meta" data-en="By Laila Al-Fayed · 8 min read" data-ar="بقلم ليلى الفايد · 8 دقائق قراءة">By Laila Al-Fayed · 8 min read</span>
+            <span className="label eyebrow">{hero.category}</span>
+            <h1><Link href={`/article/${hero.slug}`}>{hero.title}</Link></h1>
+            <p>{hero.subtitle}</p>
+            <span className="meta">By {hero.author} · {hero.meta}</span>
           </div>
         </article>
 
@@ -59,23 +66,22 @@ export default function HomePage() {
               <span className="meta" data-en="For this month" data-ar="هذا الشهر">For this month</span>
             </div>
             <ol>
-              <li><Link href="/search?q=Mecca" data-en="How Pilgrimage Infrastructure Became a Design Challenge of Global Scale" data-ar="كيف أصبحت بنية الحج تحدياً تصميمياً عالمياً">How Pilgrimage Infrastructure Became a Design Challenge of Global Scale</Link></li>
-              <li><Link href="/search?q=Doha" data-en="Doha's Neighborhood Tables Are Defining a New Dining Culture" data-ar="موائد أحياء الدوحة تُعيد تعريف ثقافة الطعام">Doha&apos;s Neighborhood Tables Are Defining a New Dining Culture</Link></li>
-              <li><Link href="/search?q=Real+Estate" data-en="The Gulf's Real Estate Market Is Learning the Value of Walkability" data-ar="سوق العقارات الخليجي يكتشف قيمة قابلية المشي">The Gulf&apos;s Real Estate Market Is Learning the Value of Walkability</Link></li>
-              <li><Link href="/search?q=Jeddah" data-en="Jeddah's Startup Scene Finds Its Rhythm Between Sea and City" data-ar="مشهد الشركات الناشئة في جدة يجد إيقاعه بين البحر والمدينة">Jeddah&apos;s Startup Scene Finds Its Rhythm Between Sea and City</Link></li>
+              {mostRead.map((a) => (
+                <li key={a.slug}><Link href={`/article/${a.slug}`}>{a.title}</Link></li>
+              ))}
             </ol>
           </aside>
           <div className="lead-stack reveal">
             <article className="mini-lead">
-              <Link className="mini-media" href="/article">
-                <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&h=400&fit=crop&auto=format" alt="Modern museum facade" loading="lazy" />
+              <Link className="mini-media" href="/article/vision-2030-cities">
+                <Image fill src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&h=400&fit=crop&auto=format" alt="Modern museum facade" sizes="(min-width: 768px) 300px, 100vw" />
               </Link>
               <span className="label eyebrow" data-en="Cities" data-ar="المدن">Cities</span>
-              <h3><Link href="/article" data-en="Museum Districts Are Becoming the Gulf's New Public Squares" data-ar="أحياء المتاحف تصبح الساحات العامة الجديدة في الخليج">Museum Districts Are Becoming the Gulf&apos;s New Public Squares</Link></h3>
+              <h3><Link href="/article/vision-2030-cities" data-en="Museum Districts Are Becoming the Gulf's New Public Squares" data-ar="أحياء المتاحف تصبح الساحات العامة الجديدة في الخليج">Museum Districts Are Becoming the Gulf&apos;s New Public Squares</Link></h3>
             </article>
             <article className="mini-lead">
               <Link className="mini-media" href="/search?q=Book+Fair">
-                <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=400&fit=crop&auto=format" alt="Minimal theater stage" loading="lazy" />
+                <Image fill src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&h=400&fit=crop&auto=format" alt="Minimal theater stage" sizes="(min-width: 768px) 300px, 100vw" />
               </Link>
               <span className="label eyebrow" data-en="Reading Culture" data-ar="ثقافة القراءة">Reading Culture</span>
               <h3><Link href="/search?q=Book+Fair" data-en="Book Fairs Are Rewriting the Region's Cultural Calendar" data-ar="معارض الكتاب تُعيد كتابة التقويم الثقافي للمنطقة">Book Fairs Are Rewriting the Region&apos;s Cultural Calendar</Link></h3>
@@ -95,16 +101,16 @@ export default function HomePage() {
           </div>
           <div className="news-grid news-list reveal">
             <article className="news-card">
-              <Link className="news-card-media" href="/article">
-                <img src="https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=500&fit=crop&auto=format" alt="Modern architectural development" loading="lazy" />
+              <Link className="news-card-media" href="/headlines">
+                <Image fill src="https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&h=500&fit=crop&auto=format" alt="Modern architectural development" sizes="(min-width: 1280px) 400px, 50vw" />
               </Link>
               <span className="label eyebrow" data-en="Business" data-ar="أعمال">Business</span>
-              <h3><Link href="/article" data-en="Real Estate Advisors Reframe Growth Around Culture and Community" data-ar="مستشارو العقارات يُعيدون صياغة مفهوم النمو حول الثقافة والمجتمع">Real Estate Advisors Reframe Growth Around Culture and Community</Link></h3>
+              <h3><Link href="/headlines" data-en="Real Estate Advisors Reframe Growth Around Culture and Community" data-ar="مستشارو العقارات يُعيدون صياغة مفهوم النمو حول الثقافة والمجتمع">Real Estate Advisors Reframe Growth Around Culture and Community</Link></h3>
               <p data-en="Global property voices are shifting from spectacle toward livable districts." data-ar="أصوات العقارات العالمية تتحول من الضجة إلى الأحياء الصالحة للعيش.">Global property voices are shifting from spectacle toward livable districts, credible data, and long-term value.</p>
             </article>
             <article className="news-card">
               <Link className="news-card-media" href="/culture">
-                <img src="https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?w=800&h=500&fit=crop&auto=format" alt="Artist in studio" loading="lazy" />
+                <Image fill src="https://images.unsplash.com/photo-1529516548873-9ce57c8f155e?w=800&h=500&fit=crop&auto=format" alt="Artist in studio" sizes="(min-width: 1280px) 400px, 50vw" />
               </Link>
               <span className="label eyebrow" data-en="Urban Life" data-ar="الحياة الحضرية">Urban Life</span>
               <h3><Link href="/culture" data-en="Expo City Dubai Opens a Walk Through the City's Future Story" data-ar="إكسبو سيتي دبي تفتح مساراً عبر قصة مستقبل المدينة">Expo City Dubai Opens a Walk Through the City&apos;s Future Story</Link></h3>
@@ -112,7 +118,7 @@ export default function HomePage() {
             </article>
             <article className="news-card">
               <Link className="news-card-media" href="/search?q=Aviation">
-                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=500&fit=crop&auto=format" alt="Fine dining detail" loading="lazy" />
+                <Image fill src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=500&fit=crop&auto=format" alt="Fine dining detail" sizes="(min-width: 1280px) 400px, 50vw" />
               </Link>
               <span className="label eyebrow" data-en="Travel" data-ar="السفر">Travel</span>
               <h3><Link href="/search?q=Aviation" data-en="Connected Flight Is Changing the Region's Travel Expectations" data-ar="الرحلات المتصلة تغير توقعات السفر في المنطقة">Connected Flight Is Changing the Region&apos;s Travel Expectations</Link></h3>
@@ -137,12 +143,12 @@ export default function HomePage() {
           </div>
           <div className="video-layout">
             <article className="video-feature reveal">
-              <a className="video-media" href="/article" onClick={(e) => { e.preventDefault(); showDemoToast("Video playback is available in the full production edition."); }}>
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=560&fit=crop&auto=format" alt="Fashion editorial portrait" loading="lazy" />
+              <VideoMediaLink href="/article/gulf-fashion-identity">
+                <Image fill src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=560&fit=crop&auto=format" alt="Fashion editorial portrait" sizes="(min-width: 1280px) 900px, 100vw" />
                 <span className="play-dot"><span className="material-symbols-outlined">play_arrow</span></span>
-              </a>
+              </VideoMediaLink>
               <span className="label eyebrow" data-en="Field Notes" data-ar="ملاحظات ميدانية">Field Notes</span>
-              <h2><Link href="/article" data-en="Inside the Studios Turning Gulf Design Into Everyday Culture" data-ar="داخل الاستوديوهات التي تحوّل تصميم الخليج إلى ثقافة يومية">Inside the Studios Turning Gulf Design Into Everyday Culture</Link></h2>
+              <h2><Link href="/article/gulf-fashion-identity" data-en="Inside the Studios Turning Gulf Design Into Everyday Culture" data-ar="داخل الاستوديوهات التي تحوّل تصميم الخليج إلى ثقافة يومية">Inside the Studios Turning Gulf Design Into Everyday Culture</Link></h2>
               <p data-en="Short films, interviews, and visits with the people shaping objects, interiors, and public moments." data-ar="أفلام قصيرة ومقابلات وزيارات مع الأشخاص الذين يصنعون الأشياء والمساحات واللحظات العامة.">Short films, interviews, and visits with the people shaping objects, interiors, and public moments.</p>
             </article>
             <div className="video-list reveal">
@@ -175,6 +181,7 @@ export default function HomePage() {
             <Link className="chip" href="/events" data-en="Events" data-ar="الفعاليات">Events</Link>
             <Link className="chip" href="/interviews" data-en="Interviews" data-ar="مقابلات">Interviews</Link>
             <Link className="chip" href="/sports" data-en="Sports" data-ar="الرياضة">Sports</Link>
+            <Link className="chip" href="/culture" data-en="Culture" data-ar="الثقافة">Culture</Link>
           </div>
         </div>
       </section>
@@ -186,19 +193,7 @@ export default function HomePage() {
             <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
             <p className="deck" data-en="The morning read for people following the region's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة المنطقة ومدنها وأفكارها. مجاني، كل يوم عمل.">The morning read for people following the region&apos;s culture, cities, and ideas. Free, every weekday.</p>
           </div>
-          <form className="newsletter-form" onSubmit={(e) => { e.preventDefault(); (e.currentTarget.querySelector("input") as HTMLInputElement).value = ""; (e.currentTarget.closest(".newsletter-strip") as HTMLElement)?.setAttribute("data-sent", "true"); }}>
-            <input
-              type="email"
-              required
-              placeholder="Your email address"
-              data-placeholder-en="Your email address"
-              data-placeholder-ar="عنوان بريدك الإلكتروني"
-              aria-label="Email address for newsletter"
-              data-label-en="Email address for newsletter"
-              data-label-ar="البريد الإلكتروني للنشرة"
-            />
-            <button className="button" type="submit" data-en="Subscribe free" data-ar="اشترك مجاناً">Subscribe free</button>
-          </form>
+          <NewsletterForm />
           <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
         </div>
       </section>

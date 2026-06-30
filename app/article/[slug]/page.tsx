@@ -1,6 +1,8 @@
+import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticle } from "@/lib/articles";
+import { getArticle, getPublishedArticles } from "@/lib/articles";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
 import type { Metadata } from "next";
@@ -8,13 +10,46 @@ import type { Metadata } from "next";
 const U = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
 
+function parseInline(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  const re = /\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g;
+  let last = 0;
+  let i = 0;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    if (match[1] !== undefined) parts.push(<strong key={i++}>{match[1]}</strong>);
+    else if (match[2] !== undefined) parts.push(<em key={i++}>{match[2]}</em>);
+    else parts.push(<a key={i++} href={match[4]} target="_blank" rel="noopener noreferrer">{match[3]}</a>);
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length === 0 ? text : parts.length === 1 ? parts[0] : <>{parts}</>;
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return { title: "Article not found" };
-  return { title: `${article.title} | SAUDI MAG`, description: article.subtitle };
+  const heroUrl = `https://images.unsplash.com/${article.heroPhoto}?w=1200&h=630&fit=crop&auto=format`;
+  return {
+    title: article.title,
+    description: article.subtitle,
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description: article.subtitle,
+      images: [{ url: heroUrl, width: 1200, height: 630, alt: article.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.subtitle,
+      images: [heroUrl],
+    },
+  };
 }
 
 export default async function ArticleSlugPage(
@@ -22,10 +57,30 @@ export default async function ArticleSlugPage(
 ) {
   const { slug } = await params;
   const article = getArticle(slug);
-  if (!article) notFound();
+  if (!article || (article.status ?? "published") === "draft") notFound();
+
+  const allArticles = getPublishedArticles();
+  const related = [
+    ...allArticles.filter(a => a.slug !== slug && a.relatedCategory === article.relatedCategory),
+    ...allArticles.filter(a => a.slug !== slug && a.relatedCategory !== article.relatedCategory),
+  ].slice(0, 3);
+
+  const heroUrl = `https://images.unsplash.com/${article.heroPhoto}?w=1200&h=630&fit=crop&auto=format`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.subtitle,
+    image: heroUrl,
+    author: { "@type": "Person", name: article.author, jobTitle: article.authorRole },
+    publisher: { "@type": "Organization", name: "SAUDI MAG" },
+    datePublished: article.meta,
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://saudimag.com/article/${article.slug}` },
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <ReadingProgress />
       <main className="page" id="main-content">
         <nav className="breadcrumb container" aria-label="Breadcrumb">
@@ -38,7 +93,7 @@ export default async function ArticleSlugPage(
 
         <article>
           <figure className="article-hero reveal">
-            <img src={U(article.heroPhoto, 1920, 1080)} alt={article.title} data-article-hero="" />
+            <Image fill priority src={U(article.heroPhoto, 1920, 1080)} alt={article.title} data-article-hero="" sizes="100vw" />
           </figure>
 
           <header className="article-header container reveal">
@@ -47,7 +102,7 @@ export default async function ArticleSlugPage(
             <p className="article-subtitle">{article.subtitle}</p>
             <div className="byline">
               <div className="author">
-                <img src={U(article.authorPhoto, 200, 200)} alt={article.author} loading="lazy" />
+                <Image src={U(article.authorPhoto, 200, 200)} alt={article.author} width={54} height={54} />
                 <div>
                   <span className="meta">By {article.author}</span>
                   <p>{article.meta}</p>
@@ -93,7 +148,7 @@ export default async function ArticleSlugPage(
                 const isFirst = article.body.findIndex((b) => b.type === "p") === idx;
                 return (
                   <p key={block.id} id={block.id} className={isFirst ? "drop-cap" : undefined}>
-                    {block.text}
+                    {parseInline(block.text)}
                   </p>
                 );
               })}
@@ -109,7 +164,7 @@ export default async function ArticleSlugPage(
 
               <div className="author-bio">
                 <div className="author-bio-avatar">
-                  <img src={U(article.authorPhoto, 200, 200)} alt={article.author} loading="lazy" />
+                  <Image fill src={U(article.authorPhoto, 200, 200)} alt={article.author} sizes="72px" />
                 </div>
                 <div>
                   <span className="author-bio-role">{article.authorRole}</span>
@@ -140,13 +195,13 @@ export default async function ArticleSlugPage(
               </Link>
             </div>
             <div className="editorial-grid">
-              {article.relatedPhotos.map((photoId, i) => (
-                <article key={photoId} className="article-card span-4 reveal">
-                  <Link className="card-media" href="/article">
-                    <img src={U(photoId, 600, 400)} alt="Related article" loading="lazy" />
+              {related.map((rel) => (
+                <article key={rel.slug} className="article-card span-4 reveal">
+                  <Link className="card-media" href={`/article/${rel.slug}`}>
+                    <Image fill src={U(rel.heroPhoto, 600, 400)} alt={rel.title} sizes="(min-width: 1280px) 400px, 33vw" />
                   </Link>
-                  <span className="label eyebrow">{article.category}</span>
-                  <h3><Link href="/article">Related story {i + 1}</Link></h3>
+                  <span className="label eyebrow">{rel.category}</span>
+                  <h3><Link href={`/article/${rel.slug}`}>{rel.title}</Link></h3>
                 </article>
               ))}
             </div>
