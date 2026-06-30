@@ -27,7 +27,7 @@ export default function ArticlePage() {
       <main className="page" id="main-content">
         <article>
           <figure className="article-hero reveal">
-            <Image fill priority src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop&auto=format" alt="Modern Saudi architectural landmark at dusk with cinematic lighting" data-article-hero="" sizes="100vw" />
+            <Image fill priority src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&h=1080&fit=crop&auto=format" alt="Modern Saudi architectural landmark at dusk with cinematic lighting" data-article-hero="" sizes="100vw" />
           </figure>
 
           <header className="article-header container reveal">
