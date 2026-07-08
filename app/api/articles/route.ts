@@ -1,4 +1,5 @@
-import { getArticles, upsertArticle } from "@/lib/articles";
+import { getArticles, upsertArticle, normalizeArticle, ValidationError } from "@/lib/articles";
+import { isAuthed } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function GET() {
@@ -6,12 +7,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const article = await request.json();
-  if (!article?.slug || !article?.title) {
-    return Response.json({ error: "slug and title are required" }, { status: 400 });
+  if (!(await isAuthed())) {
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+  let article;
+  try {
+    article = normalizeArticle(await request.json());
+  } catch (err) {
+    const message = err instanceof ValidationError ? err.message : "invalid request body";
+    return Response.json({ error: message }, { status: 400 });
   }
   upsertArticle(article);
   revalidatePath("/article/" + article.slug);
+  revalidatePath("/" + article.relatedCategory);
   revalidatePath("/admin");
   return Response.json({ ok: true }, { status: 201 });
 }

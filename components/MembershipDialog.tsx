@@ -22,21 +22,29 @@ const MembershipDialog = forwardRef<MembershipDialogHandle>((_, ref) => {
     document.body.style.overflow = "";
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const data = {
-      tier,
       name: (form.elements.namedItem("name") as HTMLInputElement).value.trim(),
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
-      requestedAt: new Date().toISOString(),
+      type: `Membership: ${tier}`,
+      message: `Membership signup for the ${tier} tier.`,
     };
+    setError(false);
     try {
-      const existing = JSON.parse(localStorage.getItem("saudi-magazine-membership-requests") || "[]");
-      existing.push(data);
-      localStorage.setItem("saudi-magazine-membership-requests", JSON.stringify(existing));
-    } catch {}
-    setSubmitted(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      setSubmitted(true);
+    } catch {
+      setError(true);
+    }
   };
 
   return (
@@ -84,6 +92,11 @@ const MembershipDialog = forwardRef<MembershipDialogHandle>((_, ref) => {
           <button className="button" type="submit" data-en="Join membership" data-ar="انضم الآن">
             Join membership
           </button>
+          {error && (
+            <p className="form-label" style={{ color: "#c0392b" }} data-en="Something went wrong. Please try again." data-ar="حدث خطأ ما. يرجى المحاولة مرة أخرى.">
+              Something went wrong. Please try again.
+            </p>
+          )}
         </form>
       ) : (
         <p className="membership-success">Thank you. Your membership request has been received.</p>

@@ -57,9 +57,25 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(LANG_KEY, lang);
   }, [lang]);
 
-  // Re-apply on route change so new DOM nodes get translated
+  // Re-apply on route change, and keep watching for dynamically-added nodes
+  // (client-rendered content that mounts after navigation) so they get
+  // translated too. A guard prevents the observer from reacting to the
+  // textContent changes applyLang itself makes.
   useEffect(() => {
-    applyLang(lang);
+    let applying = false;
+    const run = () => {
+      applying = true;
+      applyLang(lang);
+      applying = false;
+    };
+    run();
+
+    const observer = new MutationObserver(() => {
+      if (applying) return;
+      run();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [lang, pathname]);
 
   const toggle = () => setLang((l) => (l === "en" ? "ar" : "en"));

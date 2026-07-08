@@ -3,9 +3,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getArticle, getPublishedArticles } from "@/lib/articles";
+import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
 import type { Metadata } from "next";
+
+// Statically prerender every published article; revalidate hourly and on write
+// (the API calls revalidatePath after each save).
+export const revalidate = 3600;
+
+export function generateStaticParams() {
+  return getPublishedArticles().map((a) => ({ slug: a.slug }));
+}
 
 const U = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
@@ -134,17 +143,20 @@ export default async function ArticleSlugPage(
                   return <h2 key={block.id} id={block.id}>{block.text}</h2>;
                 if (block.type === "blockquote")
                   return <blockquote key={block.id} className="pullquote">{block.text}</blockquote>;
-                if (block.type === "video")
+                if (block.type === "video") {
+                  const embed = safeEmbedUrl(block.videoUrl);
+                  if (!embed) return null;
                   return (
                     <div key={block.id} className="article-video">
                       <iframe
-                        src={block.videoUrl}
+                        src={embed}
                         title={block.text}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       />
                     </div>
                   );
+                }
                 const isFirst = article.body.findIndex((b) => b.type === "p") === idx;
                 return (
                   <p key={block.id} id={block.id} className={isFirst ? "drop-cap" : undefined}>

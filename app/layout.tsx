@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { Newsreader, Sora, Cairo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -23,11 +22,6 @@ const cairo = Cairo({
   display: "swap",
   variable: "--font-cairo",
 });
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import RevealObserver from "@/components/RevealObserver";
-import ScrollToTop from "@/components/ScrollToTop";
-
 const FAVICON =
   "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23000'/><rect x='2' y='2' width='60' height='60' fill='none' stroke='%23a6d61f' stroke-width='3'/><text x='32' y='44' font-size='34' font-weight='bold' text-anchor='middle' fill='%23a6d61f' font-family='Arial,sans-serif'>S</text></svg>";
 
@@ -59,14 +53,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const isAdmin = pathname.startsWith("/admin");
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" dir="ltr" className={`${newsreader.variable} ${sora.variable} ${cairo.variable}`}>
       <head>
+        {/* Apply saved theme + language before first paint to avoid a
+            light/LTR flash for dark-mode / Arabic users. Keep the storage keys
+            in sync with ThemeContext (saudi-mag-dark-mode) and LangContext
+            (saudi-mag-lang). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;if(localStorage.getItem('saudi-mag-dark-mode')==='1')d.dataset.theme='dark';if(localStorage.getItem('saudi-mag-lang')==='ar'){d.lang='ar';d.dir='rtl';}}catch(e){}})();`,
+          }}
+        />
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href={FAVICON} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,22 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <ThemeProvider>
-          <LangProvider>
-            {isAdmin ? (
-              children
-            ) : (
-              <>
-                <a className="skip-link" href="#main-content">
-                  Skip to content
-                </a>
-                <Header />
-                {children}
-                <Footer />
-                <RevealObserver />
-                <ScrollToTop />
-              </>
-            )}
-          </LangProvider>
+          <LangProvider>{children}</LangProvider>
         </ThemeProvider>
       </body>
     </html>

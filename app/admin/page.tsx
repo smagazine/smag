@@ -305,6 +305,10 @@ export default function AdminPage() {
   const [filterCat, setFilterCat] = useState("All");
   const [slugLocked, setSlugLocked] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [pwd, setPwd] = useState("");
+  const [loginErr, setLoginErr] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -323,7 +327,46 @@ export default function AdminPage() {
     }
   }, [showToast]);
 
-  useEffect(() => { fetchArticles(); }, [fetchArticles]);
+  // Check existing session on mount; only load articles once authenticated.
+  useEffect(() => {
+    fetch("/api/admin/login")
+      .then((r) => r.json())
+      .then((d) => setAuthed(Boolean(d.authed)))
+      .catch(() => setAuthed(false));
+  }, []);
+
+  useEffect(() => {
+    if (authed) fetchArticles();
+  }, [authed, fetchArticles]);
+
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
+    setLoggingIn(true);
+    setLoginErr("");
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwd }),
+      });
+      if (!res.ok) {
+        setLoginErr("Incorrect password");
+        return;
+      }
+      setPwd("");
+      setAuthed(true);
+    } catch {
+      setLoginErr("Login failed");
+    } finally {
+      setLoggingIn(false);
+    }
+  }
+
+  async function logout() {
+    await fetch("/api/admin/login", { method: "DELETE" }).catch(() => {});
+    setAuthed(false);
+    setArticles([]);
+  }
 
   // Auto-slug from title when creating new article
   useEffect(() => {
@@ -441,6 +484,45 @@ export default function AdminPage() {
 
   const wordCount = draft.body.filter(b => b.type === "p" || b.type === "blockquote").reduce((acc, b) => acc + b.text.split(/\s+/).filter(Boolean).length, 0);
 
+  // Session check in progress
+  if (authed === null) {
+    return (
+      <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#666", display: "grid", placeItems: "center", fontSize: 13 }}>
+        Loading…
+      </div>
+    );
+  }
+
+  // Login gate
+  if (!authed) {
+    return (
+      <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#e5e5e5", display: "grid", placeItems: "center", fontFamily: "var(--font-body,system-ui,sans-serif)" }}>
+        <form onSubmit={login} style={{ width: 320, background: "#111", border: "1px solid #1e1e1e", borderRadius: 12, padding: "28px 26px", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+            <div style={{ width: 26, height: 26, background: "#c8ff00", borderRadius: 4, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 12, color: "#000" }}>S</div>
+            <span style={{ fontWeight: 700, fontSize: 13, color: "#fff", letterSpacing: "0.06em" }}>SAUDI MAG</span>
+          </div>
+          <label style={{ fontSize: 12, color: "#888", fontWeight: 600 }}>Admin password</label>
+          <input
+            type="password"
+            value={pwd}
+            onChange={(e) => setPwd(e.target.value)}
+            autoFocus
+            style={{ ...inputStyle, background: "#0d0d0d" }}
+          />
+          {loginErr && <p style={{ fontSize: 12, color: "#ff6b6b", margin: 0 }}>{loginErr}</p>}
+          <button
+            type="submit"
+            disabled={loggingIn}
+            style={{ padding: "10px 12px", background: "#c8ff00", color: "#000", border: "none", borderRadius: 7, fontSize: 13, fontWeight: 800, cursor: "pointer", opacity: loggingIn ? 0.6 : 1 }}
+          >
+            {loggingIn ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#e5e5e5", fontFamily: "var(--font-body,system-ui,sans-serif)", display: "flex", flexDirection: "column" }}>
 
@@ -463,6 +545,7 @@ export default function AdminPage() {
             </button>
           )}
           <Link href="/" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>← View site</Link>
+          <button type="button" onClick={logout} style={{ fontSize: 12, color: "#888", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>Log out</button>
         </div>
       </header>
 

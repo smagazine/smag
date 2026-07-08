@@ -4,7 +4,9 @@ import { useState } from "react";
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const data = {
@@ -12,17 +14,20 @@ export default function ContactPage() {
       email: (form.elements.namedItem("email") as HTMLInputElement).value.trim(),
       type: (form.elements.namedItem("type") as HTMLInputElement).value.trim(),
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim(),
-      requestedAt: new Date().toISOString(),
     };
+    setError(false);
     try {
-      const existing = JSON.parse(
-        localStorage.getItem("saudi-magazine-contact-requests") || "[]"
-      );
-      existing.push(data);
-      localStorage.setItem("saudi-magazine-contact-requests", JSON.stringify(existing));
-    } catch {}
-    form.reset();
-    setSubmitted(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error();
+      form.reset();
+      setSubmitted(true);
+    } catch {
+      setError(true);
+    }
   };
 
   return (
@@ -89,6 +94,11 @@ export default function ContactPage() {
             {submitted && (
               <p className="form-success" data-en="Thank you. Your inquiry has been received by the editorial desk." data-ar="شكراً لك. تم استلام استفسارك من قِبل مكتب التحرير.">
                 Thank you. Your inquiry has been received by the editorial desk.
+              </p>
+            )}
+            {error && (
+              <p className="form-success" style={{ color: "#c0392b" }} data-en="Something went wrong. Please check your details and try again." data-ar="حدث خطأ ما. يرجى التحقق من بياناتك والمحاولة مرة أخرى.">
+                Something went wrong. Please check your details and try again.
               </p>
             )}
           </form>
