@@ -59,21 +59,21 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
   // Re-apply on route change, and keep watching for dynamically-added nodes
   // (client-rendered content that mounts after navigation) so they get
-  // translated too. A guard prevents the observer from reacting to the
-  // textContent changes applyLang itself makes.
+  // translated too. We disconnect the observer while applyLang runs — its own
+  // textContent writes would otherwise be re-observed (observer callbacks are
+  // async microtasks, so a synchronous flag can't guard them) and loop forever.
   useEffect(() => {
-    let applying = false;
-    const run = () => {
-      applying = true;
+    const observer = new MutationObserver((records) => {
+      // Only react when elements are actually added to the tree, not to the
+      // characterData/childList churn applyLang itself produces.
+      const addedNodes = records.some((r) => r.addedNodes.length > 0);
+      if (!addedNodes) return;
+      observer.disconnect();
       applyLang(lang);
-      applying = false;
-    };
-    run();
-
-    const observer = new MutationObserver(() => {
-      if (applying) return;
-      run();
+      observer.observe(document.body, { childList: true, subtree: true });
     });
+
+    applyLang(lang);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [lang, pathname]);
