@@ -29,6 +29,19 @@ interface Article {
   featured?: boolean;
 }
 
+interface ContactEntry {
+  name: string;
+  email: string;
+  type: string;
+  message: string;
+  receivedAt?: string;
+}
+
+interface SubscriberEntry {
+  email: string;
+  receivedAt?: string;
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -52,16 +65,36 @@ const RELATED_CATEGORIES = [
 
 const CAT_COLOR: Record<string, string> = {
   "Culture": "#8b5cf6",
-  "Sports": "#22c55e",
-  "F&B": "#f59e0b",
-  "Events": "#ec4899",
-  "Interviews": "#06b6d4",
-  "Headlines": "#ef4444",
+  "Sports": "#16a34a",
+  "F&B": "#d97706",
+  "Events": "#db2777",
+  "Interviews": "#0891b2",
+  "Headlines": "#dc2626",
   "Architecture & Design": "#64748b",
 };
 
+// Palette for the light "floating frame" admin shell.
+const C = {
+  page: "#dbdce1",
+  frame: "#f3f3f5",
+  card: "#ffffff",
+  ink: "#141416",
+  inkSoft: "#1f1f23",
+  text: "#17181a",
+  sub: "#8a8f98",
+  faint: "#b3b7bf",
+  line: "#e8e9ec",
+  lime: "#a6d61f",
+  limeInk: "#3d4d00",
+  red: "#e5484d",
+};
+
+const FONT = "var(--font-sora, system-ui, sans-serif)";
+
 const U = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+
+const pid = (raw: string) => (raw.startsWith("photo-") ? raw : `photo-${raw}`);
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -92,7 +125,176 @@ const BLANK_ARTICLE: Article = {
   featured: false,
 };
 
-// ── Sub-components ─────────────────────────────────────────────────────────
+// ── Icons (inline stroke SVGs, matching the soft-line reference style) ─────
+
+function Ic({ d, size = 17 }: { d: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  );
+}
+
+const ICONS = {
+  home: "M3 10.5 12 3l9 7.5M5 9.5V21h5v-6h4v6h5V9.5",
+  doc: "M7 3h7l5 5v13H7zM14 3v5h5M10 13h5M10 17h5",
+  img: "M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4M9 9h.01",
+  inbox: "M4 4h16v16H4zM4 13h5l1.5 2.5h3L15 13h5",
+  search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM21 21l-4.35-4.35",
+  plus: "M12 5v14M5 12h14",
+  arrow: "M7 17 17 7M9 7h8v8",
+  logout: "M15 4h4v16h-4M10 8l-4 4 4 4M6 12h9",
+  star: "m12 3 2.7 5.8 6.3.8-4.6 4.3 1.2 6.1L12 17l-5.6 3 1.2-6.1L3 9.6l6.3-.8z",
+  trash: "M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6",
+};
+
+// ── Shared style atoms ─────────────────────────────────────────────────────
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: "#f3f3f5",
+  border: "1px solid #ececef",
+  borderRadius: 12,
+  padding: "10px 14px",
+  color: C.text,
+  fontSize: 13,
+  outline: "none",
+  boxSizing: "border-box",
+  fontFamily: FONT,
+};
+
+const textareaStyle: React.CSSProperties = {
+  ...inputStyle,
+  resize: "vertical",
+  lineHeight: 1.6,
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  width: "auto",
+  cursor: "pointer",
+};
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 10.5,
+  fontWeight: 700,
+  color: C.sub,
+  textTransform: "uppercase",
+  letterSpacing: "0.09em",
+  marginBottom: 7,
+};
+
+// Fully-rounded pill button, ghost variant by default.
+const pillStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 7,
+  borderRadius: 999,
+  border: `1px solid ${C.line}`,
+  background: C.card,
+  color: C.text,
+  fontSize: 12,
+  fontWeight: 600,
+  padding: "8px 16px",
+  cursor: "pointer",
+  fontFamily: FONT,
+  lineHeight: 1,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+};
+
+const darkPillStyle: React.CSSProperties = {
+  ...pillStyle,
+  background: C.ink,
+  border: `1px solid ${C.ink}`,
+  color: "#fff",
+};
+
+const limePillStyle: React.CSSProperties = {
+  ...pillStyle,
+  background: C.lime,
+  border: `1px solid ${C.lime}`,
+  color: "#111",
+  fontWeight: 700,
+};
+
+const iconBtnStyle: React.CSSProperties = {
+  width: 34,
+  height: 34,
+  borderRadius: 999,
+  border: `1px solid ${C.line}`,
+  background: C.card,
+  color: C.sub,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+};
+
+const cardStyle: React.CSSProperties = {
+  background: C.card,
+  borderRadius: 22,
+  padding: "20px 22px",
+  boxShadow: "0 1px 2px rgba(20,20,22,0.04), 0 8px 28px rgba(20,20,22,0.05)",
+};
+
+const darkCardStyle: React.CSSProperties = {
+  ...cardStyle,
+  background: C.ink,
+  color: "#fff",
+  boxShadow: "0 14px 36px rgba(20,20,22,0.28)",
+};
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: 10.5,
+  fontWeight: 700,
+  color: C.sub,
+  textTransform: "uppercase",
+  letterSpacing: "0.11em",
+  marginBottom: 16,
+};
+
+function catChip(cat: string, dark = false): React.CSSProperties {
+  const col = CAT_COLOR[cat] ?? "#64748b";
+  return {
+    fontSize: 10,
+    fontWeight: 700,
+    padding: "3px 9px",
+    borderRadius: 999,
+    background: dark ? "rgba(255,255,255,0.12)" : `${col}16`,
+    color: dark ? "#e5e5e5" : col,
+    whiteSpace: "nowrap",
+  };
+}
+
+// ── Small pieces ───────────────────────────────────────────────────────────
+
+/** Deterministic mini sparkline (no randomness → stable across renders). */
+function Spark({ seed, color = C.ink, w = 84, h = 26 }: { seed: number; color?: string; w?: number; h?: number }) {
+  const pts: string[] = [];
+  const n = 12;
+  for (let i = 0; i < n; i++) {
+    const y = h / 2 + Math.sin(i * 1.1 + seed) * (h / 3.2) + Math.cos(i * 0.6 + seed * 2) * (h / 6);
+    pts.push(`${(i / (n - 1)) * w},${Math.max(2, Math.min(h - 2, y)).toFixed(1)}`);
+  }
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden>
+      <polyline points={pts.join(" ")} fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Thumb({ photo, size = 30, radius = 999, ring = C.card }: { photo: string; size?: number; radius?: number; ring?: string }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: radius, overflow: "hidden", flexShrink: 0, border: `2px solid ${ring}`, background: "#d9dade" }}>
+      {photo && (
+        <img src={U(pid(photo), size * 2, size * 2)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      )}
+    </div>
+  );
+}
 
 function extractPhotoId(raw: string): string {
   const urlMatch = raw.match(/unsplash\.com\/(photo-[\w-]+)/);
@@ -102,20 +304,10 @@ function extractPhotoId(raw: string): string {
   return raw;
 }
 
-function PhotoField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const photoId = value.startsWith("photo-") ? value : value ? `photo-${value}` : "";
-  const previewSrc = photoId ? U(photoId, 240, 160) : null;
-
+function PhotoField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const previewSrc = value ? U(pid(value), 240, 160) : null;
   return (
-    <div style={{ marginBottom: 18 }}>
+    <div style={{ marginBottom: 16 }}>
       <label style={labelStyle}>{label}</label>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
         <input
@@ -125,12 +317,12 @@ function PhotoField({
           placeholder="photo-xxx… or paste full Unsplash URL"
         />
         {previewSrc && (
-          <div style={{ width: 80, height: 54, borderRadius: 6, overflow: "hidden", flexShrink: 0, border: "1px solid #333" }}>
+          <div style={{ width: 82, height: 54, borderRadius: 12, overflow: "hidden", flexShrink: 0, border: `1px solid ${C.line}` }}>
             <img
               src={previewSrc}
               alt=""
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => { (e.currentTarget.parentElement!.style.display = "none"); }}
+              onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
             />
           </div>
         )}
@@ -139,13 +331,15 @@ function PhotoField({
   );
 }
 
+const BLOCK_COLORS: Record<string, string> = {
+  p: "#64748b",
+  h2: "#7ba314",
+  blockquote: "#8b5cf6",
+  video: "#d97706",
+};
+
 function BlockEditor({
-  block,
-  idx,
-  total,
-  onChange,
-  onDelete,
-  onMove,
+  block, idx, total, onChange, onDelete, onMove,
 }: {
   block: BodyBlock;
   idx: number;
@@ -154,47 +348,26 @@ function BlockEditor({
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
 }) {
-  const typeColors: Record<string, string> = {
-    p: "#64748b",
-    h2: "#c8ff00",
-    blockquote: "#8b5cf6",
-    video: "#f59e0b",
-  };
-
   return (
-    <div style={{ background: "#111", border: "1px solid #2a2a2a", borderRadius: 8, padding: 14, marginBottom: 8 }}>
+    <div style={{ background: "#f7f7f8", border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 10 }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "center" }}>
         <select
           value={block.type}
           onChange={(e) => onChange({ ...block, type: e.target.value as BodyBlock["type"] })}
-          style={{ ...selectStyle, fontSize: 11, padding: "4px 8px", color: typeColors[block.type], fontWeight: 700, minWidth: 110 }}
+          style={{ ...selectStyle, background: C.card, fontSize: 11, padding: "5px 10px", borderRadius: 999, color: BLOCK_COLORS[block.type], fontWeight: 700, minWidth: 112 }}
         >
           <option value="p">Paragraph</option>
           <option value="h2">Heading H2</option>
           <option value="blockquote">Blockquote</option>
           <option value="video">Video</option>
         </select>
-        <div style={{ display: "flex", gap: 4, marginLeft: "auto" }}>
-          <button
-            type="button"
-            onClick={() => onMove(-1)}
-            disabled={idx === 0}
-            style={{ ...iconBtnStyle, opacity: idx === 0 ? 0.3 : 1 }}
-            title="Move up"
-          >↑</button>
-          <button
-            type="button"
-            onClick={() => onMove(1)}
-            disabled={idx === total - 1}
-            style={{ ...iconBtnStyle, opacity: idx === total - 1 ? 0.3 : 1 }}
-            title="Move down"
-          >↓</button>
-          <button
-            type="button"
-            onClick={onDelete}
-            style={{ ...iconBtnStyle, color: "#ef4444", borderColor: "#3a1a1a" }}
-            title="Delete block"
-          >✕</button>
+        <div style={{ display: "flex", gap: 5, marginLeft: "auto" }}>
+          <button type="button" onClick={() => onMove(-1)} disabled={idx === 0} title="Move up"
+            style={{ ...iconBtnStyle, width: 28, height: 28, opacity: idx === 0 ? 0.35 : 1, fontSize: 12 }}>↑</button>
+          <button type="button" onClick={() => onMove(1)} disabled={idx === total - 1} title="Move down"
+            style={{ ...iconBtnStyle, width: 28, height: 28, opacity: idx === total - 1 ? 0.35 : 1, fontSize: 12 }}>↓</button>
+          <button type="button" onClick={onDelete} title="Delete block"
+            style={{ ...iconBtnStyle, width: 28, height: 28, color: C.red, fontSize: 11 }}>✕</button>
         </div>
       </div>
 
@@ -208,12 +381,12 @@ function BlockEditor({
           block.type === "blockquote" ? "“Quote text…”" :
           "Embed title or description…"
         }
-        style={{ ...textareaStyle, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
+        style={{ ...textareaStyle, background: C.card, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
       />
 
       {block.type === "p" && (
-        <p style={{ fontSize: 10, color: "#444", marginTop: 6, lineHeight: 1.5 }}>
-          Markdown: <code style={{ color: "#666" }}>**bold**</code> · <code style={{ color: "#666" }}>*italic*</code> · <code style={{ color: "#666" }}>[link](url)</code>
+        <p style={{ fontSize: 10, color: C.faint, marginTop: 6, lineHeight: 1.5 }}>
+          Markdown: <code style={{ color: C.sub }}>**bold**</code> · <code style={{ color: C.sub }}>*italic*</code> · <code style={{ color: C.sub }}>[link](url)</code>
         </p>
       )}
       {block.type === "video" && (
@@ -221,80 +394,27 @@ function BlockEditor({
           value={block.videoUrl ?? ""}
           onChange={(e) => onChange({ ...block, videoUrl: e.target.value })}
           placeholder="https://www.youtube.com/embed/…"
-          style={{ ...inputStyle, marginTop: 8 }}
+          style={{ ...inputStyle, background: C.card, marginTop: 8 }}
         />
       )}
     </div>
   );
 }
 
-// ── Styles ─────────────────────────────────────────────────────────────────
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  background: "#111",
-  border: "1px solid #2a2a2a",
-  borderRadius: 6,
-  padding: "9px 12px",
-  color: "#ddd",
-  fontSize: 13,
-  outline: "none",
-  boxSizing: "border-box",
-};
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: "vertical",
-  fontFamily: "inherit",
-  lineHeight: 1.6,
-};
-
-const selectStyle: React.CSSProperties = {
-  background: "#111",
-  border: "1px solid #2a2a2a",
-  borderRadius: 6,
-  padding: "9px 12px",
-  color: "#ddd",
-  fontSize: 13,
-  outline: "none",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 11,
-  fontWeight: 700,
-  color: "#666",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  marginBottom: 6,
-};
-
-const iconBtnStyle: React.CSSProperties = {
-  background: "none",
-  border: "1px solid #2a2a2a",
-  borderRadius: 5,
-  color: "#888",
-  cursor: "pointer",
-  fontSize: 13,
-  padding: "3px 8px",
-  lineHeight: 1,
-};
-
-const sectionCard: React.CSSProperties = {
-  background: "#161616",
-  border: "1px solid #222",
-  borderRadius: 10,
-  padding: "20px 22px",
-  marginBottom: 16,
-};
-
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type Tab = "articles" | "editor" | "media";
+type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox";
+
+const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS }[] = [
+  { key: "dashboard", label: "Dashboard", icon: "home" },
+  { key: "articles", label: "Articles", icon: "doc" },
+  { key: "media", label: "Media", icon: "img" },
+  { key: "inbox", label: "Inbox", icon: "inbox" },
+];
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [tab, setTab] = useState<Tab>("articles");
+  const [tab, setTab] = useState<Tab>("dashboard");
   const [draft, setDraft] = useState<Article>(BLANK_ARTICLE);
   const [isNew, setIsNew] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -309,6 +429,8 @@ export default function AdminPage() {
   const [pwd, setPwd] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const [contacts, setContacts] = useState<ContactEntry[]>([]);
+  const [subscribers, setSubscribers] = useState<SubscriberEntry[]>([]);
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -327,7 +449,19 @@ export default function AdminPage() {
     }
   }, [showToast]);
 
-  // Check existing session on mount; only load articles once authenticated.
+  const fetchSubmissions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/submissions");
+      if (!res.ok) return;
+      const d = await res.json();
+      setContacts(Array.isArray(d.contacts) ? d.contacts : []);
+      setSubscribers(Array.isArray(d.subscribers) ? d.subscribers : []);
+    } catch {
+      /* dashboard extras — non-fatal */
+    }
+  }, []);
+
+  // Check existing session on mount; only load data once authenticated.
   useEffect(() => {
     fetch("/api/admin/login")
       .then((r) => r.json())
@@ -336,8 +470,11 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (authed) fetchArticles();
-  }, [authed, fetchArticles]);
+    if (authed) {
+      fetchArticles();
+      fetchSubmissions();
+    }
+  }, [authed, fetchArticles, fetchSubmissions]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -366,6 +503,9 @@ export default function AdminPage() {
     await fetch("/api/admin/login", { method: "DELETE" }).catch(() => {});
     setAuthed(false);
     setArticles([]);
+    setContacts([]);
+    setSubscribers([]);
+    setTab("dashboard");
   }
 
   // Auto-slug from title when creating new article
@@ -484,10 +624,23 @@ export default function AdminPage() {
 
   const wordCount = draft.body.filter(b => b.type === "p" || b.type === "blockquote").reduce((acc, b) => acc + b.text.split(/\s+/).filter(Boolean).length, 0);
 
+  const published = articles.filter(a => (a.status ?? "published") === "published");
+  const drafts = articles.filter(a => (a.status ?? "published") === "draft");
+  const featured = articles.find(a => a.featured);
+  const pubPct = articles.length ? Math.round((published.length / articles.length) * 1000) / 10 : 0;
+
+  const TITLES: Record<Tab, [string, string]> = {
+    dashboard: ["Dashboard", "Everything happening across SAUDI MAG"],
+    articles: ["Articles", `${filtered.length} of ${articles.length} stories`],
+    editor: [isNew ? "New Article" : "Edit Article", isNew ? "Draft a new story" : `/article/${draft.slug}`],
+    media: ["Media", `Hero images across all ${articles.length} articles`],
+    inbox: ["Inbox", `${contacts.length} contact requests · ${subscribers.length} subscribers`],
+  };
+
   // Session check in progress
   if (authed === null) {
     return (
-      <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#666", display: "grid", placeItems: "center", fontSize: 13 }}>
+      <div style={{ minHeight: "100svh", background: C.page, color: C.sub, display: "grid", placeItems: "center", fontSize: 13, fontFamily: FONT }}>
         Loading…
       </div>
     );
@@ -496,26 +649,20 @@ export default function AdminPage() {
   // Login gate
   if (!authed) {
     return (
-      <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#e5e5e5", display: "grid", placeItems: "center", fontFamily: "var(--font-body,system-ui,sans-serif)" }}>
-        <form onSubmit={login} style={{ width: 320, background: "#111", border: "1px solid #1e1e1e", borderRadius: 12, padding: "28px 26px", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-            <div style={{ width: 26, height: 26, background: "#c8ff00", borderRadius: 4, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 12, color: "#000" }}>S</div>
-            <span style={{ fontWeight: 700, fontSize: 13, color: "#fff", letterSpacing: "0.06em" }}>SAUDI MAG</span>
+      <div style={{ minHeight: "100svh", background: `radial-gradient(120% 120% at 20% 0%, #e9eaee 0%, ${C.page} 60%, #cfd1d7 100%)`, display: "grid", placeItems: "center", fontFamily: FONT }}>
+        <form onSubmit={login} style={{ width: 340, background: C.card, borderRadius: 26, padding: "30px 28px", display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 24px 70px rgba(20,20,22,0.18)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 6 }}>
+            <div style={{ width: 34, height: 34, background: C.ink, borderRadius: 999, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 14, color: C.lime }}>S</div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 13, color: C.text, letterSpacing: "0.05em" }}>SAUDI MAG</div>
+              <div style={{ fontSize: 10.5, color: C.sub }}>Newsroom console</div>
+            </div>
           </div>
-          <label style={{ fontSize: 12, color: "#888", fontWeight: 600 }}>Admin password</label>
-          <input
-            type="password"
-            value={pwd}
-            onChange={(e) => setPwd(e.target.value)}
-            autoFocus
-            style={{ ...inputStyle, background: "#0d0d0d" }}
-          />
-          {loginErr && <p style={{ fontSize: 12, color: "#ff6b6b", margin: 0 }}>{loginErr}</p>}
-          <button
-            type="submit"
-            disabled={loggingIn}
-            style={{ padding: "10px 12px", background: "#c8ff00", color: "#000", border: "none", borderRadius: 7, fontSize: 13, fontWeight: 800, cursor: "pointer", opacity: loggingIn ? 0.6 : 1 }}
-          >
+          <label style={{ ...labelStyle, marginBottom: 0 }}>Admin password</label>
+          <input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} autoFocus style={inputStyle} />
+          {loginErr && <p style={{ fontSize: 12, color: C.red, margin: 0 }}>{loginErr}</p>}
+          <button type="submit" disabled={loggingIn}
+            style={{ ...darkPillStyle, justifyContent: "center", padding: "12px 16px", fontSize: 13, opacity: loggingIn ? 0.6 : 1 }}>
             {loggingIn ? "Signing in…" : "Sign in"}
           </button>
         </form>
@@ -523,180 +670,348 @@ export default function AdminPage() {
     );
   }
 
+  const activeNav = tab === "editor" ? "articles" : tab;
+  const [title, subtitle] = TITLES[tab];
+
   return (
-    <div style={{ minHeight: "100svh", background: "#0d0d0d", color: "#e5e5e5", fontFamily: "var(--font-body,system-ui,sans-serif)", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100svh", background: `radial-gradient(130% 110% at 15% -10%, #eceef1 0%, ${C.page} 55%, #cccdd3 100%)`, padding: "clamp(10px, 2vw, 24px)", fontFamily: FONT, color: C.text, boxSizing: "border-box" }}>
+      <div style={{ maxWidth: 1440, margin: "0 auto", height: "calc(100svh - clamp(20px, 4vw, 48px))", minHeight: 620, background: C.frame, borderRadius: 30, boxShadow: "0 30px 90px rgba(20,20,22,0.22), inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", overflow: "hidden" }}>
 
-      {/* Top bar */}
-      <header style={{ borderBottom: "1px solid #1e1e1e", background: "#111", display: "flex", alignItems: "center", height: 52, padding: "0 20px", flexShrink: 0, gap: 12 }}>
-        <div style={{ width: 26, height: 26, background: "#c8ff00", borderRadius: 4, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 12, color: "#000" }}>S</div>
-        <span style={{ fontWeight: 700, fontSize: 13, color: "#fff", letterSpacing: "0.06em" }}>SAUDI MAG</span>
-        <span style={{ color: "#333" }}>/</span>
-        <span style={{ fontSize: 12, color: "#666", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          {tab === "editor" ? (isNew ? "New Article" : "Edit Article") : "Admin"}
-        </span>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }}>
-          {tab === "editor" && (
-            <button
-              type="button"
-              onClick={() => setTab("articles")}
-              style={{ fontSize: 12, color: "#888", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}
-            >
-              ← Back
-            </button>
-          )}
-          <Link href="/" style={{ fontSize: 12, color: "#888", textDecoration: "none" }}>← View site</Link>
-          <button type="button" onClick={logout} style={{ fontSize: 12, color: "#888", background: "none", border: "none", cursor: "pointer", padding: "0 4px" }}>Log out</button>
-        </div>
-      </header>
+        {/* ── Sidebar rail ── */}
+        <aside style={{ width: 218, flexShrink: 0, display: "flex", flexDirection: "column", padding: "26px 18px 20px", borderRight: `1px solid ${C.line}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px", marginBottom: 34 }}>
+            <div style={{ width: 34, height: 34, background: C.ink, borderRadius: 999, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 14, color: C.lime, flexShrink: 0 }}>S</div>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: 12.5, letterSpacing: "0.05em" }}>SAUDI MAG</div>
+              <div style={{ fontSize: 10, color: C.sub }}>Newsroom</div>
+            </div>
+          </div>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
-
-        {/* Sidebar */}
-        <aside style={{ width: 190, background: "#111", borderRight: "1px solid #1e1e1e", padding: "16px 0", flexShrink: 0, display: "flex", flexDirection: "column" }}>
-          {(["articles", "media"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={{
-                display: "flex", alignItems: "center", gap: 9, width: "100%", padding: "9px 18px",
-                background: tab === t || (tab === "editor" && t === "articles") ? "#1a1a1a" : "transparent",
-                border: "none",
-                borderLeft: tab === t || (tab === "editor" && t === "articles") ? "2px solid #c8ff00" : "2px solid transparent",
-                color: tab === t || (tab === "editor" && t === "articles") ? "#fff" : "#777",
-                fontSize: 13, fontWeight: 600, textAlign: "left", cursor: "pointer", letterSpacing: "0.03em",
-              }}
-            >
-              <span>{t === "articles" ? "☰" : "🖼"}</span>
-              {t === "articles" ? "Articles" : "Media"}
-            </button>
-          ))}
-
-          <div style={{ margin: "12px 18px", borderTop: "1px solid #1e1e1e" }} />
-
-          <button
-            type="button"
-            onClick={openNew}
-            style={{ margin: "0 12px", padding: "9px 12px", background: "#c8ff00", color: "#000", border: "none", borderRadius: 7, fontSize: 12, fontWeight: 800, cursor: "pointer", letterSpacing: "0.04em" }}
-          >
-            + New Article
-          </button>
-
-          <div style={{ marginTop: "auto", padding: "16px 18px", borderTop: "1px solid #1e1e1e" }}>
-            <p style={{ fontSize: 11, color: "#555", marginBottom: 6 }}>{articles.length} articles total</p>
-            {CATEGORIES.map((c) => {
-              const count = articles.filter(a => a.category === c).length;
-              if (!count) return null;
+          <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {NAV.map(({ key, label, icon }) => {
+              const active = activeNav === key;
               return (
-                <div key={c} style={{ display: "flex", justifyContent: "space-between", padding: "3px 0" }}>
-                  <span style={{ fontSize: 11, color: "#666", display: "flex", alignItems: "center", gap: 5 }}>
-                    <span style={{ width: 5, height: 5, borderRadius: "50%", background: CAT_COLOR[c] ?? "#888", display: "inline-block" }} />
-                    {c}
-                  </span>
-                  <span style={{ fontSize: 11, color: "#444" }}>{count}</span>
-                </div>
+                <button key={key} onClick={() => setTab(key)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 11, padding: "11px 16px",
+                    borderRadius: 999, border: "none", cursor: "pointer", textAlign: "left",
+                    fontSize: 12.5, fontWeight: 600, fontFamily: FONT,
+                    background: active ? C.ink : "transparent",
+                    color: active ? "#fff" : C.sub,
+                    boxShadow: active ? "0 10px 22px rgba(20,20,22,0.25)" : "none",
+                    transition: "background 0.15s, color 0.15s",
+                  }}>
+                  <Ic d={ICONS[icon]} />
+                  {label}
+                  {key === "inbox" && contacts.length > 0 && (
+                    <span style={{ marginLeft: "auto", background: active ? C.lime : "#e4e5e9", color: active ? "#111" : C.sub, borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "2px 7px" }}>
+                      {contacts.length}
+                    </span>
+                  )}
+                </button>
               );
             })}
+          </nav>
+
+          <button type="button" onClick={openNew} style={{ ...limePillStyle, justifyContent: "center", marginTop: 18, padding: "11px 16px", boxShadow: "0 10px 24px rgba(166,214,31,0.4)" }}>
+            <Ic d={ICONS.plus} size={14} /> New Article
+          </button>
+
+          <div style={{ marginTop: "auto" }}>
+            <div style={{ borderTop: `1px solid ${C.line}`, margin: "0 6px 14px" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px" }}>
+              <div style={{ width: 36, height: 36, borderRadius: 999, background: `linear-gradient(135deg, ${C.lime}, #5f8c00)`, display: "grid", placeItems: "center", fontWeight: 800, fontSize: 13, color: "#111", flexShrink: 0 }}>A</div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 700 }}>Admin</div>
+                <Link href="/" style={{ fontSize: 10.5, color: C.sub, textDecoration: "none" }}>View site ↗</Link>
+              </div>
+              <button type="button" onClick={logout} title="Log out" style={{ ...iconBtnStyle, width: 30, height: 30 }}>
+                <Ic d={ICONS.logout} size={13} />
+              </button>
+            </div>
           </div>
         </aside>
 
-        {/* Main area */}
-        <main ref={editorRef} style={{ flex: 1, overflowY: "auto", padding: 24, position: "relative" }}>
+        {/* ── Main area ── */}
+        <main ref={editorRef} style={{ flex: 1, overflowY: "auto", padding: "26px 30px 34px", position: "relative" }}>
+
+          {/* Header row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+            <div style={{ marginRight: "auto" }}>
+              <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.02em", margin: 0, fontFamily: FONT }}>{title}</h1>
+              <p style={{ fontSize: 12, color: C.sub, marginTop: 3 }}>{subtitle}</p>
+            </div>
+
+            {(tab === "articles" || tab === "media") && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.card, borderRadius: 999, padding: "9px 16px", border: `1px solid ${C.line}`, minWidth: 220 }}>
+                <span style={{ color: C.faint, display: "inline-flex" }}><Ic d={ICONS.search} size={14} /></span>
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Type searching…"
+                  style={{ border: "none", outline: "none", background: "transparent", fontSize: 12.5, fontFamily: FONT, color: C.text, width: "100%" }} />
+              </div>
+            )}
+
+            {tab === "editor" ? (
+              <>
+                <button type="button" onClick={() => setTab("articles")} style={pillStyle}>Cancel</button>
+                {!isNew && (
+                  <button type="button" onClick={() => setDeleteConfirm(draft.slug)} style={{ ...pillStyle, color: C.red }}>Delete</button>
+                )}
+                <button type="button" onClick={save} disabled={saving}
+                  style={{ ...darkPillStyle, opacity: saving ? 0.6 : 1, padding: "10px 20px" }}>
+                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? "Save draft" : isNew ? "Publish" : "Save changes"}
+                </button>
+              </>
+            ) : (
+              <>
+                <span style={{ ...pillStyle, cursor: "default", color: C.sub }}>
+                  {published.length} live · {drafts.length} draft{drafts.length === 1 ? "" : "s"}
+                </span>
+                <Link href="/" target="_blank" style={{ ...darkPillStyle, padding: "10px 18px" }}>
+                  View site <Ic d={ICONS.arrow} size={13} />
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* ── DASHBOARD ── */}
+          {tab === "dashboard" && (
+            loading ? (
+              <p style={{ color: C.sub, textAlign: "center", padding: 60, fontSize: 13 }}>Loading…</p>
+            ) : (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 330px", gap: 18, alignItems: "start" }}>
+                  {/* Categories "schedule" card */}
+                  <div style={{ ...cardStyle, padding: "22px 24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
+                      <p style={{ ...sectionLabel, marginBottom: 0 }}>Desks</p>
+                      <span style={{ marginLeft: "auto", fontSize: 11.5, color: C.sub }}>{articles.length} stories across {CATEGORIES.filter(c => articles.some(a => a.category === c)).length} desks</span>
+                    </div>
+                    {(() => {
+                      const rows = CATEGORIES
+                        .map(c => ({ cat: c, items: articles.filter(a => a.category === c) }))
+                        .filter(r => r.items.length > 0)
+                        .sort((a, b) => b.items.length - a.items.length);
+                      const max = rows.length ? rows[0].items.length : 1;
+                      return rows.map(({ cat, items }) => (
+                        <div key={cat} style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                          <span style={{ fontSize: 11.5, color: C.sub, fontWeight: 600, display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                            <span style={{ width: 7, height: 7, borderRadius: 999, background: CAT_COLOR[cat] ?? "#888", flexShrink: 0 }} />
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat}</span>
+                          </span>
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            <button type="button" onClick={() => { setFilterCat(cat); setSearch(""); setTab("articles"); }}
+                              title={`View ${cat} articles`}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 8, border: "none", cursor: "pointer",
+                                background: C.ink, color: "#fff", borderRadius: 999, padding: "6px 8px 6px 14px",
+                                width: `${Math.max(22, (items.length / max) * 100)}%`, minWidth: 150,
+                                fontFamily: FONT, boxShadow: "0 8px 18px rgba(20,20,22,0.18)",
+                              }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+                                {items.length} article{items.length === 1 ? "" : "s"}
+                              </span>
+                              <span style={{ marginLeft: "auto", display: "flex" }}>
+                                {items.slice(0, 3).map((a, i) => (
+                                  <span key={a.slug} style={{ marginLeft: i === 0 ? 0 : -9, display: "inline-flex" }}>
+                                    <Thumb photo={a.heroPhoto} size={24} ring={C.ink} />
+                                  </span>
+                                ))}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+
+                  {/* Featured story — dark preview card */}
+                  <div style={{ ...darkCardStyle, padding: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                      <span style={{ color: C.lime, display: "inline-flex" }}><Ic d={ICONS.star} size={14} /></span>
+                      <p style={{ ...sectionLabel, marginBottom: 0, color: "rgba(255,255,255,0.55)" }}>Featured story</p>
+                    </div>
+                    {featured ? (
+                      <>
+                        <div style={{ borderRadius: 16, overflow: "hidden", aspectRatio: "16/10", marginBottom: 14, background: "#26262a" }}>
+                          {featured.heroPhoto && (
+                            <img src={U(pid(featured.heroPhoto), 600, 380)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                          )}
+                        </div>
+                        <span style={catChip(featured.category, true)}>{featured.category}</span>
+                        <p style={{ fontSize: 14.5, fontWeight: 700, lineHeight: 1.35, margin: "10px 0 4px" }}>{featured.title}</p>
+                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginBottom: 14 }}>{featured.author} · {featured.meta.split("·")[0]?.trim()}</p>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button type="button" onClick={() => openEdit(featured)}
+                            style={{ ...pillStyle, background: "#fff", border: "1px solid #fff", color: "#111", fontWeight: 700 }}>Edit</button>
+                          <Link href={`/article/${featured.slug}`} target="_blank"
+                            style={{ ...pillStyle, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)", color: "#fff" }}>
+                            View <Ic d={ICONS.arrow} size={12} />
+                          </Link>
+                        </div>
+                      </>
+                    ) : (
+                      <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, padding: "18px 0" }}>
+                        No featured story set. Star an article in the Articles list to place it on the homepage hero.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Stat strip */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
+                  {[
+                    { label: "Total stories", value: articles.length, seed: 1 },
+                    { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}`, seed: 2, lime: true },
+                    { label: "Drafts in progress", value: drafts.length, seed: 3 },
+                    { label: "Subscribers", value: subscribers.length, sub: `${contacts.length} contact requests`, seed: 4 },
+                  ].map((s) => (
+                    <div key={s.label} style={{ ...cardStyle, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 10.5, fontWeight: 700, color: C.sub, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{s.label}</p>
+                        <p style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1 }}>{s.value}</p>
+                        {s.sub && <p style={{ fontSize: 10.5, color: C.faint, marginTop: 5 }}>{s.sub}</p>}
+                      </div>
+                      <div style={{ marginLeft: "auto", flexShrink: 0 }}>
+                        <Spark seed={s.seed} color={s.lime ? "#7ba314" : C.faint} w={64} h={30} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom row: recent inbox + dark latest-stories panel */}
+                <div style={{ display: "grid", gridTemplateColumns: "330px minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+                  <div style={{ ...cardStyle, padding: "20px 22px" }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+                      <p style={{ ...sectionLabel, marginBottom: 0 }}>Latest inbox</p>
+                      <button type="button" onClick={() => setTab("inbox")} style={{ ...pillStyle, marginLeft: "auto", padding: "5px 12px", fontSize: 11 }}>All</button>
+                    </div>
+                    {contacts.length === 0 && subscribers.length === 0 ? (
+                      <p style={{ fontSize: 12, color: C.faint, padding: "10px 0" }}>No submissions yet.</p>
+                    ) : (
+                      [...contacts.slice(-3).reverse().map(c => ({ kind: "contact" as const, ...c })),
+                       ...subscribers.slice(-2).reverse().map(sb => ({ kind: "sub" as const, name: sb.email, email: sb.email, type: "Subscriber", message: "", receivedAt: sb.receivedAt }))]
+                        .slice(0, 5)
+                        .map((m, i) => (
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 11, padding: "9px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 999, background: m.kind === "sub" ? "#eef4d8" : "#ececef", color: m.kind === "sub" ? "#5f8c00" : C.sub, display: "grid", placeItems: "center", fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                              {(m.name || m.email || "?").charAt(0).toUpperCase()}
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <p style={{ fontSize: 12, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.name || m.email}</p>
+                              <p style={{ fontSize: 10.5, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {m.kind === "sub" ? "New subscriber" : `${m.type} — ${m.message}`}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+
+                  {/* Dark latest-stories panel */}
+                  <div style={{ ...darkCardStyle, padding: "22px 24px" }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 18 }}>
+                      <p style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>Latest stories</p>
+                      <button type="button" onClick={() => { setFilterCat("All"); setTab("articles"); }}
+                        style={{ ...pillStyle, marginLeft: "auto", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)", color: "#fff", padding: "6px 14px", fontSize: 11 }}>
+                        All articles
+                      </button>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 14 }}>
+                      {articles.slice(0, 3).map((a) => (
+                        <div key={a.slug} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 16, padding: 14, display: "flex", flexDirection: "column", minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                            <Thumb photo={a.heroPhoto} size={30} ring="rgba(255,255,255,0.15)" />
+                            <span style={catChip(a.category, true)}>{a.category}</span>
+                            {(a.status ?? "published") === "draft" && (
+                              <span style={{ fontSize: 9, fontWeight: 800, color: "#f5c451", letterSpacing: "0.08em" }}>DRAFT</span>
+                            )}
+                          </div>
+                          <p style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{a.title}</p>
+                          <p style={{ fontSize: 10.5, color: "rgba(255,255,255,0.45)", marginBottom: 12 }}>{a.author}</p>
+                          <button type="button" onClick={() => openEdit(a)}
+                            style={{ ...pillStyle, marginTop: "auto", alignSelf: "flex-start", background: "transparent", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", padding: "6px 14px", fontSize: 11 }}>
+                            Edit →
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )
+          )}
 
           {/* ── ARTICLES LIST ── */}
           {tab === "articles" && (
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, gap: 12, flexWrap: "wrap" }}>
-                <div>
-                  <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>Articles</h1>
-                  <p style={{ fontSize: 12, color: "#555", marginTop: 2 }}>{filtered.length} of {articles.length}</p>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search…"
-                    style={{ ...inputStyle, width: 200 }}
-                  />
-                  <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} style={selectStyle}>
-                    <option>All</option>
-                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                  </select>
-                </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
+                {["All", ...CATEGORIES].map((c) => {
+                  const active = filterCat === c;
+                  return (
+                    <button key={c} type="button" onClick={() => setFilterCat(c)}
+                      style={{
+                        ...pillStyle, padding: "7px 14px", fontSize: 11.5,
+                        background: active ? C.ink : C.card,
+                        border: `1px solid ${active ? C.ink : C.line}`,
+                        color: active ? "#fff" : C.sub,
+                      }}>
+                      {c}
+                    </button>
+                  );
+                })}
               </div>
 
               {loading ? (
-                <p style={{ color: "#555", textAlign: "center", padding: 48 }}>Loading…</p>
+                <p style={{ color: C.sub, textAlign: "center", padding: 48, fontSize: 13 }}>Loading…</p>
               ) : (
-                <div style={{ background: "#161616", border: "1px solid #222", borderRadius: 10, overflow: "hidden" }}>
+                <div style={{ ...cardStyle, padding: "6px 10px" }}>
                   {filtered.length === 0 && (
-                    <p style={{ padding: 40, textAlign: "center", color: "#555" }}>No articles found.</p>
+                    <p style={{ padding: 40, textAlign: "center", color: C.faint, fontSize: 13 }}>No articles found.</p>
                   )}
                   {filtered.map((article, i) => (
                     <div
                       key={article.slug}
                       style={{
-                        display: "grid", gridTemplateColumns: "56px 1fr auto", gap: 14,
-                        padding: "13px 16px", alignItems: "center",
-                        borderBottom: i < filtered.length - 1 ? "1px solid #1a1a1a" : "none",
+                        display: "grid", gridTemplateColumns: "62px minmax(0,1fr) auto", gap: 14,
+                        padding: "12px 12px", alignItems: "center", borderRadius: 16,
+                        borderTop: i === 0 ? "none" : `1px solid ${C.line}`,
                         transition: "background 0.1s",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = "#1c1c1c")}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#f7f7f8")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                     >
-                      <div style={{ width: 48, height: 34, borderRadius: 5, overflow: "hidden", flexShrink: 0 }}>
-                        {article.heroPhoto ? (
-                          <img
-                            src={U(article.heroPhoto.startsWith("photo-") ? article.heroPhoto : `photo-${article.heroPhoto}`, 96, 68)}
-                            alt=""
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        ) : (
-                          <div style={{ width: "100%", height: "100%", background: "#222" }} />
+                      <div style={{ width: 56, height: 42, borderRadius: 12, overflow: "hidden", flexShrink: 0, background: "#e4e5e9" }}>
+                        {article.heroPhoto && (
+                          <img src={U(pid(article.heroPhoto), 112, 84)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         )}
                       </div>
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#ddd", marginBottom: 3 }}>{article.title}</p>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 3, background: `${CAT_COLOR[article.category] ?? "#888"}18`, color: CAT_COLOR[article.category] ?? "#888" }}>
-                            {article.category}
-                          </span>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{article.title}</p>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          <span style={catChip(article.category)}>{article.category}</span>
                           {(article.status ?? "published") === "draft" && (
-                            <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 3, background: "#f59e0b20", color: "#f59e0b", letterSpacing: "0.08em" }}>DRAFT</span>
+                            <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#fdf0d5", color: "#b45309", letterSpacing: "0.08em" }}>DRAFT</span>
                           )}
-                          <span style={{ fontSize: 11, color: "#555" }}>{article.author}</span>
-                          <span style={{ fontSize: 11, color: "#444" }}>·</span>
-                          <span style={{ fontSize: 11, color: "#555" }}>{article.meta.split("·")[0]?.trim()}</span>
+                          <span style={{ fontSize: 11, color: C.sub }}>{article.author}</span>
+                          <span style={{ fontSize: 11, color: C.faint }}>·</span>
+                          <span style={{ fontSize: 11, color: C.sub }}>{article.meta.split("·")[0]?.trim()}</span>
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: 6 }}>
-                        <button
-                          type="button"
-                          onClick={() => toggleFeatured(article)}
+                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                        <button type="button" onClick={() => toggleFeatured(article)}
                           title={article.featured ? "Featured homepage hero" : "Set as featured"}
-                          style={{ fontSize: 16, color: article.featured ? "#c8ff00" : "#444", background: "none", border: "1px solid #2a2a2a", borderRadius: 5, padding: "4px 9px", cursor: "pointer", lineHeight: 1 }}
-                        >
-                          {article.featured ? "★" : "☆"}
+                          style={{ ...iconBtnStyle, color: article.featured ? "#8fbc12" : C.faint, background: article.featured ? "#f2f8dd" : C.card, borderColor: article.featured ? "#dcebae" : C.line }}>
+                          <Ic d={ICONS.star} size={14} />
                         </button>
-                        <Link
-                          href={`/article/${article.slug}`}
-                          target="_blank"
-                          style={{ fontSize: 11, color: "#888", textDecoration: "none", padding: "5px 10px", border: "1px solid #2a2a2a", borderRadius: 5 }}
-                        >
-                          View ↗
+                        <Link href={`/article/${article.slug}`} target="_blank" style={{ ...pillStyle, padding: "8px 13px", fontSize: 11, color: C.sub }}>
+                          View <Ic d={ICONS.arrow} size={11} />
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => openEdit(article)}
-                          style={{ fontSize: 11, color: "#c8ff00", background: "none", border: "1px solid #c8ff0040", borderRadius: 5, padding: "5px 10px", cursor: "pointer", fontWeight: 700 }}
-                        >
+                        <button type="button" onClick={() => openEdit(article)} style={{ ...darkPillStyle, padding: "8px 15px", fontSize: 11 }}>
                           Edit
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteConfirm(article.slug)}
-                          style={{ fontSize: 11, color: "#ef4444", background: "none", border: "1px solid #3a1a1a", borderRadius: 5, padding: "5px 10px", cursor: "pointer" }}
-                        >
-                          Delete
+                        <button type="button" onClick={() => setDeleteConfirm(article.slug)} title="Delete"
+                          style={{ ...iconBtnStyle, color: C.red }}>
+                          <Ic d={ICONS.trash} size={13} />
                         </button>
                       </div>
                     </div>
@@ -708,51 +1023,16 @@ export default function AdminPage() {
 
           {/* ── ARTICLE EDITOR ── */}
           {tab === "editor" && (
-            <div style={{ maxWidth: 780 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-                <div>
-                  <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                    {isNew ? "New Article" : "Edit Article"}
-                  </h1>
-                  {!isNew && (
-                    <p style={{ fontSize: 12, color: "#555", marginTop: 3 }}>
-                      /article/{draft.slug}
-                      {" · "}
-                      <Link href={`/article/${draft.slug}`} target="_blank" style={{ color: "#c8ff00", textDecoration: "none" }}>View live ↗</Link>
-                    </p>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {!isNew && (
-                    <button
-                      type="button"
-                      onClick={() => setDeleteConfirm(draft.slug)}
-                      style={{ fontSize: 12, color: "#ef4444", background: "none", border: "1px solid #3a1a1a", borderRadius: 7, padding: "8px 14px", cursor: "pointer" }}
-                    >
-                      Delete
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setTab("articles")}
-                    style={{ fontSize: 12, color: "#888", background: "none", border: "1px solid #2a2a2a", borderRadius: 7, padding: "8px 14px", cursor: "pointer" }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={save}
-                    disabled={saving}
-                    style={{ fontSize: 12, fontWeight: 800, color: "#000", background: saving ? "#888" : "#c8ff00", border: "none", borderRadius: 7, padding: "8px 18px", cursor: saving ? "not-allowed" : "pointer" }}
-                  >
-                    {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? (isNew ? "Save draft" : "Save draft") : (isNew ? "Publish" : "Save changes")}
-                  </button>
-                </div>
-              </div>
+            <div style={{ maxWidth: 820 }}>
+              {!isNew && (
+                <p style={{ fontSize: 12, color: C.sub, margin: "-12px 0 18px" }}>
+                  <Link href={`/article/${draft.slug}`} target="_blank" style={{ color: "#7ba314", textDecoration: "none", fontWeight: 600 }}>View live ↗</Link>
+                </p>
+              )}
 
               {/* Identity */}
-              <div style={sectionCard}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Identity</p>
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Identity</p>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Title</label>
                   <input style={inputStyle} value={draft.title} onChange={S("title")} placeholder="Article headline…" />
@@ -765,10 +1045,10 @@ export default function AdminPage() {
                   <div>
                     <label style={labelStyle}>
                       Slug
-                      {!isNew && <span style={{ color: "#444", fontWeight: 400, marginLeft: 6 }}>(read-only)</span>}
+                      {!isNew && <span style={{ color: C.faint, fontWeight: 400, marginLeft: 6, textTransform: "none", letterSpacing: 0 }}>(read-only)</span>}
                     </label>
                     <input
-                      style={{ ...inputStyle, color: isNew ? "#ddd" : "#555" }}
+                      style={{ ...inputStyle, color: isNew ? C.text : C.faint }}
                       value={draft.slug}
                       readOnly={!isNew}
                       onChange={(e) => { setSlugLocked(true); setDraft(d => ({ ...d, slug: e.target.value })); }}
@@ -786,7 +1066,7 @@ export default function AdminPage() {
                   <div>
                     <label style={labelStyle}>Status</label>
                     <select
-                      style={{ ...selectStyle, width: "100%", color: (draft.status ?? "published") === "draft" ? "#f59e0b" : "#c8ff00" }}
+                      style={{ ...selectStyle, width: "100%", fontWeight: 700, color: (draft.status ?? "published") === "draft" ? "#b45309" : "#5f8c00" }}
                       value={draft.status ?? "published"}
                       onChange={(e) => setDraft(d => ({ ...d, status: e.target.value as "draft" | "published" }))}
                     >
@@ -795,12 +1075,12 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div style={{ display: "flex", alignItems: "flex-end", paddingBottom: 2 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, color: draft.featured ? "#c8ff00" : "#888", userSelect: "none" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: draft.featured ? "#5f8c00" : C.sub, userSelect: "none" }}>
                       <input
                         type="checkbox"
                         checked={draft.featured ?? false}
                         onChange={(e) => setDraft(d => ({ ...d, featured: e.target.checked }))}
-                        style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#c8ff00" }}
+                        style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#5f8c00" }}
                       />
                       Featured (homepage hero)
                     </label>
@@ -809,8 +1089,8 @@ export default function AdminPage() {
               </div>
 
               {/* Author */}
-              <div style={sectionCard}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Author</p>
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Author</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                   <div>
                     <label style={labelStyle}>Author name</label>
@@ -829,8 +1109,8 @@ export default function AdminPage() {
               </div>
 
               {/* Media */}
-              <div style={sectionCard}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Media</p>
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Media</p>
                 <PhotoField label="Hero photo ID" value={draft.heroPhoto} onChange={(v) => setDraft(d => ({ ...d, heroPhoto: v }))} />
                 {([0, 1, 2] as const).map((i) => (
                   <PhotoField
@@ -847,24 +1127,18 @@ export default function AdminPage() {
               </div>
 
               {/* Body */}
-              <div style={sectionCard}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 10, flexWrap: "wrap" }}>
+                  <p style={{ ...sectionLabel, marginBottom: 0 }}>
                     Body — {draft.body.length} block{draft.body.length !== 1 ? "s" : ""} · ~{wordCount} words
                   </p>
                   <div style={{ display: "flex", gap: 6 }}>
                     {(["p", "h2", "blockquote", "video"] as const).map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => addBlock(t)}
+                      <button key={t} type="button" onClick={() => addBlock(t)}
                         style={{
-                          fontSize: 10, fontWeight: 700, padding: "4px 9px", borderRadius: 4, cursor: "pointer", border: "1px solid",
-                          background: "transparent",
-                          color: t === "p" ? "#64748b" : t === "h2" ? "#c8ff00" : t === "blockquote" ? "#8b5cf6" : "#f59e0b",
-                          borderColor: t === "p" ? "#64748b40" : t === "h2" ? "#c8ff0040" : t === "blockquote" ? "#8b5cf640" : "#f59e0b40",
-                        }}
-                      >
+                          ...pillStyle, padding: "5px 12px", fontSize: 10.5, fontWeight: 700,
+                          color: BLOCK_COLORS[t], borderColor: `${BLOCK_COLORS[t]}44`,
+                        }}>
                         + {t === "p" ? "Para" : t === "h2" ? "H2" : t === "blockquote" ? "Quote" : "Video"}
                       </button>
                     ))}
@@ -872,7 +1146,7 @@ export default function AdminPage() {
                 </div>
 
                 {draft.body.length === 0 && (
-                  <p style={{ color: "#555", fontSize: 13, padding: "24px 0", textAlign: "center" }}>
+                  <p style={{ color: C.faint, fontSize: 13, padding: "24px 0", textAlign: "center" }}>
                     No blocks yet. Add a paragraph to get started.
                   </p>
                 )}
@@ -891,8 +1165,8 @@ export default function AdminPage() {
               </div>
 
               {/* Metadata */}
-              <div style={sectionCard}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#555", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Metadata</p>
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Metadata</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>Tags (comma-separated)</label>
@@ -904,7 +1178,7 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label style={labelStyle}>Related category (for "Read Next")</label>
+                    <label style={labelStyle}>Related category (for &quot;Read Next&quot;)</label>
                     <select style={{ ...selectStyle, width: "100%" }} value={draft.relatedCategory} onChange={S("relatedCategory")}>
                       {RELATED_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
@@ -913,30 +1187,18 @@ export default function AdminPage() {
               </div>
 
               {/* Bottom save bar */}
-              <div style={{ position: "sticky", bottom: 0, background: "#0d0d0d", borderTop: "1px solid #1e1e1e", padding: "14px 0", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <div style={{ position: "sticky", bottom: -34, background: C.frame, padding: "14px 0 20px", display: "flex", justifyContent: "flex-end", gap: 8, borderTop: `1px solid ${C.line}` }}>
                 {!isNew && (
-                  <button
-                    type="button"
-                    onClick={() => setDeleteConfirm(draft.slug)}
-                    style={{ fontSize: 13, color: "#ef4444", background: "none", border: "1px solid #3a1a1a", borderRadius: 7, padding: "10px 18px", cursor: "pointer" }}
-                  >
+                  <button type="button" onClick={() => setDeleteConfirm(draft.slug)} style={{ ...pillStyle, color: C.red, padding: "11px 20px" }}>
                     Delete article
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setTab("articles")}
-                  style={{ fontSize: 13, color: "#888", background: "none", border: "1px solid #2a2a2a", borderRadius: 7, padding: "10px 18px", cursor: "pointer" }}
-                >
+                <button type="button" onClick={() => setTab("articles")} style={{ ...pillStyle, padding: "11px 20px" }}>
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  onClick={save}
-                  disabled={saving}
-                  style={{ fontSize: 13, fontWeight: 800, color: "#000", background: saving ? "#888" : "#c8ff00", border: "none", borderRadius: 7, padding: "10px 24px", cursor: saving ? "not-allowed" : "pointer" }}
-                >
-                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? (isNew ? "Save draft" : "Save draft") : (isNew ? "Publish article" : "Save changes")}
+                <button type="button" onClick={save} disabled={saving}
+                  style={{ ...darkPillStyle, padding: "11px 26px", fontSize: 13, opacity: saving ? 0.6 : 1 }}>
+                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? "Save draft" : isNew ? "Publish article" : "Save changes"}
                 </button>
               </div>
             </div>
@@ -944,34 +1206,85 @@ export default function AdminPage() {
 
           {/* ── MEDIA GRID ── */}
           {tab === "media" && (
-            <div>
-              <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 6 }}>Media</h1>
-              <p style={{ fontSize: 12, color: "#555", marginBottom: 20 }}>Hero images across all {articles.length} articles</p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 14 }}>
-                {articles.map((a) => {
-                  const pid = a.heroPhoto.startsWith("photo-") ? a.heroPhoto : `photo-${a.heroPhoto}`;
-                  return (
-                    <div key={a.slug} style={{ background: "#161616", border: "1px solid #222", borderRadius: 10, overflow: "hidden" }}>
-                      <div style={{ aspectRatio: "16/9", overflow: "hidden", cursor: "pointer" }} onClick={() => openEdit(a)}>
-                        {a.heroPhoto ? (
-                          <img src={U(pid, 480, 270)} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
-                            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                          />
-                        ) : (
-                          <div style={{ width: "100%", height: "100%", background: "#222", display: "grid", placeItems: "center", color: "#444", fontSize: 12 }}>No image</div>
-                        )}
-                      </div>
-                      <div style={{ padding: "10px 12px" }}>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: "#ccc", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 6 }}>{a.title}</p>
-                        <div style={{ display: "flex", justifyContent: "space-between" }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 3, background: `${CAT_COLOR[a.category] ?? "#888"}18`, color: CAT_COLOR[a.category] ?? "#888" }}>{a.category}</span>
-                          <button type="button" onClick={() => openEdit(a)} style={{ fontSize: 11, color: "#c8ff00", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>Edit →</button>
-                        </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+              {articles
+                .filter((a) => {
+                  const q = search.toLowerCase();
+                  return !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
+                })
+                .map((a) => (
+                  <div key={a.slug} style={{ ...cardStyle, padding: 10, overflow: "hidden" }}>
+                    <div style={{ aspectRatio: "16/9", overflow: "hidden", cursor: "pointer", borderRadius: 14, background: "#e4e5e9" }} onClick={() => openEdit(a)}>
+                      {a.heroPhoto ? (
+                        <img src={U(pid(a.heroPhoto), 480, 270)} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                        />
+                      ) : (
+                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: C.faint, fontSize: 12 }}>No image</div>
+                      )}
+                    </div>
+                    <div style={{ padding: "12px 8px 6px" }}>
+                      <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 }}>{a.title}</p>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={catChip(a.category)}>{a.category}</span>
+                        <button type="button" onClick={() => openEdit(a)} style={{ fontSize: 11, color: "#5f8c00", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontFamily: FONT }}>Edit →</button>
                       </div>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
+            </div>
+          )}
+
+          {/* ── INBOX ── */}
+          {tab === "inbox" && (
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+              <div style={cardStyle}>
+                <p style={sectionLabel}>Contact requests</p>
+                {contacts.length === 0 ? (
+                  <p style={{ fontSize: 12.5, color: C.faint, padding: "16px 0" }}>No contact requests yet.</p>
+                ) : (
+                  [...contacts].reverse().map((c, i) => (
+                    <div key={i} style={{ padding: "14px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 999, background: "#ececef", color: C.sub, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 800, flexShrink: 0 }}>
+                          {(c.name || "?").charAt(0).toUpperCase()}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</p>
+                          <p style={{ fontSize: 11, color: C.sub }}>{c.email}</p>
+                        </div>
+                        <span style={{ ...catChip("Interviews"), marginLeft: "auto", background: "#ececef", color: C.sub }}>{c.type}</span>
+                        {c.receivedAt && (
+                          <span style={{ fontSize: 10.5, color: C.faint, whiteSpace: "nowrap" }}>{new Date(c.receivedAt).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                      <p style={{ fontSize: 12.5, color: "#4b4e55", lineHeight: 1.6, paddingLeft: 44 }}>{c.message}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div style={{ ...darkCardStyle }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+                  <p style={{ ...sectionLabel, marginBottom: 0, color: "rgba(255,255,255,0.55)" }}>Subscribers</p>
+                  <span style={{ marginLeft: "auto", background: C.lime, color: "#111", borderRadius: 999, fontSize: 11, fontWeight: 800, padding: "3px 10px" }}>{subscribers.length}</span>
+                </div>
+                {subscribers.length === 0 ? (
+                  <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.5)", padding: "10px 0" }}>No subscribers yet.</p>
+                ) : (
+                  [...subscribers].reverse().map((sb, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderTop: i === 0 ? "none" : "1px solid rgba(255,255,255,0.09)" }}>
+                      <div style={{ width: 30, height: 30, borderRadius: 999, background: "rgba(166,214,31,0.18)", color: C.lime, display: "grid", placeItems: "center", fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                        {sb.email.charAt(0).toUpperCase()}
+                      </div>
+                      <p style={{ fontSize: 12.5, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sb.email}</p>
+                      {sb.receivedAt && (
+                        <span style={{ marginLeft: "auto", fontSize: 10.5, color: "rgba(255,255,255,0.4)", whiteSpace: "nowrap" }}>{new Date(sb.receivedAt).toLocaleDateString()}</span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -980,15 +1293,18 @@ export default function AdminPage() {
 
       {/* Delete confirmation dialog */}
       {deleteConfirm && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "grid", placeItems: "center", zIndex: 100 }}>
-          <div style={{ background: "#161616", border: "1px solid #333", borderRadius: 12, padding: 28, maxWidth: 380, width: "90%" }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, color: "#fff", marginBottom: 8 }}>Delete article?</h2>
-            <p style={{ fontSize: 13, color: "#888", marginBottom: 22, lineHeight: 1.5 }}>
-              This will permanently delete <strong style={{ color: "#ddd" }}>{articles.find(a => a.slug === deleteConfirm)?.title}</strong>. This cannot be undone.
+        <div style={{ position: "fixed", inset: 0, background: "rgba(20,20,22,0.45)", backdropFilter: "blur(3px)", display: "grid", placeItems: "center", zIndex: 100 }}>
+          <div style={{ background: C.card, borderRadius: 24, padding: 28, maxWidth: 400, width: "90%", boxShadow: "0 30px 80px rgba(20,20,22,0.3)" }}>
+            <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8, fontFamily: FONT }}>Delete article?</h2>
+            <p style={{ fontSize: 13, color: C.sub, marginBottom: 22, lineHeight: 1.6 }}>
+              This will permanently delete <strong style={{ color: C.text }}>{articles.find(a => a.slug === deleteConfirm)?.title}</strong>. This cannot be undone.
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button type="button" onClick={() => setDeleteConfirm(null)} style={{ fontSize: 13, color: "#888", background: "none", border: "1px solid #2a2a2a", borderRadius: 7, padding: "9px 16px", cursor: "pointer" }}>Cancel</button>
-              <button type="button" onClick={() => confirmDelete(deleteConfirm)} style={{ fontSize: 13, fontWeight: 700, color: "#fff", background: "#ef4444", border: "none", borderRadius: 7, padding: "9px 16px", cursor: "pointer" }}>Delete</button>
+              <button type="button" onClick={() => setDeleteConfirm(null)} style={{ ...pillStyle, padding: "10px 18px" }}>Cancel</button>
+              <button type="button" onClick={() => confirmDelete(deleteConfirm)}
+                style={{ ...pillStyle, background: C.red, border: `1px solid ${C.red}`, color: "#fff", fontWeight: 700, padding: "10px 18px" }}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -997,18 +1313,20 @@ export default function AdminPage() {
       {/* Toast notification */}
       {toast && (
         <div style={{
-          position: "fixed", bottom: 24, right: 24, zIndex: 200,
-          background: toast.type === "ok" ? "#c8ff00" : "#ef4444",
-          color: toast.type === "ok" ? "#000" : "#fff",
-          padding: "12px 20px", borderRadius: 8, fontSize: 13, fontWeight: 700,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-          animation: "fadeIn 0.2s ease",
+          position: "fixed", bottom: 28, right: 28, zIndex: 200,
+          background: toast.type === "ok" ? C.ink : C.red,
+          color: "#fff",
+          padding: "13px 22px", borderRadius: 999, fontSize: 13, fontWeight: 700,
+          boxShadow: "0 14px 40px rgba(20,20,22,0.35)",
+          display: "flex", alignItems: "center", gap: 9,
+          animation: "adminFadeIn 0.2s ease",
         }}>
+          {toast.type === "ok" && <span style={{ color: C.lime, fontSize: 15 }}>✓</span>}
           {toast.msg}
         </div>
       )}
 
-      <style>{`@keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }`}</style>
+      <style>{`@keyframes adminFadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }`}</style>
     </div>
   );
 }

@@ -19,8 +19,16 @@ export interface CategoryConfig {
   italicTitle?: boolean;
 }
 
-// Vary card widths so a short list still reads as an editorial grid.
-const SPANS = ["span-8", "span-4", "span-6", "span-6"];
+// Vary card widths for editorial rhythm while keeping rows balanced: a wide
+// span-8 (landscape) pairs with a span-4 (portrait) at equal height, and
+// span-6 landscape cards pair evenly. The media aspect must match the width or
+// the grid goes lopsided.
+const LAYOUT = [
+  { span: "span-8", media: "landscape" },
+  { span: "span-4", media: "" },
+  { span: "span-6", media: "landscape" },
+  { span: "span-6", media: "landscape" },
+];
 
 function meta(a: Article): string {
   return a.author ? `By ${a.author}${a.meta ? ` · ${a.meta}` : ""}` : a.meta;
@@ -88,9 +96,11 @@ export default function CategoryView({
           {rest.length > 0 && (
             <section className="section container">
               <div className="editorial-grid reveal">
-                {rest.map((a, i) => (
-                  <article key={a.slug} className={`article-card ${SPANS[i % SPANS.length]}`}>
-                    <Link className="card-media" href={`/article/${a.slug}`}>
+                {rest.map((a, i) => {
+                  const layout = LAYOUT[i % LAYOUT.length];
+                  return (
+                  <article key={a.slug} className={`article-card ${layout.span}`}>
+                    <Link className={`card-media${layout.media ? ` ${layout.media}` : ""}`} href={`/article/${a.slug}`}>
                       <Image fill src={U(a.heroPhoto, 800, 500)} alt={a.title} sizes="(min-width: 1280px) 800px, 100vw" />
                     </Link>
                     <span className="label eyebrow">{a.category}</span>
@@ -98,7 +108,8 @@ export default function CategoryView({
                     <p>{a.subtitle}</p>
                     <span className="meta">{meta(a)}</span>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
