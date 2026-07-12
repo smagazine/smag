@@ -4130,3 +4130,34 @@ blockquote {
   padding-top: clamp(16px, 2.2vw, 26px);
   padding-bottom: clamp(12px, 1.6vw, 18px);
 }
+
+/* ── Spacing rhythm pass ────────────────────────────────────────────────── */
+
+:root {
+  --hairline-gap: clamp(28px, 3.5vw, 44px);
+}
+
+/* End-of-article ladder (tags → author bio → share) used three different
+   margin/padding pairs; one shared gap keeps the hairlines evenly spaced. */
+.article-tags,
+.author-bio,
+.article-body .share-bar {
+  margin-top: var(--hairline-gap);
+  padding-top: var(--hairline-gap);
+}
+
+/* Author portrait is a circle (the global rounding pass squared it off),
+   and centering it against three lines of text balances the block. */
+.author-bio {
+  align-items: center;
+}
+
+.author-bio-avatar {
+  border-radius: 50%;
+}
+
+/* Stacked content sections were doubling their padding (bottom of one +
+   top of the next). Keep a single stack of space between them. */
+.ao-home section.section + section.section:not(.soft) {
+  padding-top: 0;
+}
