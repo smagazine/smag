@@ -43,8 +43,37 @@ export default function HomePage() {
     photo: articles.find((a) => a.relatedCategory === route)?.heroPhoto,
   }));
 
+  const tickerArticles = articles.slice(0, 4);
+
   return (
     <main className="page ao-home" id="main-content">
+
+      {/* ── Issue strip + top-stories ticker ── */}
+      <div className="issue-strip">
+        <span className="issue-num" data-en="Issue 12" data-ar="العدد 12">Issue 12</span>
+        <span className="issue-dot" aria-hidden="true" />
+        <span data-en="June 2026" data-ar="يونيو 2026">June 2026</span>
+        <span className="issue-dot" aria-hidden="true" />
+        <span data-en="Cities &amp; Culture" data-ar="المدن والثقافة">Cities &amp; Culture</span>
+      </div>
+
+      <div className="ticker-band ao-ticker reveal">
+        <div className="ticker">
+          <span className="label" data-en="Top Stories" data-ar="أبرز القصص">Top Stories</span>
+          <div className="ticker-wrap">
+            {[false, true].map((clone) => (
+              <div key={String(clone)} className="ticker-track" aria-hidden={clone || undefined}>
+                {tickerArticles.map((a) => (
+                  <span key={a.slug} style={{ display: "contents" }}>
+                    <TitleLink a={a} />
+                    <span className="ticker-sep" aria-hidden="true">·</span>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* ── Full-bleed hero ── */}
       <section className="ao-hero reveal">

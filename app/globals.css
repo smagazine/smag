@@ -4238,3 +4238,33 @@ blockquote {
   margin-inline-end: -0.42em; /* optically balance the tracking overhang */
   text-transform: uppercase;
 }
+
+/* ── Homepage issue strip + ticker on the frame ─────────────────────────── */
+
+.ao-home .issue-strip {
+  border-bottom: none;
+  background: transparent;
+  padding-top: clamp(14px, 2vw, 22px);
+  padding-bottom: 2px;
+}
+
+.ao-ticker {
+  margin: 10px var(--frame-gap) 0;
+  border-radius: 999px;
+  overflow: hidden;
+  padding-inline: clamp(14px, 2.5vw, 28px);
+  box-shadow: 0 10px 26px rgba(165, 206, 57, 0.35);
+}
+
+.ao-ticker .ticker {
+  padding: 10px 0;
+}
+
+.ao-ticker .ticker .label {
+  border-radius: 999px;
+}
+
+/* The ticker eats the hero's top gap so the stack stays even */
+.ao-ticker + .ao-hero {
+  margin-top: calc(var(--frame-gap) - 4px);
+}
