@@ -4167,3 +4167,32 @@ blockquote {
 .article-layout {
   padding-bottom: clamp(40px, 6vw, 80px);
 }
+
+/* ── Frame consistency for remaining full-bleed blocks ──────────────────── */
+
+/* About: the dark feature band joins the frame language instead of running
+   edge-to-edge into the footer. */
+.feature-band {
+  margin: 0 var(--frame-gap) var(--frame-gap);
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* Subscribe: the hero image gets the same inset rounded frame as every
+   other hero on the site. */
+.subscription-hero {
+  margin-inline: var(--frame-gap);
+  margin-top: var(--frame-gap);
+}
+
+.subscription-hero .image-frame {
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* Generalize the homepage's collapsed section rhythm to every page:
+   two stacked plain sections keep a single stack of space. Sections on
+   or after a .soft band keep their padding (the band needs the inset). */
+.page section.section:not(.soft) + section.section:not(.soft) {
+  padding-top: 0;
+}
