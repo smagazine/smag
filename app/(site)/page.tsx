@@ -1,49 +1,95 @@
 import Link from "next/link";
 import Image from "next/image";
 import NewsletterForm from "@/components/NewsletterForm";
-import { getPublishedArticles } from "@/lib/articles";
-import { U, CatPill, Byline, TitleLink, SeeAll, AoCard, AoLead } from "@/components/Editorial";
+import { getPublishedArticles, type Article } from "@/lib/articles";
+import { U, CatPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
 
 export const revalidate = 3600;
 
-// Route + Arabic label for each CMS category (keyed by relatedCategory route).
-const DESKS: Record<string, { en: string; ar: string }> = {
-  "culture": { en: "Culture", ar: "الثقافة" },
-  "sports": { en: "Sports", ar: "الرياضة" },
-  "f-and-b": { en: "F&B", ar: "طعام وشراب" },
-  "events": { en: "Events", ar: "الفعاليات" },
-  "interviews": { en: "Interviews", ar: "مقابلات" },
-  "headlines": { en: "Headlines", ar: "الأخبار" },
-};
+const date = (a: Article) => a.meta.split("·")[0]?.trim();
+
+/** Compact slot card: rounded image, pill + date meta row, uppercase title. */
+function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article; sizes?: string }) {
+  return (
+    <article className="ao-slot-card">
+      <Link className="ao-media" href={`/article/${a.slug}`}>
+        <Image fill src={U(a.heroPhoto, 520, 380)} alt={a.title} sizes={sizes} />
+      </Link>
+      <div className="ao-slot-meta">
+        <CatPill category={a.category} />
+        <span className="ao-slot-date">{date(a)}</span>
+      </div>
+      <h3 className="ao-card-title"><TitleLink a={a} /></h3>
+    </article>
+  );
+}
 
 export default function HomePage() {
   const articles = getPublishedArticles();
-  const hero = articles.find((a) => a.featured) ?? articles[0];
-  const rest = articles.filter((a) => a.slug !== hero.slug);
+  const featured = articles.find((a) => a.featured) ?? articles[0];
+  const rest = articles.filter((a) => a.slug !== featured.slug);
 
-  // Desk sections claim categories with at least 2 stories (lead + cards);
-  // the remainder feeds Trending and the closing mixed grid, so every
-  // published article appears on the portal exactly once.
-  const byDesk = Object.keys(DESKS)
-    .map((route) => ({ route, items: rest.filter((a) => a.relatedCategory === route).slice(0, 4) }))
-    .filter((d) => d.items.length >= 2)
-    .sort((a, b) => b.items.length - a.items.length)
-    .slice(0, 3);
-  const inDesks = new Set(byDesk.flatMap((d) => d.items.map((a) => a.slug)));
-  const remaining = rest.filter((a) => !inDesks.has(a.slug));
+  // Front-page allocation — every article appears exactly once:
+  // 5-slot opener grid, then the briefs strip, then the feed. Sections
+  // shrink or hide gracefully while the archive is small.
+  const gridSide = rest.slice(0, 4);
+  const strip = rest.slice(4, 8);
+  const feed = rest.slice(8);
 
-  const trendLead = remaining[0];
-  const trendList = remaining.slice(1, 4);
-  const mixed = remaining.slice(4, 10);
-
-  // Category nav pills, each carrying the newest image from that desk.
-  const catNav = Object.entries(DESKS).map(([route, label]) => ({
-    route,
-    label,
-    photo: articles.find((a) => a.relatedCategory === route)?.heroPhoto,
-  }));
-
+  // Ranked re-surfacing is the one deliberate exception (like any
+  // "most read" module).
+  const popular = articles.slice(0, 4);
+  const spotlight = featured;
   const tickerArticles = articles.slice(0, 4);
+
+  const sidebar = (
+    <>
+      {/* Editor spotlight */}
+      <div className="ao-side-card reveal">
+        <p className="ao-side-label" data-en="Editor&rsquo;s Spotlight" data-ar="تحت الضوء">Editor&rsquo;s Spotlight</p>
+        <div className="ao-spot-head">
+          <span className="ao-spot-avatar">
+            <Image fill src={U(spotlight.authorPhoto, 160, 160)} alt={spotlight.author} sizes="72px" />
+          </span>
+          <div>
+            <p className="ao-spot-name">{spotlight.author}</p>
+            <p className="ao-spot-role">{spotlight.authorRole}</p>
+          </div>
+        </div>
+        <p className="ao-spot-bio" data-en="Contributing to SAUDI MAG's long-form coverage of Gulf culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة لثقافة الخليج ومدنه والحياة المعاصرة.">
+          Contributing to SAUDI MAG&apos;s long-form coverage of Gulf culture, cities, and contemporary life.
+        </p>
+        <Link className="ao-spot-link" href={`/article/${spotlight.slug}`} data-en="Read their latest" data-ar="اقرأ أحدث مقالاتهم">Read their latest</Link>
+      </div>
+
+      {/* Most popular — dark card */}
+      <div className="ao-side-card dark reveal">
+        <p className="ao-side-label" data-en="Most Popular" data-ar="الأكثر قراءة">Most Popular</p>
+        {popular.map((a, i) => (
+          <div key={a.slug} className="ao-pop-row">
+            <span className="ao-pop-num">{String(i + 1).padStart(2, "0")}</span>
+            <span className="ao-media ao-pop-thumb">
+              <Image fill src={U(a.heroPhoto, 160, 160)} alt="" sizes="52px" />
+            </span>
+            <div>
+              <h3 className="ao-pop-title"><TitleLink a={a} /></h3>
+              <Byline a={a} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Newsletter — compact dark card (class kept for NewsletterForm state) */}
+      <div className="newsletter-strip ao-nl reveal">
+        <div>
+          <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
+          <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
+        </div>
+        <NewsletterForm />
+        <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
+      </div>
+    </>
+  );
 
   return (
     <main className="page ao-home" id="main-content">
@@ -75,130 +121,96 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ── Full-bleed hero ── */}
-      <section className="ao-hero reveal">
-        <Image
-          fill
-          priority
-          src={U(hero.heroPhoto, 1600, 1000)}
-          alt={hero.title}
-          sizes="100vw"
-        />
-        <div className="ao-hero-scrim" aria-hidden="true" />
-        <div className="ao-hero-copy">
-          <div className="ao-hero-pills">
-            <span className="ao-pill on-dark" data-en="Featured" data-ar="مميز">Featured</span>
-            <CatPill category={hero.category} dark />
-          </div>
-          <h1 className="ao-hero-title">
-            <TitleLink a={hero} />
-          </h1>
-          <p className="ao-hero-deck" data-en={hero.subtitle} data-ar={hero.subtitleAr ?? hero.subtitle}>{hero.subtitle}</p>
-          <Link className="ao-readmore" href={`/article/${hero.slug}`} data-en="Read more" data-ar="اقرأ المزيد">
-            Read more
+      {/* ── Split masthead ── */}
+      <div className="container ao-masthead reveal" aria-hidden="true">
+        <span>SAUDI<span className="brand-dot">.</span></span>
+        <span className="ao-masthead-mag">MAG</span>
+      </div>
+
+      {/* ── Five-slot opener grid ── */}
+      <section className="container ao-slots reveal">
+        <div className="ao-slot-col">
+          {gridSide.slice(0, 2).map((a) => <SlotCard key={a.slug} a={a} />)}
+        </div>
+        <article className="ao-slot-feature">
+          <Link className="ao-media" href={`/article/${featured.slug}`}>
+            <Image fill priority src={U(featured.heroPhoto, 1000, 720)} alt={featured.title} sizes="(min-width: 900px) 46vw, 100vw" />
           </Link>
+          <div className="ao-slot-meta center">
+            <CatPill category={featured.category} />
+            <span className="ao-slot-date">{date(featured)}</span>
+          </div>
+          <h2 className="ao-slot-feature-title"><TitleLink a={featured} /></h2>
+          <Byline a={featured} />
+        </article>
+        <div className="ao-slot-col">
+          {gridSide.slice(2, 4).map((a) => <SlotCard key={a.slug} a={a} />)}
         </div>
       </section>
 
-      {/* ── Today's Trending ── */}
-      {trendLead && (
-        <section className="section container">
-          <div className="ao-dark-panel reveal">
-          <div className="ao-sec-head">
-            <h2 data-en="Today&rsquo;s Trending" data-ar="الأكثر رواجاً اليوم">Today&rsquo;s Trending</h2>
-            <SeeAll href="/headlines" />
-          </div>
-          <div className="ao-trend">
-            <article className="ao-trend-lead">
-              <Link className="ao-media" href={`/article/${trendLead.slug}`}>
-                <Image fill src={U(trendLead.heroPhoto, 1000, 700)} alt={trendLead.title} sizes="(min-width: 900px) 55vw, 100vw" />
-              </Link>
-              <CatPill category={trendLead.category} />
-              <h3 className="ao-card-title"><TitleLink a={trendLead} /></h3>
-              <Byline a={trendLead} />
-            </article>
-            <div className="ao-trend-list">
-              {trendList.map((a) => (
-                <article key={a.slug} className="ao-trend-row">
-                  <Link className="ao-media ao-trend-thumb" href={`/article/${a.slug}`}>
-                    <Image fill src={U(a.heroPhoto, 280, 280)} alt={a.title} sizes="130px" />
-                  </Link>
-                  <div>
+      {/* ── Briefs strip ── */}
+      {strip.length > 0 && (
+        <section className="container ao-strip-wrap reveal">
+          <div className="ao-strip" data-count={strip.length}>
+            {strip.map((a) => (
+              <article key={a.slug} className="ao-brief">
+                <Link className="ao-media ao-brief-thumb" href={`/article/${a.slug}`}>
+                  <Image fill src={U(a.heroPhoto, 180, 180)} alt="" sizes="72px" />
+                </Link>
+                <div>
+                  <h3 className="ao-brief-title"><TitleLink a={a} /></h3>
+                  <div className="ao-slot-meta">
                     <CatPill category={a.category} />
-                    <h3 className="ao-card-title"><TitleLink a={a} /></h3>
-                    <Byline a={a} />
+                    <span className="ao-slot-date">{date(a)}</span>
                   </div>
-                </article>
-              ))}
-            </div>
-          </div>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       )}
 
       {/* ── Photo-pill category nav ── */}
       <nav className="container ao-catnav reveal" aria-label="Browse categories">
-        {catNav.map(({ route, label, photo }, i) => (
-          <Link key={route} className={`ao-cat-pill${i % 2 ? " filled" : ""}`} href={`/${route}`}>
-            {photo && (
-              <span className="ao-cat-pill-img">
-                <Image fill src={U(photo, 120, 120)} alt="" sizes="60px" />
-              </span>
-            )}
-            <span data-en={label.en} data-ar={label.ar}>{label.en}</span>
-          </Link>
-        ))}
+        {[
+          ["culture", "Culture", "الثقافة"],
+          ["sports", "Sports", "الرياضة"],
+          ["f-and-b", "F&B", "طعام وشراب"],
+          ["events", "Events", "الفعاليات"],
+          ["interviews", "Interviews", "مقابلات"],
+          ["headlines", "Headlines", "الأخبار"],
+        ].map(([route, en, ar], i) => {
+          const photo = articles.find((a) => a.relatedCategory === route)?.heroPhoto;
+          return (
+            <Link key={route} className={`ao-cat-pill${i % 2 ? " filled" : ""}`} href={`/${route}`}>
+              {photo && (
+                <span className="ao-cat-pill-img">
+                  <Image fill src={U(photo, 120, 120)} alt="" sizes="60px" />
+                </span>
+              )}
+              <span data-en={en} data-ar={ar}>{en}</span>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* ── Desk sections ── */}
-      {byDesk.map(({ route, items }) => {
-        const label = DESKS[route];
-        const [lead, ...row] = items;
-        return (
-          <section key={route} className="section container">
+      {/* ── Feed + sidebar (or sidebar band while the feed is empty) ── */}
+      {feed.length > 0 ? (
+        <section className="section container ao-front-cols">
+          <div className="ao-feed">
             <div className="ao-sec-head reveal">
-              <h2 data-en={label.en} data-ar={label.ar}>{label.en}</h2>
-              <SeeAll href={`/${route}`} />
+              <h2 data-en="Latest Stories" data-ar="أحدث القصص">Latest Stories</h2>
+              <SeeAll href="/search" />
             </div>
-            <AoLead a={lead} />
-            {row.length === 1 ? (
-              /* A single leftover story mirrors the lead instead of sitting as
-                 a lonely card in an empty row. */
-              <AoLead a={row[0]} flip />
-            ) : row.length > 1 && (
-              <div className="ao-card-row reveal" data-count={Math.min(row.length, 3)}>
-                {row.slice(0, 3).map((a) => <AoCard key={a.slug} a={a} />)}
-              </div>
-            )}
-          </section>
-        );
-      })}
-
-      {/* ── Everything else from the magazine ── */}
-      {mixed.length > 0 && (
+            {feed.map((a, i) => <AoLead key={a.slug} a={a} flip={i % 2 === 1} />)}
+          </div>
+          <aside className="ao-front-side">{sidebar}</aside>
+        </section>
+      ) : (
         <section className="section container">
-          <div className="ao-sec-head reveal">
-            <h2 data-en="More From the Magazine" data-ar="المزيد من المجلة">More From the Magazine</h2>
-            <SeeAll href="/search" />
-          </div>
-          <div className="ao-card-row reveal" data-count={Math.min(mixed.length, 3)}>
-            {mixed.slice(0, 6).map((a) => <AoCard key={a.slug} a={a} />)}
-          </div>
+          <div className="ao-side-band">{sidebar}</div>
         </section>
       )}
-
-      {/* ── Newsletter ── */}
-      <section className="section soft">
-        <div className="container newsletter-strip reveal">
-          <div>
-            <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
-            <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
-            <p className="deck" data-en="The morning read for people following the region's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة المنطقة ومدنها وأفكارها. مجاني، كل يوم عمل.">The morning read for people following the region&apos;s culture, cities, and ideas. Free, every weekday.</p>
-          </div>
-          <NewsletterForm />
-          <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
-        </div>
-      </section>
     </main>
   );
 }
