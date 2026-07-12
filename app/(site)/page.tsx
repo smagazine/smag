@@ -1,12 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import NewsletterForm from "@/components/NewsletterForm";
-import { getPublishedArticles, type Article } from "@/lib/articles";
+import { getPublishedArticles } from "@/lib/articles";
+import { U, CatPill, Byline, TitleLink, SeeAll, AoCard, AoLead } from "@/components/Editorial";
 
 export const revalidate = 3600;
-
-const U = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
 
 // Route + Arabic label for each CMS category (keyed by relatedCategory route).
 const DESKS: Record<string, { en: string; ar: string }> = {
@@ -17,54 +15,6 @@ const DESKS: Record<string, { en: string; ar: string }> = {
   "interviews": { en: "Interviews", ar: "مقابلات" },
   "headlines": { en: "Headlines", ar: "الأخبار" },
 };
-
-const CAT_AR: Record<string, string> = {
-  "Culture": "الثقافة",
-  "Sports": "الرياضة",
-  "F&B": "طعام وشراب",
-  "Events": "الفعاليات",
-  "Interviews": "مقابلات",
-  "Headlines": "الأخبار",
-  "Architecture & Design": "العمارة والتصميم",
-};
-
-/** First paragraph of the body with inline markdown stripped, for excerpts. */
-function excerpt(a: Article): string {
-  const p = a.body.find((b) => b.type === "p")?.text ?? a.subtitle;
-  return p
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/\[(.+?)\]\([^)]*\)/g, "$1");
-}
-
-function CatPill({ category, dark = false }: { category: string; dark?: boolean }) {
-  return (
-    <span className={`ao-pill${dark ? " on-dark" : ""}`} data-en={category} data-ar={CAT_AR[category] ?? category}>
-      {category}
-    </span>
-  );
-}
-
-function Byline({ a }: { a: Article }) {
-  return <span className="ao-byline">{a.author || a.meta.split("·")[0]?.trim()}</span>;
-}
-
-function TitleLink({ a }: { a: Article }) {
-  return (
-    <Link href={`/article/${a.slug}`} data-en={a.title} data-ar={a.titleAr ?? a.title}>
-      {a.title}
-    </Link>
-  );
-}
-
-function SeeAll({ href }: { href: string }) {
-  return (
-    <Link className="ao-seeall" href={href}>
-      <span data-en="See all" data-ar="عرض الكل">See all</span>
-      <span className="ao-seeall-arrow" aria-hidden="true">→</span>
-    </Link>
-  );
-}
 
 export default function HomePage() {
   const articles = getPublishedArticles();
@@ -124,11 +74,12 @@ export default function HomePage() {
       {/* ── Today's Trending ── */}
       {trendLead && (
         <section className="section container">
-          <div className="ao-sec-head reveal">
+          <div className="ao-dark-panel reveal">
+          <div className="ao-sec-head">
             <h2 data-en="Today&rsquo;s Trending" data-ar="الأكثر رواجاً اليوم">Today&rsquo;s Trending</h2>
             <SeeAll href="/headlines" />
           </div>
-          <div className="ao-trend reveal">
+          <div className="ao-trend">
             <article className="ao-trend-lead">
               <Link className="ao-media" href={`/article/${trendLead.slug}`}>
                 <Image fill src={U(trendLead.heroPhoto, 1000, 700)} alt={trendLead.title} sizes="(min-width: 900px) 55vw, 100vw" />
@@ -151,6 +102,7 @@ export default function HomePage() {
                 </article>
               ))}
             </div>
+          </div>
           </div>
         </section>
       )}
@@ -179,43 +131,14 @@ export default function HomePage() {
               <h2 data-en={label.en} data-ar={label.ar}>{label.en}</h2>
               <SeeAll href={`/${route}`} />
             </div>
-            <article className="ao-desk-lead reveal">
-              <Link className="ao-media" href={`/article/${lead.slug}`}>
-                <Image fill src={U(lead.heroPhoto, 900, 640)} alt={lead.title} sizes="(min-width: 900px) 42vw, 100vw" />
-              </Link>
-              <div className="ao-desk-lead-copy">
-                <CatPill category={lead.category} />
-                <h3 className="ao-card-title lg"><TitleLink a={lead} /></h3>
-                <p className="ao-excerpt" data-en={excerpt(lead)} data-ar={lead.subtitleAr ?? excerpt(lead)}>{excerpt(lead)}</p>
-                <Byline a={lead} />
-              </div>
-            </article>
+            <AoLead a={lead} />
             {row.length === 1 ? (
               /* A single leftover story mirrors the lead instead of sitting as
                  a lonely card in an empty row. */
-              <article className="ao-desk-lead flip reveal">
-                <Link className="ao-media" href={`/article/${row[0].slug}`}>
-                  <Image fill src={U(row[0].heroPhoto, 900, 640)} alt={row[0].title} sizes="(min-width: 900px) 42vw, 100vw" />
-                </Link>
-                <div className="ao-desk-lead-copy">
-                  <CatPill category={row[0].category} />
-                  <h3 className="ao-card-title lg"><TitleLink a={row[0]} /></h3>
-                  <p className="ao-excerpt" data-en={excerpt(row[0])} data-ar={row[0].subtitleAr ?? excerpt(row[0])}>{excerpt(row[0])}</p>
-                  <Byline a={row[0]} />
-                </div>
-              </article>
+              <AoLead a={row[0]} flip />
             ) : row.length > 1 && (
               <div className="ao-card-row reveal" data-count={Math.min(row.length, 3)}>
-                {row.slice(0, 3).map((a) => (
-                  <article key={a.slug} className="ao-card">
-                    <Link className="ao-media" href={`/article/${a.slug}`}>
-                      <Image fill src={U(a.heroPhoto, 640, 460)} alt={a.title} sizes="(min-width: 900px) 30vw, 100vw" />
-                    </Link>
-                    <CatPill category={a.category} />
-                    <h3 className="ao-card-title"><TitleLink a={a} /></h3>
-                    <Byline a={a} />
-                  </article>
-                ))}
+                {row.slice(0, 3).map((a) => <AoCard key={a.slug} a={a} />)}
               </div>
             )}
           </section>
@@ -230,16 +153,7 @@ export default function HomePage() {
             <SeeAll href="/search" />
           </div>
           <div className="ao-card-row reveal" data-count={Math.min(mixed.length, 3)}>
-            {mixed.slice(0, 6).map((a) => (
-              <article key={a.slug} className="ao-card">
-                <Link className="ao-media" href={`/article/${a.slug}`}>
-                  <Image fill src={U(a.heroPhoto, 640, 460)} alt={a.title} sizes="(min-width: 900px) 30vw, 100vw" />
-                </Link>
-                <CatPill category={a.category} />
-                <h3 className="ao-card-title"><TitleLink a={a} /></h3>
-                <Byline a={a} />
-              </article>
-            ))}
+            {mixed.slice(0, 6).map((a) => <AoCard key={a.slug} a={a} />)}
           </div>
         </section>
       )}

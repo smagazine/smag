@@ -1,11 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
 import CategoryFilters from "@/components/CategoryFilters";
 import Breadcrumb from "@/components/Breadcrumb";
+import { AoCard, AoLead } from "@/components/Editorial";
 import type { Article } from "@/lib/articles";
-
-const U = (id: string, w: number, h: number) =>
-  id ? `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format` : "";
 
 export interface CategoryConfig {
   /** English page title, also used as the breadcrumb label. */
@@ -19,19 +15,12 @@ export interface CategoryConfig {
   italicTitle?: boolean;
 }
 
-// Vary card widths for editorial rhythm while keeping rows balanced: a wide
-// span-8 (landscape) pairs with a span-4 (portrait) at equal height, and
-// span-6 landscape cards pair evenly. The media aspect must match the width or
-// the grid goes lopsided.
-const LAYOUT = [
-  { span: "span-8", media: "landscape" },
-  { span: "span-4", media: "" },
-  { span: "span-6", media: "landscape" },
-  { span: "span-6", media: "landscape" },
-];
-
-function meta(a: Article): string {
-  return a.author ? `By ${a.author}${a.meta ? ` · ${a.meta}` : ""}` : a.meta;
+/** Rows of three cards; a single leftover renders as a mirrored lead so it
+    never sits alone in an empty row. */
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
 }
 
 export default function CategoryView({
@@ -44,7 +33,7 @@ export default function CategoryView({
   const [lead, ...rest] = articles;
 
   return (
-    <main className="page" id="main-content">
+    <main className="page ao-home" id="main-content">
       <Breadcrumb
         crumbs={[
           { label: "Home", href: "/", labelAr: "الرئيسية" },
@@ -78,42 +67,18 @@ export default function CategoryView({
           </p>
         </section>
       ) : (
-        <>
-          <div className="container" style={{ paddingTop: "clamp(24px,4vw,48px)" }}>
-            <article className="main-lead reveal" style={{ minHeight: 540, marginBottom: "var(--stack-md)" }}>
-              <Link className="main-lead-media" href={`/article/${lead.slug}`}>
-                <Image fill priority src={U(lead.heroPhoto, 1400, 900)} alt={lead.title} sizes="(min-width: 1280px) 900px, 100vw" />
-              </Link>
-              <div className="main-lead-copy">
-                <span className="label eyebrow">{lead.category}</span>
-                <h1><Link href={`/article/${lead.slug}`}>{lead.title}</Link></h1>
-                <p>{lead.subtitle}</p>
-                <span className="meta">{meta(lead)}</span>
+        <section className="section container">
+          <AoLead a={lead} priority />
+          {chunk(rest, 3).map((group, gi) =>
+            group.length === 1 ? (
+              <AoLead key={group[0].slug} a={group[0]} flip={gi % 2 === 0} />
+            ) : (
+              <div key={group[0].slug} className="ao-card-row reveal" data-count={group.length}>
+                {group.map((a) => <AoCard key={a.slug} a={a} />)}
               </div>
-            </article>
-          </div>
-
-          {rest.length > 0 && (
-            <section className="section container">
-              <div className="editorial-grid reveal">
-                {rest.map((a, i) => {
-                  const layout = LAYOUT[i % LAYOUT.length];
-                  return (
-                  <article key={a.slug} className={`article-card ${layout.span}`}>
-                    <Link className={`card-media${layout.media ? ` ${layout.media}` : ""}`} href={`/article/${a.slug}`}>
-                      <Image fill src={U(a.heroPhoto, 800, 500)} alt={a.title} sizes="(min-width: 1280px) 800px, 100vw" />
-                    </Link>
-                    <span className="label eyebrow">{a.category}</span>
-                    <h3><Link href={`/article/${a.slug}`}>{a.title}</Link></h3>
-                    <p>{a.subtitle}</p>
-                    <span className="meta">{meta(a)}</span>
-                  </article>
-                  );
-                })}
-              </div>
-            </section>
+            )
           )}
-        </>
+        </section>
       )}
     </main>
   );

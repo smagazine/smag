@@ -1,12 +1,8 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { AoCard } from "@/components/Editorial";
 import type { Article } from "@/lib/articles";
-
-const U = (id: string, w: number, h: number) =>
-  id ? `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format` : "";
 
 function matches(a: Article, q: string): boolean {
   if (!q) return true;
@@ -92,15 +88,12 @@ function SearchContent() {
       </section>
 
       <section className="section container">
-        <div className="section-header reveal">
-          <div>
-            <span className="label eyebrow" data-en="Archive Directory" data-ar="دليل الأرشيف">Archive Directory</span>
-            <h2>
-              {q
-                ? `${visible.length} result${visible.length === 1 ? "" : "s"}`
-                : "All Stories"}
-            </h2>
-          </div>
+        <div className="ao-sec-head reveal">
+          <h2>
+            {q
+              ? `${visible.length} result${visible.length === 1 ? "" : "s"}`
+              : <span data-en="All Stories" data-ar="جميع القصص">All Stories</span>}
+          </h2>
         </div>
 
         {loading ? (
@@ -108,18 +101,8 @@ function SearchContent() {
         ) : visible.length === 0 ? (
           <p className="deck" data-en="No matching stories found." data-ar="لم يتم العثور على قصص مطابقة.">No matching stories found.</p>
         ) : (
-          <div className="editorial-grid reveal">
-            {visible.map((a) => (
-              <article key={a.slug} className="article-card span-4">
-                <Link className="card-media" href={`/article/${a.slug}`}>
-                  <Image fill src={U(a.heroPhoto, 600, 450)} alt={a.title} sizes="(min-width: 1280px) 400px, 33vw" />
-                </Link>
-                <span className="label eyebrow">{a.category}</span>
-                <h3><Link href={`/article/${a.slug}`}>{a.title}</Link></h3>
-                <p>{a.subtitle}</p>
-                <span className="meta">{a.meta}</span>
-              </article>
-            ))}
+          <div className="ao-search-grid reveal">
+            {visible.map((a) => <AoCard key={a.slug} a={a} />)}
           </div>
         )}
       </section>

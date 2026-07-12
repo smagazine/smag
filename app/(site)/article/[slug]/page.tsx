@@ -6,6 +6,7 @@ import { getArticle, getPublishedArticles } from "@/lib/articles";
 import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
+import { CatPill, SeeAll, AoCard } from "@/components/Editorial";
 import type { Metadata } from "next";
 
 // Statically prerender every published article; revalidate hourly and on write
@@ -106,9 +107,9 @@ export default async function ArticleSlugPage(
           </figure>
 
           <header className="article-header container reveal">
-            <span className="label eyebrow article-kicker">{article.category}</span>
-            <h1>{article.title}</h1>
-            <p className="article-subtitle">{article.subtitle}</p>
+            <div className="article-kicker"><CatPill category={article.category} /></div>
+            <h1 data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</h1>
+            <p className="article-subtitle" data-en={article.subtitle} data-ar={article.subtitleAr ?? article.subtitle}>{article.subtitle}</p>
             <div className="byline">
               <div className="author">
                 <Image src={U(article.authorPhoto, 200, 200)} alt={article.author} width={54} height={54} />
@@ -192,30 +193,12 @@ export default async function ArticleSlugPage(
 
         <section className="section soft">
           <div className="container">
-            <div className="section-header reveal">
-              <div>
-                <span className="label eyebrow" data-en="Read Next" data-ar="اقرأ أيضاً">Read Next</span>
-                <h2 data-en="More stories" data-ar="المزيد من القصص">More stories</h2>
-              </div>
-              <Link
-                className="button secondary"
-                href={`/${article.relatedCategory}`}
-                data-en="View all"
-                data-ar="عرض الكل"
-              >
-                View all
-              </Link>
+            <div className="ao-sec-head reveal">
+              <h2 data-en="Read Next" data-ar="اقرأ أيضاً">Read Next</h2>
+              <SeeAll href={`/${article.relatedCategory}`} />
             </div>
-            <div className="editorial-grid">
-              {related.map((rel) => (
-                <article key={rel.slug} className="article-card span-4 reveal">
-                  <Link className="card-media" href={`/article/${rel.slug}`}>
-                    <Image fill src={U(rel.heroPhoto, 600, 400)} alt={rel.title} sizes="(min-width: 1280px) 400px, 33vw" />
-                  </Link>
-                  <span className="label eyebrow">{rel.category}</span>
-                  <h3><Link href={`/article/${rel.slug}`}>{rel.title}</Link></h3>
-                </article>
-              ))}
+            <div className="ao-card-row reveal" data-count={Math.min(related.length, 3)}>
+              {related.map((rel) => <AoCard key={rel.slug} a={rel} />)}
             </div>
           </div>
         </section>

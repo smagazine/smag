@@ -3432,19 +3432,19 @@ dialog.membership-dialog::backdrop {
 
 /* ── Editorial home (AnOther-style) ─────────────────────────────────────── */
 
-.ao-home .ao-media {
+.ao-media {
   position: relative;
   display: block;
   overflow: hidden;
   background: var(--color-soft);
 }
 
-.ao-home .ao-media img {
+.ao-media img {
   object-fit: cover;
   transition: transform 500ms ease;
 }
 
-.ao-home a.ao-media:hover img {
+a.ao-media:hover img {
   transform: scale(1.03);
 }
 
@@ -3808,4 +3808,272 @@ dialog.membership-dialog::backdrop {
   .ao-desk-lead.flip > .ao-media {
     order: 2;
   }
+}
+
+/* ── Sitewide editorial pass: pull the whole site onto the ao-* system ──── */
+
+/* Headlines: bold uppercase sans replaces the oversized serif display. */
+h1,
+h2,
+h3,
+.display,
+.headline {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+h1,
+.display {
+  font-size: clamp(1.9rem, 4.4vw, 3.6rem);
+}
+
+h2,
+.headline-xl {
+  font-size: clamp(1.45rem, 2.9vw, 2.3rem);
+}
+
+h3,
+.headline-md {
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+}
+
+/* Serif survives only as an accent voice. */
+.pullquote,
+blockquote {
+  font-family: var(--font-serif);
+  text-transform: none;
+}
+
+/* Buttons and chips become pills. */
+.button {
+  border-radius: 999px;
+  padding: 12px 28px;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+
+.chip {
+  border-radius: 999px;
+  border: 1px solid var(--color-ink);
+  background: var(--color-paper);
+  padding: 8px 18px;
+}
+
+.chip:hover,
+.chip.active {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+/* Eyebrow labels become outlined pills, matching the card category pills. */
+.label.eyebrow {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.66rem;
+  color: var(--color-ink);
+  margin-bottom: 14px;
+}
+
+.feature-band .label.eyebrow,
+.news-dark .label.eyebrow,
+.site-footer .label.eyebrow {
+  color: #fff;
+}
+
+/* Article page details. */
+.article-kicker {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.article-tag {
+  border-radius: 999px;
+}
+
+.search-field {
+  border-radius: 999px;
+}
+
+/* Rhythm between stacked editorial rows on category pages. */
+.ao-card-row + .ao-card-row,
+.ao-card-row + .ao-desk-lead,
+.ao-desk-lead + .ao-card-row {
+  margin-top: clamp(24px, 4vw, 40px);
+}
+
+.ao-card-row + .ao-desk-lead {
+  border-top: 1px solid var(--color-line);
+  padding-top: clamp(24px, 4vw, 40px);
+}
+
+/* Search results grid reuses the card anatomy without row hairlines. */
+.ao-search-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 44px) clamp(20px, 3vw, 40px);
+}
+
+@media (max-width: 900px) {
+  .ao-search-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+[data-theme="dark"] .page-header--warm,
+[data-theme="dark"] .page-header--cream {
+  background: var(--color-soft);
+}
+
+/* ── Dashboard DNA: rounded, floating, soft ─────────────────────────────── */
+
+/* Floating rounded header bar */
+.site-header {
+  top: 10px;
+  margin: 12px clamp(10px, 1.5vw, 24px) 0;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+/* Every editorial image gets the dashboard radius + a soft lift */
+.ao-media,
+.card-media,
+.news-card-media,
+.mini-media,
+.video-media,
+.newsrow-thumb,
+.image-frame,
+.author-bio-avatar {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ao-media,
+.card-media,
+.news-card-media {
+  box-shadow: 0 8px 26px rgba(20, 20, 22, 0.07);
+}
+
+/* Full-bleed heroes become inset rounded frames */
+.ao-hero,
+.article-hero {
+  margin-inline: clamp(10px, 1.5vw, 24px);
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* Cards and panels used on static pages */
+.tier,
+.membership-card,
+.mobile-sheet,
+.contact-form,
+.stat-item {
+  border-radius: 22px;
+}
+
+.tier {
+  box-shadow: 0 10px 32px rgba(20, 20, 22, 0.07);
+}
+
+.ao-cat-pill,
+.ao-cat-pill-img {
+  box-shadow: 0 6px 18px rgba(20, 20, 22, 0.08);
+}
+
+/* Dark accent panel — fixed near-black like the admin's cards, so it stays
+   dark in BOTH themes (the ink token would invert in dark mode). */
+.ao-dark-panel {
+  background: #141416;
+  border-radius: 26px;
+  padding: clamp(20px, 3.5vw, 44px);
+  color: #fff;
+  box-shadow: 0 18px 50px rgba(20, 20, 22, 0.22);
+}
+
+[data-theme="dark"] .ao-dark-panel {
+  border: 1px solid #26262a;
+}
+
+.ao-dark-panel .ao-sec-head {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+.ao-dark-panel .ao-sec-head h2,
+.ao-dark-panel .ao-card-title a {
+  color: #fff;
+}
+
+.ao-dark-panel .ao-pill {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
+}
+
+.ao-dark-panel .ao-byline {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.ao-dark-panel .ao-seeall {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.ao-dark-panel .ao-seeall-arrow {
+  border-color: #fff;
+  color: #fff;
+}
+
+.ao-dark-panel .ao-seeall:hover .ao-seeall-arrow {
+  background: #fff;
+  color: #141416;
+}
+
+.ao-dark-panel .ao-trend-row + .ao-trend-row {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.ao-dark-panel .ao-media {
+  background: #26262a;
+  box-shadow: none;
+}
+
+/* Newsletter strip becomes a dark rounded panel with lime accents */
+.newsletter-strip {
+  background: #141416;
+  color: #fff;
+  border-radius: 26px;
+  padding: clamp(28px, 4vw, 52px);
+}
+
+.newsletter-strip h2 {
+  color: #fff;
+}
+
+.newsletter-strip .deck {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletter-strip .label.eyebrow {
+  color: var(--color-gold);
+}
+
+.newsletter-form input {
+  border-color: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 12px 20px;
+  color: #fff;
+}
+
+.newsletter-form input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+[data-theme="dark"] .newsletter-strip {
+  border: 1px solid #26262a;
 }
