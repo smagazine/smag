@@ -13,7 +13,11 @@ export interface Article {
   slug: string;
   category: string;
   title: string;
+  /** Optional Arabic title; falls back to `title` when absent. */
+  titleAr?: string;
   subtitle: string;
+  /** Optional Arabic subtitle; falls back to `subtitle` when absent. */
+  subtitleAr?: string;
   author: string;
   authorRole: string;
   meta: string;
@@ -133,7 +137,9 @@ export function normalizeArticle(input: unknown): Article {
     slug,
     category: str("category"),
     title: str("title", true),
+    titleAr: str("titleAr") || undefined,
     subtitle: str("subtitle"),
+    subtitleAr: str("subtitleAr") || undefined,
     author: str("author"),
     authorRole: str("authorRole"),
     meta: str("meta"),
