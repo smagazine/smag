@@ -3750,11 +3750,19 @@ a.ao-media:hover img {
 
 /* Card rows with hairline dividers */
 .ao-card-row {
+  --row-gap: clamp(20px, 3vw, 40px);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: clamp(20px, 3vw, 40px);
+  gap: var(--row-gap);
   border-top: 1px solid var(--color-line);
   padding-top: clamp(20px, 3vw, 32px);
+}
+
+/* Directly under a section heading the row's own rule would double the
+   heading's border — one hairline is enough. */
+.ao-sec-head + .ao-card-row {
+  border-top: none;
+  padding-top: 0;
 }
 
 .ao-card-row[data-count="1"] {
@@ -3769,9 +3777,20 @@ a.ao-media:hover img {
   aspect-ratio: 10 / 7;
 }
 
-.ao-card + .ao-card {
-  border-inline-start: 1px solid var(--color-line);
-  padding-inline-start: clamp(20px, 3vw, 40px);
+/* Dividers live in the grid gap (not as card padding, which would steal
+   width from every card after the first and break column alignment). */
+.ao-card {
+  position: relative;
+  min-width: 0;
+}
+
+.ao-card-row > .ao-card + .ao-card::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--row-gap, 32px) / -2);
+  width: 1px;
+  background: var(--color-line);
 }
 
 /* Responsive */
@@ -3791,9 +3810,11 @@ a.ao-media:hover img {
     grid-template-columns: 1fr;
   }
 
+  .ao-card-row > .ao-card + .ao-card::before {
+    display: none;
+  }
+
   .ao-card + .ao-card {
-    border-inline-start: none;
-    padding-inline-start: 0;
     border-top: 1px solid var(--color-line);
     padding-top: 20px;
   }
