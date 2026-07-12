@@ -4,8 +4,9 @@ export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="container">
-        <Link className="footer-brand" href="/">
-          SAUDI <em className="brand-mag">MAG</em>
+        <Link className="footer-brand" href="/" aria-label="SAUDI MAG home">
+          <span className="brand-word">SAUDI<span className="brand-dot">.</span></span>
+          <span className="brand-mag">MAG</span>
         </Link>
         <nav className="footer-nav" aria-label="Footer navigation">
           <Link href="/about" data-en="About" data-ar="عن المجلة">About</Link>

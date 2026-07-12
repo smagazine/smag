@@ -92,8 +92,9 @@ export default function Header() {
                 <span data-en="Search" data-ar="بحث">Search</span>
               </button>
             </div>
-            <Link className="brand" href="/">
-              SAUDI <em className="brand-mag">MAG</em>
+            <Link className="brand" href="/" aria-label="SAUDI MAG home">
+              <span className="brand-word">SAUDI<span className="brand-dot">.</span></span>
+              <span className="brand-mag">MAG</span>
             </Link>
             <div className="nav-actions">
               <button

@@ -5,14 +5,14 @@
   --color-soft: #f0f0f0;
   --color-paper: #ffffff;
   --color-line: #e0e0e0;
-  --color-gold: #a6d61f;
-  --color-gold-soft: #c8e85a;
-  --color-clay: #a6d61f;
+  --color-gold: #a5ce39;
+  --color-gold-soft: #c3de74;
+  --color-clay: #a5ce39;
   --color-sage: #0d0d0d;
   --color-blue: #111111;
   --color-charcoal: #0a0a0a;
   --font-serif: var(--font-newsreader, Georgia, serif);
-  --font-sans: var(--font-sora, Arial, sans-serif);
+  --font-sans: var(--font-brand, Arial, sans-serif);
   --container: 1280px;
   --gutter: clamp(16px, 3vw, 48px);
   --stack-lg: clamp(48px, 7vw, 88px);
@@ -4195,4 +4195,46 @@ blockquote {
    or after a .soft band keep their padding (the band needs the inset). */
 .page section.section:not(.soft) + section.section:not(.soft) {
   padding-top: 0;
+}
+
+/* ── Brand lockup (from the brand sheet): SAUDI. over lime MAG ──────────── */
+
+.brand,
+.footer-brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.brand::before {
+  content: none;
+}
+
+.brand .brand-word,
+.footer-brand .brand-word {
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brand-dot {
+  color: var(--color-gold);
+}
+
+.brand .brand-mag,
+.footer-brand .brand-mag {
+  color: var(--color-gold);
+  font-family: var(--font-sans);
+  font-size: 0.62em;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  margin-inline-end: -0.42em; /* optically balance the tracking overhang */
+  text-transform: uppercase;
 }

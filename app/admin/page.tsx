@@ -84,12 +84,12 @@ const C = {
   sub: "#8a8f98",
   faint: "#b3b7bf",
   line: "#e8e9ec",
-  lime: "#a6d61f",
+  lime: "#a5ce39",
   limeInk: "#3d4d00",
   red: "#e5484d",
 };
 
-const FONT = "var(--font-sora, system-ui, sans-serif)";
+const FONT = "var(--font-brand, system-ui, sans-serif)";
 
 const U = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
@@ -270,6 +270,26 @@ function catChip(cat: string, dark = false): React.CSSProperties {
 }
 
 // ── Small pieces ───────────────────────────────────────────────────────────
+
+/** S. monogram tile from the brand sheet: white S on black, lime dot. */
+function BrandMark({ size = 34 }: { size?: number }) {
+  return (
+    <div style={{ position: "relative", width: size, height: size, background: "#000", borderRadius: Math.round(size * 0.3), display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: size * 0.5, flexShrink: 0, fontFamily: FONT }}>
+      S
+      <span style={{ position: "absolute", right: size * 0.13, bottom: size * 0.17, width: size * 0.16, height: size * 0.16, borderRadius: 999, background: C.lime }} />
+    </div>
+  );
+}
+
+/** Inline SAUDI. MAG wordmark. */
+function BrandWord() {
+  return (
+    <div style={{ fontWeight: 800, fontSize: 12.5, color: C.text, letterSpacing: "0.09em" }}>
+      SAUDI<span style={{ color: C.lime }}>.</span>{" "}
+      <span style={{ color: "#7ba314", letterSpacing: "0.2em" }}>MAG</span>
+    </div>
+  );
+}
 
 /** Deterministic mini sparkline (no randomness → stable across renders). */
 function Spark({ seed, color = C.ink, w = 84, h = 26 }: { seed: number; color?: string; w?: number; h?: number }) {
@@ -652,9 +672,9 @@ export default function AdminPage() {
       <div style={{ minHeight: "100svh", background: `radial-gradient(120% 120% at 20% 0%, #e9eaee 0%, ${C.page} 60%, #cfd1d7 100%)`, display: "grid", placeItems: "center", fontFamily: FONT }}>
         <form onSubmit={login} style={{ width: 340, background: C.card, borderRadius: 26, padding: "30px 28px", display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 24px 70px rgba(20,20,22,0.18)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 6 }}>
-            <div style={{ width: 34, height: 34, background: C.ink, borderRadius: 999, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 14, color: C.lime }}>S</div>
+            <BrandMark />
             <div>
-              <div style={{ fontWeight: 800, fontSize: 13, color: C.text, letterSpacing: "0.05em" }}>SAUDI MAG</div>
+              <BrandWord />
               <div style={{ fontSize: 10.5, color: C.sub }}>Newsroom console</div>
             </div>
           </div>
@@ -680,9 +700,9 @@ export default function AdminPage() {
         {/* ── Sidebar rail ── */}
         <aside style={{ width: 218, flexShrink: 0, display: "flex", flexDirection: "column", padding: "26px 18px 20px", borderRight: `1px solid ${C.line}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px", marginBottom: 34 }}>
-            <div style={{ width: 34, height: 34, background: C.ink, borderRadius: 999, display: "grid", placeItems: "center", fontWeight: 900, fontSize: 14, color: C.lime, flexShrink: 0 }}>S</div>
+            <BrandMark />
             <div>
-              <div style={{ fontWeight: 800, fontSize: 12.5, letterSpacing: "0.05em" }}>SAUDI MAG</div>
+              <BrandWord />
               <div style={{ fontSize: 10, color: C.sub }}>Newsroom</div>
             </div>
           </div>

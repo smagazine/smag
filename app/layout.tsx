@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Newsreader, Sora, Cairo } from "next/font/google";
+import { Newsreader, Jost, Cairo } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LangProvider } from "@/contexts/LangContext";
@@ -11,10 +11,12 @@ const newsreader = Newsreader({
   variable: "--font-newsreader",
 });
 
-const sora = Sora({
+// Brand sheet specifies Korto (commercial); Jost is the free geometric
+// stand-in until licensed font files are added.
+const jost = Jost({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-sora",
+  variable: "--font-brand",
 });
 
 const cairo = Cairo({
@@ -22,8 +24,9 @@ const cairo = Cairo({
   display: "swap",
   variable: "--font-cairo",
 });
+// S. monogram from the brand sheet: bold white S on black, lime dot.
 const FAVICON =
-  "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23000'/><rect x='2' y='2' width='60' height='60' fill='none' stroke='%23a6d61f' stroke-width='3'/><text x='32' y='44' font-size='34' font-weight='bold' text-anchor='middle' fill='%23a6d61f' font-family='Arial,sans-serif'>S</text></svg>";
+  "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23000'/><text x='29' y='46' font-size='40' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial,sans-serif'>S</text><circle cx='48' cy='44' r='6' fill='%23a5ce39'/></svg>";
 
 const SITE_URL = "https://saudimag.com";
 const SITE_OG_IMAGE = "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&h=630&fit=crop&auto=format";
@@ -55,7 +58,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className={`${newsreader.variable} ${sora.variable} ${cairo.variable}`}>
+    <html lang="en" dir="ltr" className={`${newsreader.variable} ${jost.variable} ${cairo.variable}`}>
       <head>
         {/* Apply saved theme + language before first paint to avoid a
             light/LTR flash for dark-mode / Arabic users. Keep the storage keys
