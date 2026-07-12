@@ -4077,3 +4077,35 @@ blockquote {
 [data-theme="dark"] .newsletter-strip {
   border: 1px solid #26262a;
 }
+
+/* ── Frame alignment: one shared gutter for all floating shapes ─────────── */
+
+:root {
+  --frame-gap: clamp(10px, 1.5vw, 24px);
+}
+
+.site-header {
+  margin: var(--frame-gap) var(--frame-gap) 0;
+}
+
+/* Even gap between the floating header and the first framed block */
+.ao-hero {
+  margin: var(--frame-gap) var(--frame-gap) 0;
+}
+
+.article-hero {
+  margin-inline: var(--frame-gap);
+}
+
+/* Category page headers become rounded inset panels on the same frame */
+.page-header {
+  margin-inline: var(--frame-gap);
+  border-radius: 26px;
+  overflow: hidden;
+}
+
+/* Breathing room for breadcrumbs between header and content */
+.breadcrumb {
+  padding-top: clamp(16px, 2.2vw, 26px);
+  padding-bottom: clamp(12px, 1.6vw, 18px);
+}
