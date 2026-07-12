@@ -4161,3 +4161,9 @@ blockquote {
 .ao-home section.section + section.section:not(.soft) {
   padding-top: 0;
 }
+
+/* Breathing room between the article's last row (share) and the section
+   that follows it. */
+.article-layout {
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
