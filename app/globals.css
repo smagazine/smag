@@ -4687,3 +4687,13 @@ blockquote {
     font-size: 0.6em;
   }
 }
+
+/* Front-page opener spans nearly the full frame instead of the reading
+   column — masthead, slot grid, and briefs strip share the same edges. */
+.ao-masthead,
+.ao-slots,
+.ao-strip-wrap {
+  width: 100%;
+  max-width: none;
+  padding-inline: calc(var(--frame-gap) * 2);
+}
