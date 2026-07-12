@@ -4697,3 +4697,47 @@ blockquote {
   max-width: none;
   padding-inline: calc(var(--frame-gap) * 2);
 }
+
+/* ── Mobile audit fixes ─────────────────────────────────────────────────── */
+
+/* Wordmarks never mirror in RTL — SAUDI. must not become .SAUDI */
+.brand,
+.footer-brand,
+.ao-masthead {
+  direction: ltr;
+}
+
+/* Footer: base .footer-social/.footer-legal rules sit after the old 420px
+   block in source order, so their grid-column placement was overriding the
+   mobile stack and squeezing everything into phantom columns. */
+@media (max-width: 640px) {
+  .site-footer .container {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+  }
+
+  .footer-brand,
+  .footer-nav,
+  .footer-social,
+  .footer-legal,
+  .copyright {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .footer-brand {
+    justify-self: center;
+    align-items: center;
+  }
+
+  .footer-nav,
+  .footer-social,
+  .footer-legal {
+    justify-content: center;
+  }
+
+  .copyright,
+  [dir="rtl"] .copyright {
+    text-align: center;
+  }
+}
