@@ -4741,3 +4741,17 @@ blockquote {
     text-align: center;
   }
 }
+
+/* ── Bilingual body blocks: CSS-toggled language spans ──────────────────── */
+
+.lang-ar {
+  display: none;
+}
+
+[dir="rtl"] .lang-en {
+  display: none;
+}
+
+[dir="rtl"] .lang-ar {
+  display: inline;
+}

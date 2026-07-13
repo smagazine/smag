@@ -8,6 +8,7 @@ interface BodyBlock {
   id: string;
   type: "p" | "h2" | "blockquote" | "video";
   text: string;
+  textAr?: string;
   videoUrl?: string;
 }
 
@@ -15,7 +16,9 @@ interface Article {
   slug: string;
   category: string;
   title: string;
+  titleAr?: string;
   subtitle: string;
+  subtitleAr?: string;
   author: string;
   authorRole: string;
   meta: string;
@@ -404,9 +407,24 @@ function BlockEditor({
         style={{ ...textareaStyle, background: C.card, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
       />
 
+      {block.type !== "video" && (
+        <textarea
+          value={block.textAr ?? ""}
+          onChange={(e) => onChange({ ...block, textAr: e.target.value || undefined })}
+          rows={block.type === "p" ? 4 : 2}
+          dir="rtl"
+          placeholder={
+            block.type === "p" ? "النص العربي للفقرة…" :
+            block.type === "h2" ? "العنوان الفرعي بالعربية…" :
+            "«نص الاقتباس بالعربية…»"
+          }
+          style={{ ...textareaStyle, background: C.card, marginTop: 8, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
+        />
+      )}
+
       {block.type === "p" && (
         <p style={{ fontSize: 10, color: C.faint, marginTop: 6, lineHeight: 1.5 }}>
-          Markdown: <code style={{ color: C.sub }}>**bold**</code> · <code style={{ color: C.sub }}>*italic*</code> · <code style={{ color: C.sub }}>[link](url)</code>
+          Markdown: <code style={{ color: C.sub }}>**bold**</code> · <code style={{ color: C.sub }}>*italic*</code> · <code style={{ color: C.sub }}>[link](url)</code> — Arabic field optional; English shows when empty.
         </p>
       )}
       {block.type === "video" && (
@@ -1058,8 +1076,16 @@ export default function AdminPage() {
                   <input style={inputStyle} value={draft.title} onChange={S("title")} placeholder="Article headline…" />
                 </div>
                 <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Title (Arabic)</label>
+                  <input style={inputStyle} dir="rtl" value={draft.titleAr ?? ""} onChange={(e) => setDraft(d => ({ ...d, titleAr: e.target.value || undefined }))} placeholder="العنوان بالعربية…" />
+                </div>
+                <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Subtitle / Deck</label>
                   <textarea style={{ ...textareaStyle, height: 72 }} value={draft.subtitle} onChange={S("subtitle")} placeholder="One-paragraph summary shown below the title…" />
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelStyle}>Subtitle (Arabic)</label>
+                  <textarea style={{ ...textareaStyle, height: 72 }} dir="rtl" value={draft.subtitleAr ?? ""} onChange={(e) => setDraft(d => ({ ...d, subtitleAr: e.target.value || undefined }))} placeholder="الوصف بالعربية…" />
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>

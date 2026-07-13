@@ -6,6 +6,8 @@ export interface BodyBlock {
   id: string;
   type: "p" | "h2" | "blockquote" | "video";
   text: string;
+  /** Optional Arabic text for this block; falls back to `text` when absent. */
+  textAr?: string;
   videoUrl?: string;
 }
 
@@ -123,6 +125,7 @@ export function normalizeArticle(input: unknown): Article {
       type,
       text: typeof blk.text === "string" ? blk.text : "",
     };
+    if (typeof blk.textAr === "string" && blk.textAr) block.textAr = blk.textAr;
     if (type === "video") {
       const safe = safeEmbedUrl(typeof blk.videoUrl === "string" ? blk.videoUrl : "");
       if (!safe) throw new ValidationError(`body[${i}].videoUrl is not an allowed embed URL`);

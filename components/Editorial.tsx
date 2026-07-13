@@ -19,13 +19,22 @@ export const CAT_AR: Record<string, string> = {
   "Architecture & Design": "العمارة والتصميم",
 };
 
-/** First paragraph of the body with inline markdown stripped, for excerpts. */
-export function excerpt(a: Article): string {
-  const p = a.body?.find((b) => b.type === "p")?.text ?? a.subtitle;
-  return p
+function stripInline(s: string): string {
+  return s
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\*(.+?)\*/g, "$1")
     .replace(/\[(.+?)\]\([^)]*\)/g, "$1");
+}
+
+/** First paragraph of the body with inline markdown stripped, for excerpts. */
+export function excerpt(a: Article): string {
+  return stripInline(a.body?.find((b) => b.type === "p")?.text ?? a.subtitle);
+}
+
+/** Arabic excerpt: first paragraph's textAr, else Arabic subtitle, else English. */
+export function excerptAr(a: Article): string {
+  const p = a.body?.find((b) => b.type === "p");
+  return stripInline(p?.textAr ?? a.subtitleAr ?? p?.text ?? a.subtitle);
 }
 
 export function CatPill({ category, dark = false }: { category: string; dark?: boolean }) {
@@ -82,7 +91,7 @@ export function AoLead({ a, flip = false, priority = false }: { a: Article; flip
       <div className="ao-desk-lead-copy">
         <CatPill category={a.category} />
         <h3 className="ao-card-title lg"><TitleLink a={a} /></h3>
-        <p className="ao-excerpt" data-en={excerpt(a)} data-ar={a.subtitleAr ?? excerpt(a)}>{excerpt(a)}</p>
+        <p className="ao-excerpt" data-en={excerpt(a)} data-ar={excerptAr(a)}>{excerpt(a)}</p>
         <Byline a={a} />
       </div>
     </article>

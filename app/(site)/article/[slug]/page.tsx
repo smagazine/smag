@@ -37,6 +37,21 @@ function parseInline(text: string): React.ReactNode {
   return parts.length === 0 ? text : parts.length === 1 ? parts[0] : <>{parts}</>;
 }
 
+/**
+ * Bilingual block text: both languages render as sibling spans and CSS
+ * toggles them on <html dir>. (The data-en/data-ar DOM swap only handles
+ * leaf nodes, so it can't carry the inline markup paragraphs may contain.)
+ */
+function BlockText({ text, textAr }: { text: string; textAr?: string }) {
+  if (!textAr) return <>{parseInline(text)}</>;
+  return (
+    <>
+      <span className="lang-en">{parseInline(text)}</span>
+      <span className="lang-ar">{parseInline(textAr)}</span>
+    </>
+  );
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -132,7 +147,7 @@ export default async function ArticleSlugPage(
                   .filter((b) => b.type === "h2")
                   .map((b) => (
                     <li key={b.id}>
-                      <a href={`#${b.id}`}>{b.text}</a>
+                      <a href={`#${b.id}`}><BlockText text={b.text} textAr={b.textAr} /></a>
                     </li>
                   ))}
               </ul>
@@ -141,9 +156,9 @@ export default async function ArticleSlugPage(
             <div className="article-body reveal">
               {article.body.map((block, idx) => {
                 if (block.type === "h2")
-                  return <h2 key={block.id} id={block.id}>{block.text}</h2>;
+                  return <h2 key={block.id} id={block.id}><BlockText text={block.text} textAr={block.textAr} /></h2>;
                 if (block.type === "blockquote")
-                  return <blockquote key={block.id} className="pullquote">{block.text}</blockquote>;
+                  return <blockquote key={block.id} className="pullquote"><BlockText text={block.text} textAr={block.textAr} /></blockquote>;
                 if (block.type === "video") {
                   const embed = safeEmbedUrl(block.videoUrl);
                   if (!embed) return null;
@@ -161,7 +176,7 @@ export default async function ArticleSlugPage(
                 const isFirst = article.body.findIndex((b) => b.type === "p") === idx;
                 return (
                   <p key={block.id} id={block.id} className={isFirst ? "drop-cap" : undefined}>
-                    {parseInline(block.text)}
+                    <BlockText text={block.text} textAr={block.textAr} />
                   </p>
                 );
               })}
@@ -182,7 +197,7 @@ export default async function ArticleSlugPage(
                 <div>
                   <span className="author-bio-role">{article.authorRole}</span>
                   <h3 className="author-bio-name">{article.author}</h3>
-                  <p>Contributing to SAUDI MAG&apos;s long-form coverage of Gulf culture, cities, and contemporary life.</p>
+                  <p data-en="Contributing to SAUDI MAG's long-form coverage of Gulf culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة لثقافة الخليج ومدنه والحياة المعاصرة.">Contributing to SAUDI MAG&apos;s long-form coverage of Gulf culture, cities, and contemporary life.</p>
                 </div>
               </div>
 
