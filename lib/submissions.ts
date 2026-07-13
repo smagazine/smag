@@ -13,8 +13,28 @@ const DATA_DIR = path.join(process.cwd(), "data");
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const KV_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
-const KV_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+/**
+ * Find the Upstash REST credentials regardless of the env-var prefix chosen
+ * when connecting the store in Vercel (KV_, STORAGE_, UPSTASH_, custom…).
+ */
+function resolveKv(): { url?: string; token?: string } {
+  const env = process.env;
+  for (const [u, t] of [
+    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
+    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
+  ]) {
+    if (env[u] && env[t]) return { url: env[u], token: env[t] };
+  }
+  for (const key of Object.keys(env)) {
+    if (key.endsWith("REST_API_URL") || key.endsWith("REST_URL")) {
+      const tokenKey = key.replace(/URL$/, "TOKEN");
+      if (env[key] && env[tokenKey]) return { url: env[key], token: env[tokenKey] };
+    }
+  }
+  return {};
+}
+
+const { url: KV_URL, token: KV_TOKEN } = resolveKv();
 
 export const kvConfigured = Boolean(KV_URL && KV_TOKEN);
 
