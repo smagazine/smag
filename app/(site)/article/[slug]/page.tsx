@@ -6,7 +6,8 @@ import { getArticle, getPublishedArticles } from "@/lib/articles";
 import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
-import { CatPill, SeeAll, AoCard } from "@/components/Editorial";
+import { CatPill, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
+import { getSponsor } from "@/lib/sponsors";
 import type { Metadata } from "next";
 
 // Statically prerender every published article; revalidate hourly and on write
@@ -84,6 +85,7 @@ export default async function ArticleSlugPage(
   const article = getArticle(slug);
   if (!article || (article.status ?? "published") === "draft") notFound();
 
+  const sponsor = article.sponsored ? getSponsor(article.sponsored.sponsorId) : null;
   const allArticles = getPublishedArticles();
   const related = [
     ...allArticles.filter(a => a.slug !== slug && a.relatedCategory === article.relatedCategory),
@@ -122,7 +124,10 @@ export default async function ArticleSlugPage(
           </figure>
 
           <header className="article-header container reveal">
-            <div className="article-kicker"><CatPill category={article.category} /></div>
+            <div className="article-kicker">
+              <CatPill category={article.category} />
+              {article.sponsored && <SponsoredPill />}
+            </div>
             <h1 data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</h1>
             <p className="article-subtitle" data-en={article.subtitle} data-ar={article.subtitleAr ?? article.subtitle}>{article.subtitle}</p>
             <div className="byline">
@@ -135,6 +140,16 @@ export default async function ArticleSlugPage(
               </div>
               <ShareButtons title={article.title} />
             </div>
+            {sponsor && (
+              <p className="ao-disclosure">
+                <span data-en="Partner content — in partnership with" data-ar="محتوى برعاية — بالشراكة مع">Partner content — in partnership with</span>{" "}
+                {sponsor.url ? (
+                  <a href={sponsor.url} target="_blank" rel="noopener noreferrer sponsored" data-en={sponsor.name} data-ar={sponsor.nameAr ?? sponsor.name}>{sponsor.name}</a>
+                ) : (
+                  <span data-en={sponsor.name} data-ar={sponsor.nameAr ?? sponsor.name}>{sponsor.name}</span>
+                )}
+              </p>
+            )}
           </header>
 
           <div className="container article-layout">

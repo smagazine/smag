@@ -20,6 +20,7 @@ export default function HeadlinesPage() {
         headerClass: "page-header--dark",
       }}
       articles={getPublishedByCategory("headlines")}
+      route="headlines"
     />
   );
 }

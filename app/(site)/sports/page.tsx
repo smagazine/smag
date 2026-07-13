@@ -20,6 +20,7 @@ export default function SportsPage() {
         headerClass: "page-header--dark",
       }}
       articles={getPublishedByCategory("sports")}
+      route="sports"
     />
   );
 }

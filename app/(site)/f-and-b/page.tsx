@@ -20,6 +20,7 @@ export default function FAndBPage() {
         headerClass: "page-header--cream",
       }}
       articles={getPublishedByCategory("f-and-b")}
+      route="f-and-b"
     />
   );
 }

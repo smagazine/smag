@@ -20,6 +20,7 @@ export default function EventsPage() {
         headerClass: "page-header--dark",
       }}
       articles={getPublishedByCategory("events")}
+      route="events"
     />
   );
 }

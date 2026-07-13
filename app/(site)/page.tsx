@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import NewsletterForm from "@/components/NewsletterForm";
 import { getPublishedArticles, type Article } from "@/lib/articles";
-import { U, CatPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
+import { U, CatPill, SponsoredPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
 
 export const revalidate = 3600;
 
@@ -17,6 +17,7 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
       </Link>
       <div className="ao-slot-meta">
         <CatPill category={a.category} />
+        {a.sponsored && <SponsoredPill />}
         <span className="ao-slot-date">{date(a)}</span>
       </div>
       <h3 className="ao-card-title"><TitleLink a={a} /></h3>
@@ -138,6 +139,7 @@ export default function HomePage() {
           </Link>
           <div className="ao-slot-meta center">
             <CatPill category={featured.category} />
+            {featured.sponsored && <SponsoredPill />}
             <span className="ao-slot-date">{date(featured)}</span>
           </div>
           <h2 className="ao-slot-feature-title"><TitleLink a={featured} /></h2>
@@ -161,6 +163,7 @@ export default function HomePage() {
                   <h3 className="ao-brief-title"><TitleLink a={a} /></h3>
                   <div className="ao-slot-meta">
                     <CatPill category={a.category} />
+                    {a.sponsored && <SponsoredPill />}
                     <span className="ao-slot-date">{date(a)}</span>
                   </div>
                 </div>

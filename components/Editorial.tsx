@@ -45,6 +45,13 @@ export function CatPill({ category, dark = false }: { category: string; dark?: b
   );
 }
 
+/** Native-ad disclosure pill, shown wherever a sponsored post is listed. */
+export function SponsoredPill() {
+  return (
+    <span className="ao-pill sponsored" data-en="Sponsored" data-ar="برعاية">Sponsored</span>
+  );
+}
+
 export function Byline({ a }: { a: Article }) {
   return <span className="ao-byline">{a.author || a.meta.split("·")[0]?.trim()}</span>;
 }
@@ -73,7 +80,7 @@ export function AoCard({ a, sizes = "(min-width: 900px) 30vw, 100vw" }: { a: Art
       <Link className="ao-media" href={`/article/${a.slug}`}>
         <Image fill src={U(a.heroPhoto, 640, 460)} alt={a.title} sizes={sizes} />
       </Link>
-      <CatPill category={a.category} />
+      <span className="ao-pill-row"><CatPill category={a.category} />{a.sponsored && <SponsoredPill />}</span>
       <h3 className="ao-card-title"><TitleLink a={a} /></h3>
       <Byline a={a} />
     </article>
@@ -89,7 +96,7 @@ export function AoLead({ a, flip = false, priority = false }: { a: Article; flip
         <Image fill priority={priority} src={U(a.heroPhoto, 900, 640)} alt={a.title} sizes="(min-width: 900px) 42vw, 100vw" />
       </Link>
       <div className="ao-desk-lead-copy">
-        <CatPill category={a.category} />
+        <span className="ao-pill-row"><CatPill category={a.category} />{a.sponsored && <SponsoredPill />}</span>
         <h3 className="ao-card-title lg"><TitleLink a={a} /></h3>
         <p className="ao-excerpt" data-en={excerpt(a)} data-ar={excerptAr(a)}>{excerpt(a)}</p>
         <Byline a={a} />

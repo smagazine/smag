@@ -20,6 +20,7 @@ export default function CulturePage() {
         headerClass: "page-header--warm",
       }}
       articles={getPublishedByCategory("culture")}
+      route="culture"
     />
   );
 }

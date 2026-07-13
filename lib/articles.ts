@@ -31,6 +31,13 @@ export interface Article {
   relatedCategory: string;
   status?: "draft" | "published";
   featured?: boolean;
+  /** Native-ad marker: present when this post is client content. */
+  sponsored?: {
+    sponsorId: string;
+    /** ISO dates (YYYY-MM-DD); the post only serves inside this window. */
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
 const DATA_PATH = path.join(process.cwd(), "data", "articles.json");
@@ -55,8 +62,19 @@ export function getArticle(slug: string): Article | null {
   return getArticles().find((a) => a.slug === slug) ?? null;
 }
 
+/** True when a sponsored post's run window covers today (or it has none). */
+function inSponsoredWindow(a: Article, today: string): boolean {
+  if (!a.sponsored) return true;
+  if (a.sponsored.startDate && today < a.sponsored.startDate) return false;
+  if (a.sponsored.endDate && today > a.sponsored.endDate) return false;
+  return true;
+}
+
 export function getPublishedArticles(): Article[] {
-  return getArticles().filter((a) => (a.status ?? "published") !== "draft");
+  const today = new Date().toISOString().slice(0, 10);
+  return getArticles().filter(
+    (a) => (a.status ?? "published") !== "draft" && inSponsoredWindow(a, today)
+  );
 }
 
 /** Published articles in a given category route (e.g. "culture", "sports"). */
@@ -136,6 +154,26 @@ export function normalizeArticle(input: unknown): Article {
 
   const status = raw.status === "draft" ? "draft" : "published";
 
+  let sponsored: Article["sponsored"];
+  if (raw.sponsored !== undefined && raw.sponsored !== null) {
+    if (typeof raw.sponsored !== "object") {
+      throw new ValidationError("sponsored must be an object");
+    }
+    const sp = raw.sponsored as Record<string, unknown>;
+    const sponsorId = typeof sp.sponsorId === "string" ? sp.sponsorId : "";
+    if (!sponsorId) throw new ValidationError("sponsored.sponsorId is required");
+    const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+    const date = (k: string): string | undefined => {
+      const v = sp[k];
+      if (v === undefined || v === null || v === "") return undefined;
+      if (typeof v !== "string" || !dateRe.test(v)) {
+        throw new ValidationError(`sponsored.${k} must be YYYY-MM-DD`);
+      }
+      return v;
+    };
+    sponsored = { sponsorId, startDate: date("startDate"), endDate: date("endDate") };
+  }
+
   return {
     slug,
     category: str("category"),
@@ -154,6 +192,7 @@ export function normalizeArticle(input: unknown): Article {
     relatedCategory: str("relatedCategory"),
     status,
     featured: raw.featured === true,
+    sponsored,
   };
 }
 

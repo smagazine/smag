@@ -237,7 +237,12 @@
         "text": "The results of this synthesis are beginning to appear on dining room tables across the Kingdom. At Bait Al-Kaif in Riyadh, a twelve-course tasting menu reimagines the Saudi table through a contemporary lens — saffron foam over slow-braised lamb, date molasses with aged brie, camel milk panna cotta with bitter orange. The reviews have been extraordinary; the waiting list, longer.",
         "textAr": "بدأت ثمار هذا المزج تظهر على موائد المملكة. في «بيت الكيف» بالرياض، تعيد قائمة تذوق من اثني عشر طبقاً تصوُّر المائدة السعودية بعدسة معاصرة — رغوة الزعفران فوق لحم الضأن المطهو ببطء، ودبس التمر مع الجبن المعتق، وبانا كوتا حليب الإبل مع البرتقال المر. كانت المراجعات استثنائية؛ وقائمة الانتظار أطول."
       }
-    ]
+    ],
+    "sponsored": {
+      "sponsorId": "bait-alkaif-group",
+      "startDate": "2026-07-01",
+      "endDate": "2026-12-31"
+    }
   },
   {
     "slug": "alula-heritage-future",

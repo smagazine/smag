@@ -21,6 +21,7 @@ export default function InterviewsPage() {
         italicTitle: true,
       }}
       articles={getPublishedByCategory("interviews")}
+      route="interviews"
     />
   );
 }

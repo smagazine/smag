@@ -4755,3 +4755,72 @@ blockquote {
 [dir="rtl"] .lang-ar {
   display: inline;
 }
+
+/* ── Native advertising: disclosure UI ──────────────────────────────────── */
+
+.ao-pill.sponsored {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #111;
+}
+
+.ao-pill-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ao-disclosure {
+  margin: 14px auto 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-subdued);
+}
+
+.ao-disclosure a {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ao-presented {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border: 1px solid var(--color-ink);
+  border-radius: 999px;
+  padding: 6px 16px 6px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  transition: background var(--ease), color var(--ease);
+}
+
+[dir="rtl"] .ao-presented {
+  padding: 6px 7px 6px 16px;
+}
+
+.ao-presented:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.ao-presented-logo {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ao-presented-logo img {
+  object-fit: cover;
+}

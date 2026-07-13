@@ -30,6 +30,22 @@ interface Article {
   relatedCategory: string;
   status?: "draft" | "published";
   featured?: boolean;
+  sponsored?: { sponsorId: string; startDate?: string; endDate?: string };
+}
+
+interface Sponsor {
+  id: string;
+  name: string;
+  nameAr?: string;
+  logo?: string;
+  url?: string;
+}
+
+interface CategorySponsorship {
+  route: string;
+  sponsorId: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ContactEntry {
@@ -441,14 +457,25 @@ function BlockEditor({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox";
+type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors";
 
 const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS }[] = [
   { key: "dashboard", label: "Dashboard", icon: "home" },
   { key: "articles", label: "Articles", icon: "doc" },
   { key: "media", label: "Media", icon: "img" },
+  { key: "sponsors", label: "Sponsors", icon: "star" },
   { key: "inbox", label: "Inbox", icon: "inbox" },
 ];
+
+const BLANK_SPONSOR: Sponsor = { id: "", name: "", nameAr: "", logo: "", url: "" };
+
+/** Campaign status against today's date. */
+function runStatus(startDate?: string, endDate?: string): "active" | "scheduled" | "ended" {
+  const today = new Date().toISOString().slice(0, 10);
+  if (startDate && today < startDate) return "scheduled";
+  if (endDate && today > endDate) return "ended";
+  return "active";
+}
 
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -469,6 +496,10 @@ export default function AdminPage() {
   const [loggingIn, setLoggingIn] = useState(false);
   const [contacts, setContacts] = useState<ContactEntry[]>([]);
   const [subscribers, setSubscribers] = useState<SubscriberEntry[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [sponsorships, setSponsorships] = useState<CategorySponsorship[]>([]);
+  const [sponsorForm, setSponsorForm] = useState<Sponsor>(BLANK_SPONSOR);
+  const [spForm, setSpForm] = useState<CategorySponsorship>({ route: "culture", sponsorId: "" });
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -499,6 +530,56 @@ export default function AdminPage() {
     }
   }, []);
 
+  const fetchSponsors = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sponsors");
+      if (!res.ok) return;
+      const d = await res.json();
+      setSponsors(Array.isArray(d.sponsors) ? d.sponsors : []);
+      setSponsorships(Array.isArray(d.sponsorships) ? d.sponsorships : []);
+    } catch {
+      /* non-fatal */
+    }
+  }, []);
+
+  async function saveSponsor() {
+    const payload = { ...sponsorForm, id: sponsorForm.id || slugify(sponsorForm.name) };
+    if (!payload.name.trim()) return showToast("Sponsor name is required", "err");
+    const res = await fetch("/api/sponsors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => null);
+    if (!res?.ok) return showToast("Failed to save sponsor", "err");
+    setSponsorForm(BLANK_SPONSOR);
+    await fetchSponsors();
+    showToast("Sponsor saved");
+  }
+
+  async function removeSponsor(id: string) {
+    await fetch(`/api/sponsors/${id}`, { method: "DELETE" }).catch(() => {});
+    await fetchSponsors();
+    showToast("Sponsor removed");
+  }
+
+  async function saveSponsorship() {
+    if (!spForm.sponsorId) return showToast("Pick a sponsor", "err");
+    const res = await fetch("/api/sponsorships", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(spForm),
+    }).catch(() => null);
+    if (!res?.ok) return showToast("Failed to save sponsorship", "err");
+    await fetchSponsors();
+    showToast("Category sponsorship saved");
+  }
+
+  async function removeSponsorship(route: string) {
+    await fetch(`/api/sponsorships?route=${encodeURIComponent(route)}`, { method: "DELETE" }).catch(() => {});
+    await fetchSponsors();
+    showToast("Sponsorship removed");
+  }
+
   // Check existing session on mount; only load data once authenticated.
   useEffect(() => {
     fetch("/api/admin/login")
@@ -511,8 +592,9 @@ export default function AdminPage() {
     if (authed) {
       fetchArticles();
       fetchSubmissions();
+      fetchSponsors();
     }
-  }, [authed, fetchArticles, fetchSubmissions]);
+  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -672,8 +754,14 @@ export default function AdminPage() {
     articles: ["Articles", `${filtered.length} of ${articles.length} stories`],
     editor: [isNew ? "New Article" : "Edit Article", isNew ? "Draft a new story" : `/article/${draft.slug}`],
     media: ["Media", `Hero images across all ${articles.length} articles`],
+    sponsors: ["Sponsors", `${sponsors.length} clients · ${sponsorships.length} category sponsorships`],
     inbox: ["Inbox", `${contacts.length} contact requests · ${subscribers.length} subscribers`],
   };
+
+  const sponsorName = (id: string) => sponsors.find((s) => s.id === id)?.name ?? id;
+  const sponsoredPosts = articles.filter((a) => a.sponsored);
+  const activeCampaigns = sponsoredPosts.filter((a) => runStatus(a.sponsored!.startDate, a.sponsored!.endDate) === "active" && (a.status ?? "published") === "published");
+  const scheduledCampaigns = sponsoredPosts.filter((a) => runStatus(a.sponsored!.startDate, a.sponsored!.endDate) === "scheduled");
 
   // Session check in progress
   if (authed === null) {
@@ -900,7 +988,7 @@ export default function AdminPage() {
                   {[
                     { label: "Total stories", value: articles.length, seed: 1 },
                     { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}`, seed: 2, lime: true },
-                    { label: "Drafts in progress", value: drafts.length, seed: 3 },
+                    { label: "Ad campaigns", value: activeCampaigns.length, sub: `${scheduledCampaigns.length} scheduled · ${sponsorships.length} category deals`, seed: 3, lime: activeCampaigns.length > 0 },
                     { label: "Subscribers", value: subscribers.length, sub: `${contacts.length} contact requests`, seed: 4 },
                   ].map((s) => (
                     <div key={s.label} style={{ ...cardStyle, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
@@ -1030,6 +1118,12 @@ export default function AdminPage() {
                           {(article.status ?? "published") === "draft" && (
                             <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#fdf0d5", color: "#b45309", letterSpacing: "0.08em" }}>DRAFT</span>
                           )}
+                          {article.sponsored && (
+                            <span title={`Sponsored by ${sponsorName(article.sponsored.sponsorId)} — ${runStatus(article.sponsored.startDate, article.sponsored.endDate)}`}
+                              style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#eef4d8", color: "#5f8c00", letterSpacing: "0.08em" }}>
+                              AD · {runStatus(article.sponsored.startDate, article.sponsored.endDate).toUpperCase()}
+                            </span>
+                          )}
                           <span style={{ fontSize: 11, color: C.sub }}>{article.author}</span>
                           <span style={{ fontSize: 11, color: C.faint }}>·</span>
                           <span style={{ fontSize: 11, color: C.sub }}>{article.meta.split("·")[0]?.trim()}</span>
@@ -1132,6 +1226,50 @@ export default function AdminPage() {
                     </label>
                   </div>
                 </div>
+              </div>
+
+              {/* Sponsorship */}
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Sponsorship</p>
+                <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: draft.sponsored ? "#5f8c00" : C.sub, userSelect: "none", marginBottom: draft.sponsored ? 14 : 0 }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(draft.sponsored)}
+                    onChange={(e) => setDraft(d => ({ ...d, sponsored: e.target.checked ? { sponsorId: sponsors[0]?.id ?? "" } : undefined }))}
+                    style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#5f8c00" }}
+                  />
+                  Sponsored post (client content, labeled on the site)
+                </label>
+                {draft.sponsored && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+                    <div>
+                      <label style={labelStyle}>Client</label>
+                      <select
+                        style={{ ...selectStyle, width: "100%" }}
+                        value={draft.sponsored.sponsorId}
+                        onChange={(e) => setDraft(d => ({ ...d, sponsored: { ...d.sponsored!, sponsorId: e.target.value } }))}
+                      >
+                        {sponsors.length === 0 && <option value="">No sponsors yet — add one in Sponsors</option>}
+                        {sponsors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Runs from</label>
+                      <input type="date" style={inputStyle} value={draft.sponsored.startDate ?? ""}
+                        onChange={(e) => setDraft(d => ({ ...d, sponsored: { ...d.sponsored!, startDate: e.target.value || undefined } }))} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Until</label>
+                      <input type="date" style={inputStyle} value={draft.sponsored.endDate ?? ""}
+                        onChange={(e) => setDraft(d => ({ ...d, sponsored: { ...d.sponsored!, endDate: e.target.value || undefined } }))} />
+                    </div>
+                  </div>
+                )}
+                {draft.sponsored && (
+                  <p style={{ fontSize: 10.5, color: C.faint, marginTop: 10, lineHeight: 1.5 }}>
+                    The post serves only inside the run window and expires automatically. Status: <strong style={{ color: "#5f8c00" }}>{runStatus(draft.sponsored.startDate, draft.sponsored.endDate)}</strong>
+                  </p>
+                )}
               </div>
 
               {/* Author */}
@@ -1279,6 +1417,100 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ))}
+            </div>
+          )}
+
+          {/* ── SPONSORS ── */}
+          {tab === "sponsors" && (
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+              {/* Clients */}
+              <div style={cardStyle}>
+                <p style={sectionLabel}>Clients</p>
+                {sponsors.map((s) => (
+                  <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${C.line}` }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 999, overflow: "hidden", background: "#e4e5e9", flexShrink: 0 }}>
+                      {s.logo && <img src={U(pid(s.logo), 72, 72)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700 }}>{s.name} {s.nameAr && <span style={{ color: C.sub, fontWeight: 400 }}>· {s.nameAr}</span>}</p>
+                      <p style={{ fontSize: 11, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.url || s.id}</p>
+                    </div>
+                    <button type="button" onClick={() => setSponsorForm(s)} style={{ ...pillStyle, padding: "6px 13px", fontSize: 11 }}>Edit</button>
+                    <button type="button" onClick={() => removeSponsor(s.id)} style={{ ...iconBtnStyle, width: 30, height: 30, color: C.red }}>
+                      <Ic d={ICONS.trash} size={12} />
+                    </button>
+                  </div>
+                ))}
+                {sponsors.length === 0 && <p style={{ fontSize: 12, color: C.faint, padding: "8px 0 14px" }}>No clients yet.</p>}
+
+                <p style={{ ...sectionLabel, marginTop: 22 }}>{sponsorForm.id ? `Edit — ${sponsorForm.name}` : "Add client"}</p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Name</label>
+                    <input style={inputStyle} value={sponsorForm.name} onChange={(e) => setSponsorForm(f => ({ ...f, name: e.target.value }))} placeholder="Client name" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Name (Arabic)</label>
+                    <input style={inputStyle} dir="rtl" value={sponsorForm.nameAr ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, nameAr: e.target.value }))} placeholder="الاسم بالعربية" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Logo photo ID</label>
+                    <input style={inputStyle} value={sponsorForm.logo ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, logo: extractPhotoId(e.target.value) }))} placeholder="photo-xxx…" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Website URL</label>
+                    <input style={inputStyle} value={sponsorForm.url ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, url: e.target.value }))} placeholder="https://…" />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                  <button type="button" onClick={saveSponsor} style={{ ...darkPillStyle, padding: "9px 20px" }}>
+                    {sponsorForm.id ? "Save client" : "Add client"}
+                  </button>
+                  {sponsorForm.id && (
+                    <button type="button" onClick={() => setSponsorForm(BLANK_SPONSOR)} style={pillStyle}>Cancel</button>
+                  )}
+                </div>
+              </div>
+
+              {/* Category sponsorships */}
+              <div style={{ ...darkCardStyle }}>
+                <p style={{ ...sectionLabel, color: "rgba(255,255,255,0.55)" }}>Category sponsorships</p>
+                {sponsorships.map((sp) => (
+                  <div key={sp.route} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontSize: 12.5, fontWeight: 700 }}>
+                        /{sp.route} <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 400 }}>· {sponsorName(sp.sponsorId)}</span>
+                      </p>
+                      <p style={{ fontSize: 10.5, color: "rgba(255,255,255,0.45)" }}>
+                        {sp.startDate ?? "open"} → {sp.endDate ?? "open"} · {runStatus(sp.startDate, sp.endDate)}
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => removeSponsorship(sp.route)}
+                      style={{ ...pillStyle, background: "transparent", border: "1px solid rgba(255,255,255,0.25)", color: "#fff", padding: "5px 12px", fontSize: 10.5 }}>
+                      End
+                    </button>
+                  </div>
+                ))}
+                {sponsorships.length === 0 && <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", padding: "6px 0 12px" }}>No category deals.</p>}
+
+                <p style={{ ...sectionLabel, color: "rgba(255,255,255,0.55)", marginTop: 20 }}>Assign</p>
+                <div style={{ display: "grid", gap: 10 }}>
+                  <select style={{ ...selectStyle, width: "100%" }} value={spForm.route} onChange={(e) => setSpForm(f => ({ ...f, route: e.target.value }))}>
+                    {RELATED_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                  <select style={{ ...selectStyle, width: "100%" }} value={spForm.sponsorId} onChange={(e) => setSpForm(f => ({ ...f, sponsorId: e.target.value }))}>
+                    <option value="">Pick a client…</option>
+                    {sponsors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <input type="date" style={inputStyle} value={spForm.startDate ?? ""} onChange={(e) => setSpForm(f => ({ ...f, startDate: e.target.value || undefined }))} />
+                    <input type="date" style={inputStyle} value={spForm.endDate ?? ""} onChange={(e) => setSpForm(f => ({ ...f, endDate: e.target.value || undefined }))} />
+                  </div>
+                  <button type="button" onClick={saveSponsorship} style={{ ...limePillStyle, justifyContent: "center", padding: "10px 16px" }}>
+                    Save sponsorship
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
