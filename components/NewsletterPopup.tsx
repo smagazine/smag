@@ -88,6 +88,7 @@ export default function NewsletterPopup() {
         </p>
         <NewsletterForm />
         <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
+        <p className="newsletter-error" data-en="Something went wrong — please try again." data-ar="حدث خطأ ما — يرجى المحاولة مرة أخرى.">Something went wrong — please try again.</p>
       </div>
     </div>
   );

@@ -13,6 +13,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "valid email is required" }, { status: 400 });
   }
 
-  saveSubscriber(email);
+  try {
+    await saveSubscriber(email);
+  } catch {
+    return Response.json({ error: "could not save subscription" }, { status: 500 });
+  }
   return Response.json({ ok: true }, { status: 201 });
 }

@@ -16,6 +16,10 @@ export async function POST(request: Request) {
   if (!name) return Response.json({ error: "name is required" }, { status: 400 });
   if (!EMAIL_RE.test(email)) return Response.json({ error: "valid email is required" }, { status: 400 });
 
-  saveContact({ name, email, type, message });
+  try {
+    await saveContact({ name, email, type, message });
+  } catch {
+    return Response.json({ error: "could not save inquiry" }, { status: 500 });
+  }
   return Response.json({ ok: true }, { status: 201 });
 }

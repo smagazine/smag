@@ -4924,3 +4924,22 @@ body.nl-popup-open {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Newsletter failure feedback — a failed save must never look like nothing
+   happened. */
+.newsletter-error {
+  display: none;
+  color: #ff9d9d;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  grid-column: 2;
+}
+
+.newsletter-strip[data-error]:not([data-sent]) .newsletter-error {
+  display: block;
+}
+
+.nl-popup .newsletter-error {
+  margin-top: 12px;
+}

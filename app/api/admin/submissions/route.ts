@@ -1,27 +1,17 @@
-import fs from "fs";
-import path from "path";
 import { isAuthed } from "@/lib/auth";
+import { getContacts, getSubscribers } from "@/lib/submissions";
 
-// Admin-only read access to the form-submission stores written by
-// lib/submissions.ts. Both files are git-ignored and may not exist yet.
-
-function readJsonList(file: string): unknown[] {
-  try {
-    const list = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), "data", file), "utf-8")
-    );
-    return Array.isArray(list) ? list : [];
-  } catch {
-    return [];
-  }
-}
+// Admin-only read access to form submissions (Upstash/Vercel KV in
+// production, JSON files locally — lib/submissions.ts picks the backend).
 
 export async function GET() {
   if (!(await isAuthed())) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
-  return Response.json({
-    contacts: readJsonList("contact-requests.json"),
-    subscribers: readJsonList("subscribers.json"),
-  });
+  try {
+    const [contacts, subscribers] = await Promise.all([getContacts(), getSubscribers()]);
+    return Response.json({ contacts, subscribers });
+  } catch {
+    return Response.json({ contacts: [], subscribers: [] });
+  }
 }

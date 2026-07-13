@@ -10,6 +10,7 @@ export default function NewsletterForm() {
     const input = form.querySelector("input") as HTMLInputElement;
     const email = input.value.trim();
     setBusy(true);
+    form.closest(".newsletter-strip")?.removeAttribute("data-error");
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
