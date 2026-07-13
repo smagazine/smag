@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import NewsletterForm from "@/components/NewsletterForm";
 import { getPublishedArticles, type Article } from "@/lib/articles";
 import { U, CatPill, SponsoredPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
 
@@ -80,15 +79,6 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Newsletter — compact dark card (class kept for NewsletterForm state) */}
-      <div className="newsletter-strip ao-nl reveal">
-        <div>
-          <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
-          <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
-        </div>
-        <NewsletterForm />
-        <p className="newsletter-success" data-en="You&rsquo;re in. See you tomorrow." data-ar="أنت معنا. إلى اللقاء غداً.">You&rsquo;re in. See you tomorrow.</p>
-      </div>
     </>
   );
 

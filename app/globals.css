@@ -4824,3 +4824,103 @@ blockquote {
 .ao-presented-logo img {
   object-fit: cover;
 }
+
+/* ── Newsletter: grand bottom panel + arrival popup ─────────────────────── */
+
+/* Sidebar band holds two cards now that the newsletter moved to the
+   grand panel */
+.ao-side-band {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.nl-grand {
+  padding: clamp(36px, 5vw, 72px);
+}
+
+.nl-grand h2 {
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+  margin-block: 14px 12px;
+}
+
+.nl-grand .deck {
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 46ch;
+}
+
+.nl-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: nlFadeIn 0.25s ease;
+}
+
+body.nl-popup-open {
+  overflow: hidden;
+}
+
+.newsletter-strip.nl-popup {
+  position: relative;
+  display: block;
+  width: min(520px, 100%);
+  padding: clamp(28px, 4vw, 44px);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+}
+
+.nl-popup h2 {
+  color: #fff;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  margin-block: 14px 10px;
+}
+
+.nl-popup-deck {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-bottom: 22px;
+}
+
+.nl-popup .newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nl-popup .newsletter-form .button {
+  justify-content: center;
+}
+
+.nl-popup .newsletter-success {
+  margin-top: 12px;
+}
+
+.nl-popup-close {
+  position: absolute;
+  top: 16px;
+  inset-inline-end: 16px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background var(--ease), color var(--ease);
+}
+
+.nl-popup-close:hover {
+  background: #fff;
+  color: #111;
+}
+
+@keyframes nlFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
