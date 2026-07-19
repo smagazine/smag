@@ -25,6 +25,8 @@ function chunk<T>(items: T[], size: number): T[][] {
   return out;
 }
 
+const SITE_URL = "https://saudimag.com";
+
 export default function CategoryView({
   config,
   articles,
@@ -38,8 +40,37 @@ export default function CategoryView({
   const [lead, ...rest] = articles;
   const presenting = route ? getActiveSponsorship(route) : null;
 
+  const jsonLd = route
+    ? {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: config.title,
+        description: config.deck,
+        url: `${SITE_URL}/${route}`,
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: articles.map((a, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            url: `${SITE_URL}/article/${a.slug}`,
+            name: a.title,
+          })),
+        },
+        breadcrumb: {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: config.title, item: `${SITE_URL}/${route}` },
+          ],
+        },
+      }
+    : null;
+
   return (
     <main className="page ao-home" id="main-content">
+      {jsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      )}
       <Breadcrumb
         crumbs={[
           { label: "Home", href: "/", labelAr: "الرئيسية" },

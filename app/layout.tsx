@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Newsreader, Jost, Cairo } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LangProvider } from "@/contexts/LangContext";
@@ -23,6 +24,15 @@ const cairo = Cairo({
   subsets: ["latin", "arabic"],
   display: "swap",
   variable: "--font-cairo",
+});
+
+// Self-hosted (was a classic <link> to Google Fonts) so it's covered by
+// next/font's optimization and doesn't need a font-src CSP exception.
+const materialSymbols = localFont({
+  src: "./fonts/material-symbols-outlined.woff2",
+  display: "swap",
+  weight: "300 500",
+  variable: "--font-material-symbols",
 });
 // S. monogram from the brand sheet: bold white S on black, lime dot.
 const FAVICON =
@@ -58,7 +68,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className={`${newsreader.variable} ${jost.variable} ${cairo.variable}`}>
+    <html
+      lang="en"
+      dir="ltr"
+      className={`${newsreader.variable} ${jost.variable} ${cairo.variable} ${materialSymbols.variable}`}
+    >
       <head>
         {/* Apply saved theme + language before first paint to avoid a
             light/LTR flash for dark-mode / Arabic users. Keep the storage keys
@@ -71,12 +85,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <meta name="theme-color" content="#000000" />
         <link rel="icon" href={FAVICON} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..500,0&display=swap"
-        />
       </head>
       <body>
         <ThemeProvider>

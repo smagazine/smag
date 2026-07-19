@@ -20,6 +20,25 @@
   --ease: 220ms ease;
 }
 
+/* Self-hosted via next/font/local (see app/layout.tsx); base rule normally
+   supplied by Google's own stylesheet when linked directly. */
+.material-symbols-outlined {
+  font-family: var(--font-material-symbols);
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
 * {
   box-sizing: border-box;
 }
