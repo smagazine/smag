@@ -3,6 +3,7 @@ import CategoryFilters from "@/components/CategoryFilters";
 import Breadcrumb from "@/components/Breadcrumb";
 import { U, AoCard, AoLead } from "@/components/Editorial";
 import { getActiveSponsorship } from "@/lib/sponsors";
+import { safeJsonLd } from "@/lib/json-ld";
 import type { Article } from "@/lib/articles";
 
 export interface CategoryConfig {
@@ -69,7 +70,7 @@ export default function CategoryView({
   return (
     <main className="page ao-home" id="main-content">
       {jsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       )}
       <Breadcrumb
         crumbs={[

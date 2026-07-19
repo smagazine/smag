@@ -8,6 +8,7 @@ import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
 import { CatPill, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
 import { getSponsor } from "@/lib/sponsors";
+import { safeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 
 // Statically prerender every published article; revalidate hourly and on write
@@ -126,7 +127,7 @@ export default async function ArticleSlugPage(
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <ReadingProgress />
       <main className="page" id="main-content">
         <nav className="breadcrumb container" aria-label="Breadcrumb">
