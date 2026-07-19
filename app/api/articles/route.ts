@@ -26,6 +26,7 @@ export async function POST(request: Request) {
   }
   revalidatePath("/article/" + article.slug);
   revalidatePath("/" + article.relatedCategory);
+  revalidatePath("/");
   revalidatePath("/admin");
   return Response.json({ ok: true }, { status: 201 });
 }

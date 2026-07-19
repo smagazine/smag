@@ -23,6 +23,7 @@ export async function PUT(
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   const { slug } = await params;
+  const existing = getArticle(slug);
   let article;
   try {
     article = normalizeArticle({ ...(await request.json()), slug });
@@ -38,6 +39,10 @@ export async function PUT(
   }
   revalidatePath("/article/" + slug);
   revalidatePath("/" + article.relatedCategory);
+  if (existing && existing.relatedCategory !== article.relatedCategory) {
+    revalidatePath("/" + existing.relatedCategory);
+  }
+  revalidatePath("/");
   revalidatePath("/admin");
   return Response.json({ ok: true });
 }
@@ -58,6 +63,7 @@ export async function DELETE(
     return Response.json({ error: message }, { status: 503 });
   }
   revalidatePath("/admin");
+  revalidatePath("/");
   if (existing) revalidatePath("/" + existing.relatedCategory);
   return Response.json({ ok: true });
 }
