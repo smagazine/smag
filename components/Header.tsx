@@ -22,8 +22,17 @@ export default function Header() {
   const { lang, toggle: toggleLang } = useLang();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [prevPathname, setPrevPathname] = useState(pathname);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const menuFirstRef = useRef<HTMLButtonElement>(null);
+
+  // Close menu/search on navigation. Adjusted during render (not an effect)
+  // per https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }
 
   useEffect(() => {
     if (menuOpen) {
@@ -53,11 +62,6 @@ export default function Header() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
-
-  useEffect(() => {
-    setMenuOpen(false);
-    setSearchOpen(false);
-  }, [pathname]);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -107,7 +111,7 @@ export default function Header() {
                   {isDark ? "light_mode" : "dark_mode"}
                 </span>
               </button>
-              <button className="language-toggle" type="button" onClick={toggleLang} aria-label={`Switch to ${lang === "en" ? "Arabic" : "English"}`}>
+              <button className="language-toggle" type="button" onClick={toggleLang} aria-label={`Switch to ${lang === "en" ? "Arabic" : "English"}`} aria-pressed={lang === "ar"}>
                 <span style={{ color: lang === "en" ? "var(--color-gold)" : "rgba(255,255,255,0.4)" }}>EN</span>
                 <span style={{ color: "rgba(255,255,255,0.25)", margin: "0 3px" }}>/</span>
                 <span style={{ color: lang === "ar" ? "var(--color-gold)" : "rgba(255,255,255,0.4)" }}>AR</span>

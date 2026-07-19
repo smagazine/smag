@@ -17,6 +17,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const initialQ = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQ);
+  const [prevInitialQ, setPrevInitialQ] = useState(initialQ);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,9 +32,15 @@ function SearchContent() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Sync query state when the URL's ?q= changes, adjusted during render
+  // per https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  if (initialQ !== prevInitialQ) {
+    setPrevInitialQ(initialQ);
+    setQuery(initialQ);
+  }
+
   useEffect(() => {
     if (inputRef.current) inputRef.current.value = initialQ;
-    setQuery(initialQ);
   }, [initialQ]);
 
   const q = query.trim().toLowerCase();

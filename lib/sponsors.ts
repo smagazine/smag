@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { ValidationError } from "@/lib/articles";
+import { StorageError } from "@/lib/storage-error";
+import { withLock } from "@/lib/file-lock";
 
 /**
  * Sponsor registry + category sponsorships for the native-advertising model.
@@ -40,8 +42,15 @@ function readJson<T>(file: string): T[] {
 
 function writeJson(file: string, list: unknown[]): void {
   const tmp = `${file}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf-8");
-  fs.renameSync(tmp, file);
+  try {
+    fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf-8");
+    fs.renameSync(tmp, file);
+  } catch {
+    throw new StorageError(
+      "Could not save — the storage is read-only in this environment. " +
+        "A durable multi-writer store (e.g. a database) is required for this deployment."
+    );
+  }
 }
 
 export function getSponsors(): Sponsor[] {
@@ -115,29 +124,39 @@ export function normalizeSponsorship(input: unknown): CategorySponsorship {
   return { route, sponsorId, startDate: date("startDate"), endDate: date("endDate") };
 }
 
-export function upsertSponsor(sponsor: Sponsor): void {
-  const list = getSponsors();
-  const idx = list.findIndex((s) => s.id === sponsor.id);
-  if (idx >= 0) list[idx] = sponsor;
-  else list.push(sponsor);
-  writeJson(SPONSORS_PATH, list);
+export function upsertSponsor(sponsor: Sponsor): Promise<void> {
+  return withLock(SPONSORS_PATH, () => {
+    const list = getSponsors();
+    const idx = list.findIndex((s) => s.id === sponsor.id);
+    if (idx >= 0) list[idx] = sponsor;
+    else list.push(sponsor);
+    writeJson(SPONSORS_PATH, list);
+  });
 }
 
-export function deleteSponsor(id: string): void {
-  writeJson(SPONSORS_PATH, getSponsors().filter((s) => s.id !== id));
-  // A deleted client's category sponsorships go with it.
-  writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.sponsorId !== id));
+export function deleteSponsor(id: string): Promise<void> {
+  return withLock(SPONSORS_PATH, async () => {
+    writeJson(SPONSORS_PATH, getSponsors().filter((s) => s.id !== id));
+    // A deleted client's category sponsorships go with it.
+    await withLock(SPONSORSHIPS_PATH, () => {
+      writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.sponsorId !== id));
+    });
+  });
 }
 
 /** One sponsorship per category: upsert keyed by route. */
-export function upsertSponsorship(sponsorship: CategorySponsorship): void {
-  const list = getSponsorships();
-  const idx = list.findIndex((s) => s.route === sponsorship.route);
-  if (idx >= 0) list[idx] = sponsorship;
-  else list.push(sponsorship);
-  writeJson(SPONSORSHIPS_PATH, list);
+export function upsertSponsorship(sponsorship: CategorySponsorship): Promise<void> {
+  return withLock(SPONSORSHIPS_PATH, () => {
+    const list = getSponsorships();
+    const idx = list.findIndex((s) => s.route === sponsorship.route);
+    if (idx >= 0) list[idx] = sponsorship;
+    else list.push(sponsorship);
+    writeJson(SPONSORSHIPS_PATH, list);
+  });
 }
 
-export function deleteSponsorship(route: string): void {
-  writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.route !== route));
+export function deleteSponsorship(route: string): Promise<void> {
+  return withLock(SPONSORSHIPS_PATH, () => {
+    writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.route !== route));
+  });
 }

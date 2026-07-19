@@ -14,12 +14,24 @@ export const SESSION_COOKIE = "admin_session";
 
 // Falls back to dev defaults so the CMS works out-of-the-box locally.
 // Set ADMIN_PASSWORD and ADMIN_SECRET in the environment for any real deploy.
-const PASSWORD = process.env.ADMIN_PASSWORD ?? "admin";
-const SECRET = process.env.ADMIN_SECRET ?? "dev-insecure-secret-change-me";
+// Checked lazily (not at module load) so it fires on the first real request
+// rather than breaking `next build`, which imports route modules to collect
+// page data with NODE_ENV=production regardless of the actual deploy target.
+function getCredentials(): { password: string; secret: string } {
+  const password = process.env.ADMIN_PASSWORD;
+  const secret = process.env.ADMIN_SECRET;
+  if (process.env.NODE_ENV === "production" && (!password || !secret)) {
+    throw new Error(
+      "ADMIN_PASSWORD and ADMIN_SECRET must be set in production — refusing to run with insecure dev defaults."
+    );
+  }
+  return { password: password ?? "admin", secret: secret ?? "dev-insecure-secret-change-me" };
+}
 
 /** The token value stored in the session cookie for a valid login. */
 export function sessionToken(): string {
-  return crypto.createHmac("sha256", SECRET).update(PASSWORD).digest("hex");
+  const { password, secret } = getCredentials();
+  return crypto.createHmac("sha256", secret).update(password).digest("hex");
 }
 
 function safeEqual(a: string, b: string): boolean {
@@ -32,7 +44,7 @@ function safeEqual(a: string, b: string): boolean {
 /** True if the supplied password matches the configured admin password. */
 export function checkPassword(password: string): boolean {
   if (typeof password !== "string" || password.length === 0) return false;
-  return safeEqual(password, PASSWORD);
+  return safeEqual(password, getCredentials().password);
 }
 
 /** True if the current request carries a valid admin session cookie. */

@@ -43,10 +43,12 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Lang>("en");
   const pathname = usePathname();
 
-  // Restore persisted language on mount
+  // Restore persisted language on mount. Reads localStorage/DOM, both
+  // unavailable at render time (SSR) — this can't be computed without an effect.
   useEffect(() => {
     const saved = (localStorage.getItem(LANG_KEY) ?? "en") as Lang;
     if (saved === "ar") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLang("ar");
       applyLang("ar");
     }

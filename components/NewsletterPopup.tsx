@@ -51,7 +51,6 @@ export default function NewsletterPopup() {
       document.removeEventListener("keydown", onKey);
       observer.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function dismiss() {

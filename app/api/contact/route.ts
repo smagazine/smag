@@ -1,6 +1,12 @@
 import { EMAIL_RE, saveContact } from "@/lib/submissions";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { StorageError } from "@/lib/storage-error";
 
 export async function POST(request: Request) {
+  if (!rateLimit(`contact:${clientIp(request)}`, 5, 60_000)) {
+    return Response.json({ error: "too many requests, try again later" }, { status: 429 });
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -18,8 +24,9 @@ export async function POST(request: Request) {
 
   try {
     await saveContact({ name, email, type, message });
-  } catch {
-    return Response.json({ error: "could not save inquiry" }, { status: 500 });
+  } catch (err) {
+    const status = err instanceof StorageError ? 503 : 500;
+    return Response.json({ error: "could not save inquiry" }, { status });
   }
   return Response.json({ ok: true }, { status: 201 });
 }

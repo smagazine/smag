@@ -589,7 +589,11 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
+    // Data fetching on mount/auth-change — each fetch* sets loading state
+    // synchronously before its async request, which the lint rule can't
+    // distinguish from a plain setState-in-effect.
     if (authed) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchArticles();
       fetchSubmissions();
       fetchSponsors();
@@ -631,6 +635,7 @@ export default function AdminPage() {
   // Auto-slug from title when creating new article
   useEffect(() => {
     if (isNew && !slugLocked && draft.title) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDraft((d) => ({ ...d, slug: slugify(d.title) }));
     }
   }, [draft.title, isNew, slugLocked]);

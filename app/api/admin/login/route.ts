@@ -1,4 +1,5 @@
 import { SESSION_COOKIE, checkPassword, sessionToken, isAuthed } from "@/lib/auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { cookies } from "next/headers";
 
 // GET → report whether the caller is already authenticated (used by the admin UI).
@@ -8,6 +9,10 @@ export async function GET() {
 
 // POST → exchange a password for a session cookie.
 export async function POST(request: Request) {
+  if (!rateLimit(`login:${clientIp(request)}`, 10, 60_000)) {
+    return Response.json({ error: "too many attempts, try again later" }, { status: 429 });
+  }
+
   let password = "";
   try {
     ({ password = "" } = await request.json());

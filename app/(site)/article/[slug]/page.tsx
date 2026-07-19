@@ -21,6 +21,16 @@ export function generateStaticParams() {
 const U = (id: string, w: number, h: number) =>
   `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
 
+const SAFE_LINK_SCHEMES = /^(https?:|mailto:)/i;
+
+function safeLinkHref(url: string): string | null {
+  const trimmed = url.trim();
+  if (SAFE_LINK_SCHEMES.test(trimmed)) return trimmed;
+  // Treat scheme-relative/relative URLs (no "javascript:"-style scheme) as safe too.
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
+  return null;
+}
+
 function parseInline(text: string): React.ReactNode {
   const parts: React.ReactNode[] = [];
   const re = /\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g;
@@ -31,7 +41,16 @@ function parseInline(text: string): React.ReactNode {
     if (match.index > last) parts.push(text.slice(last, match.index));
     if (match[1] !== undefined) parts.push(<strong key={i++}>{match[1]}</strong>);
     else if (match[2] !== undefined) parts.push(<em key={i++}>{match[2]}</em>);
-    else parts.push(<a key={i++} href={match[4]} target="_blank" rel="noopener noreferrer">{match[3]}</a>);
+    else {
+      const href = safeLinkHref(match[4]);
+      parts.push(
+        href ? (
+          <a key={i++} href={href} target="_blank" rel="noopener noreferrer">{match[3]}</a>
+        ) : (
+          <span key={i++}>{match[3]}</span>
+        )
+      );
+    }
     last = match.index + match[0].length;
   }
   if (last < text.length) parts.push(text.slice(last));

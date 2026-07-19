@@ -1,5 +1,7 @@
 import fs from "fs";
 import path from "path";
+import { StorageError } from "@/lib/storage-error";
+import { withLock } from "@/lib/file-lock";
 
 // Persists form submissions. Two backends:
 //
@@ -62,8 +64,14 @@ function appendJsonFile(file: string, entry: Record<string, unknown>): void {
   }
   list.push(entry);
   const tmp = `${full}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf-8");
-  fs.renameSync(tmp, full);
+  try {
+    fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf-8");
+    fs.renameSync(tmp, full);
+  } catch {
+    throw new StorageError(
+      "Could not save — the storage is read-only in this environment and no KV store is configured."
+    );
+  }
 }
 
 async function append(kvKey: string, file: string, entry: Record<string, unknown>): Promise<void> {
@@ -71,7 +79,9 @@ async function append(kvKey: string, file: string, entry: Record<string, unknown
   if (kvConfigured) {
     await kvCommand(["RPUSH", kvKey, JSON.stringify(stamped)]);
   } else {
-    appendJsonFile(file, stamped);
+    // Locked so two concurrent submissions can't both read the same
+    // snapshot and have the second write clobber the first.
+    await withLock(path.join(DATA_DIR, file), () => appendJsonFile(file, stamped));
   }
 }
 

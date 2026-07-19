@@ -1,4 +1,4 @@
-import { getArticle, upsertArticle, deleteArticle, normalizeArticle, ValidationError } from "@/lib/articles";
+import { getArticle, upsertArticle, deleteArticle, normalizeArticle, ValidationError, StorageError } from "@/lib/articles";
 import { isAuthed } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -9,6 +9,9 @@ export async function GET(
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return Response.json({ error: "not found" }, { status: 404 });
+  if (article.status === "draft" && !(await isAuthed())) {
+    return Response.json({ error: "not found" }, { status: 404 });
+  }
   return Response.json(article);
 }
 
@@ -27,7 +30,12 @@ export async function PUT(
     const message = err instanceof ValidationError ? err.message : "invalid request body";
     return Response.json({ error: message }, { status: 400 });
   }
-  upsertArticle(article);
+  try {
+    await upsertArticle(article);
+  } catch (err) {
+    const message = err instanceof StorageError ? err.message : "could not save article";
+    return Response.json({ error: message }, { status: 503 });
+  }
   revalidatePath("/article/" + slug);
   revalidatePath("/" + article.relatedCategory);
   revalidatePath("/admin");
@@ -43,7 +51,12 @@ export async function DELETE(
   }
   const { slug } = await params;
   const existing = getArticle(slug);
-  deleteArticle(slug);
+  try {
+    await deleteArticle(slug);
+  } catch (err) {
+    const message = err instanceof StorageError ? err.message : "could not delete article";
+    return Response.json({ error: message }, { status: 503 });
+  }
   revalidatePath("/admin");
   if (existing) revalidatePath("/" + existing.relatedCategory);
   return Response.json({ ok: true });

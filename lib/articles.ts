@@ -1,6 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { safeEmbedUrl } from "@/lib/video";
+import { withLock } from "@/lib/file-lock";
+import { StorageError } from "@/lib/storage-error";
+
+export { StorageError };
 
 export interface BodyBlock {
   id: string;
@@ -86,8 +90,15 @@ export function saveArticles(articles: Article[]): void {
   // Atomic write: write to a temp file then rename, so a crash mid-write can't
   // leave data/articles.json truncated or corrupt.
   const tmp = `${DATA_PATH}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(articles, null, 2), "utf-8");
-  fs.renameSync(tmp, DATA_PATH);
+  try {
+    fs.writeFileSync(tmp, JSON.stringify(articles, null, 2), "utf-8");
+    fs.renameSync(tmp, DATA_PATH);
+  } catch {
+    throw new StorageError(
+      "Could not save articles — the storage is read-only in this environment. " +
+        "A durable multi-writer store (e.g. a database) is required for this deployment."
+    );
+  }
   cache = null;
 }
 
@@ -196,21 +207,28 @@ export function normalizeArticle(input: unknown): Article {
   };
 }
 
-export function upsertArticle(article: Article): void {
-  let articles = getArticles();
-  // Only one article can be featured at a time
-  if (article.featured) {
-    articles = articles.map((a) => a.slug !== article.slug ? { ...a, featured: false } : a);
-  }
-  const idx = articles.findIndex((a) => a.slug === article.slug);
-  if (idx >= 0) {
-    articles[idx] = article;
-  } else {
-    articles.unshift(article);
-  }
-  saveArticles(articles);
+export function upsertArticle(article: Article): Promise<void> {
+  // Locked so the read and the write happen as one uninterrupted step —
+  // otherwise two concurrent admin writes could both read the same snapshot
+  // and the second save would silently clobber the first.
+  return withLock(DATA_PATH, () => {
+    let articles = getArticles();
+    // Only one article can be featured at a time
+    if (article.featured) {
+      articles = articles.map((a) => a.slug !== article.slug ? { ...a, featured: false } : a);
+    }
+    const idx = articles.findIndex((a) => a.slug === article.slug);
+    if (idx >= 0) {
+      articles[idx] = article;
+    } else {
+      articles.unshift(article);
+    }
+    saveArticles(articles);
+  });
 }
 
-export function deleteArticle(slug: string): void {
-  saveArticles(getArticles().filter((a) => a.slug !== slug));
+export function deleteArticle(slug: string): Promise<void> {
+  return withLock(DATA_PATH, () => {
+    saveArticles(getArticles().filter((a) => a.slug !== slug));
+  });
 }

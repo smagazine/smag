@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { isAuthed } from "@/lib/auth";
-import { ValidationError } from "@/lib/articles";
+import { ValidationError, StorageError } from "@/lib/articles";
 import { getSponsors, getSponsorships, normalizeSponsor, upsertSponsor } from "@/lib/sponsors";
 
 function revalidateAll() {
@@ -27,7 +27,12 @@ export async function POST(request: Request) {
     const message = err instanceof ValidationError ? err.message : "invalid request body";
     return Response.json({ error: message }, { status: 400 });
   }
-  upsertSponsor(sponsor);
+  try {
+    await upsertSponsor(sponsor);
+  } catch (err) {
+    const message = err instanceof StorageError ? err.message : "could not save sponsor";
+    return Response.json({ error: message }, { status: 503 });
+  }
   revalidateAll();
   return Response.json({ ok: true }, { status: 201 });
 }
