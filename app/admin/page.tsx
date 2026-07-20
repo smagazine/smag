@@ -110,10 +110,16 @@ const C = {
 
 const FONT = "var(--font-brand, system-ui, sans-serif)";
 
-const U = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+// `id` is either a bare Unsplash photo ID (legacy content) or a full URL to
+// an uploaded image — pass full URLs through unchanged.
+const U = (id: string, w: number, h: number) => {
+  if (!id) return "";
+  if (/^https?:\/\//.test(id) || id.startsWith("/")) return id;
+  return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+};
 
-const pid = (raw: string) => (raw.startsWith("photo-") ? raw : `photo-${raw}`);
+const pid = (raw: string) =>
+  /^https?:\/\//.test(raw) || raw.startsWith("/") || raw.startsWith("photo-") ? raw : `photo-${raw}`;
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -335,37 +341,224 @@ function Thumb({ photo, size = 30, radius = 999, ring = C.card }: { photo: strin
   );
 }
 
-function extractPhotoId(raw: string): string {
-  const urlMatch = raw.match(/unsplash\.com\/(photo-[\w-]+)/);
-  if (urlMatch) return urlMatch[1];
-  if (raw.startsWith("photo-")) return raw;
-  if (/^[\da-z]+-[\da-z-]+$/.test(raw)) return `photo-${raw}`;
-  return raw;
+interface MediaItem {
+  id: string;
+  url: string;
+  filename: string;
+  uploadedAt: string;
+}
+
+function MediaLibraryModal({ onSelect, onClose }: { onSelect: (url: string) => void; onClose: () => void }) {
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/media")
+      .then((r) => r.json())
+      .then((d) => setItems(d.media ?? []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function remove(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setItems((prev) => prev.filter((m) => m.id !== id));
+    await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
+  }
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, background: "rgba(20,20,22,0.5)", zIndex: 1000, display: "grid", placeItems: "center", padding: 24 }}
+      onClick={onClose}
+    >
+      <div style={{ ...cardStyle, width: "min(720px, 100%)", maxHeight: "80vh", overflow: "auto" }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <p style={{ ...sectionLabel, marginBottom: 0 }}>Media library</p>
+          <button type="button" onClick={onClose} style={iconBtnStyle} aria-label="Close">×</button>
+        </div>
+        {loading ? (
+          <p style={{ fontSize: 13, color: C.sub }}>Loading…</p>
+        ) : items.length === 0 ? (
+          <p style={{ fontSize: 13, color: C.sub }}>No uploads yet — drag an image onto a photo field to add one.</p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 10 }}>
+            {items.map((m) => (
+              <div
+                key={m.id}
+                style={{ position: "relative", cursor: "pointer", borderRadius: 10, overflow: "hidden", aspectRatio: "1", background: "#e4e5e9" }}
+                onClick={() => onSelect(m.url)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.url} alt={m.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <button
+                  type="button"
+                  onClick={(e) => remove(m.id, e)}
+                  aria-label="Remove from library"
+                  style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: 999, border: "none", background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 13, cursor: "pointer", lineHeight: 1 }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void }) {
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function upload(file: File) {
+    setError("");
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "upload failed");
+      onUploaded(data.media);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div style={{ ...cardStyle, marginBottom: 16 }}>
+      <p style={sectionLabel}>Upload to library</p>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) upload(f); }}
+        onClick={() => fileInputRef.current?.click()}
+        style={{
+          padding: 28,
+          textAlign: "center",
+          border: `1.5px dashed ${dragOver ? C.lime : C.line}`,
+          borderRadius: 14,
+          cursor: "pointer",
+          background: dragOver ? "#f7fbea" : "#fafafb",
+          transition: "border-color 0.15s, background 0.15s",
+        }}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }}
+        />
+        <p style={{ fontSize: 13, fontWeight: 600, color: C.text }}>
+          {uploading ? "Uploading…" : "Drop images here, or click to browse"}
+        </p>
+        <p style={{ fontSize: 11.5, color: C.faint, marginTop: 4 }}>JPEG, PNG, WebP, GIF, or AVIF · up to 8MB</p>
+      </div>
+      {error && <p style={{ fontSize: 11.5, color: C.red, marginTop: 8 }}>{error}</p>}
+    </div>
+  );
 }
 
 function PhotoField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const [showLibrary, setShowLibrary] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const previewSrc = value ? U(pid(value), 240, 160) : null;
+
+  async function upload(file: File) {
+    setError("");
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "upload failed");
+      onChange(data.media.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) upload(file);
+  }
+
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={labelStyle}>{label}</label>
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "center",
+          padding: 10,
+          border: `1.5px dashed ${dragOver ? C.lime : C.line}`,
+          borderRadius: 14,
+          cursor: "pointer",
+          background: dragOver ? "#f7fbea" : "#fafafb",
+          transition: "border-color 0.15s, background 0.15s",
+        }}
+      >
         <input
-          style={{ ...inputStyle, flex: 1 }}
-          value={value}
-          onChange={(e) => onChange(extractPhotoId(e.target.value))}
-          placeholder="photo-xxx… or paste full Unsplash URL"
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+          style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }}
         />
-        {previewSrc && (
-          <div style={{ width: 82, height: 54, borderRadius: 12, overflow: "hidden", flexShrink: 0, border: `1px solid ${C.line}` }}>
+        <div style={{ width: 82, height: 54, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#e4e5e9", display: "grid", placeItems: "center" }}>
+          {previewSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={previewSrc}
               alt=""
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
             />
-          </div>
-        )}
+          ) : (
+            <span style={{ fontSize: 10, color: C.faint }}>No image</span>
+          )}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 12.5, fontWeight: 600, color: C.text, marginBottom: 2 }}>
+            {uploading ? "Uploading…" : "Drop an image, or click to browse"}
+          </p>
+          <p style={{ fontSize: 11, color: C.faint, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {value || "No image selected"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setShowLibrary(true); }}
+          style={{ ...pillStyle, padding: "7px 14px", fontSize: 11.5, flexShrink: 0 }}
+        >
+          Library
+        </button>
       </div>
+      {error && <p style={{ fontSize: 11.5, color: C.red, marginTop: 6 }}>{error}</p>}
+      {showLibrary && (
+        <MediaLibraryModal
+          onSelect={(url) => { onChange(url); setShowLibrary(false); }}
+          onClose={() => setShowLibrary(false)}
+        />
+      )}
     </div>
   );
 }
@@ -500,6 +693,7 @@ export default function AdminPage() {
   const [sponsorships, setSponsorships] = useState<CategorySponsorship[]>([]);
   const [sponsorForm, setSponsorForm] = useState<Sponsor>(BLANK_SPONSOR);
   const [spForm, setSpForm] = useState<CategorySponsorship>({ route: "culture", sponsorId: "" });
+  const [libraryMedia, setLibraryMedia] = useState<MediaItem[]>([]);
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -541,6 +735,22 @@ export default function AdminPage() {
       /* non-fatal */
     }
   }, []);
+
+  const fetchMedia = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/media");
+      if (!res.ok) return;
+      const d = await res.json();
+      setLibraryMedia(Array.isArray(d.media) ? d.media : []);
+    } catch {
+      /* non-fatal */
+    }
+  }, []);
+
+  async function removeLibraryMedia(id: string) {
+    setLibraryMedia((prev) => prev.filter((m) => m.id !== id));
+    await fetch(`/api/admin/media?id=${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
+  }
 
   async function saveSponsor() {
     const payload = { ...sponsorForm, id: sponsorForm.id || slugify(sponsorForm.name) };
@@ -597,8 +807,9 @@ export default function AdminPage() {
       fetchArticles();
       fetchSubmissions();
       fetchSponsors();
+      fetchMedia();
     }
-  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors]);
+  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -1294,13 +1505,13 @@ export default function AdminPage() {
                   <label style={labelStyle}>Meta (date · read time)</label>
                   <input style={inputStyle} value={draft.meta} onChange={S("meta")} placeholder="June 28, 2026 · 8 min read" />
                 </div>
-                <PhotoField label="Author photo ID" value={draft.authorPhoto} onChange={(v) => setDraft(d => ({ ...d, authorPhoto: v }))} />
+                <PhotoField label="Author photo" value={draft.authorPhoto} onChange={(v) => setDraft(d => ({ ...d, authorPhoto: v }))} />
               </div>
 
               {/* Media */}
               <div style={{ ...cardStyle, marginBottom: 16 }}>
                 <p style={sectionLabel}>Media</p>
-                <PhotoField label="Hero photo ID" value={draft.heroPhoto} onChange={(v) => setDraft(d => ({ ...d, heroPhoto: v }))} />
+                <PhotoField label="Hero photo" value={draft.heroPhoto} onChange={(v) => setDraft(d => ({ ...d, heroPhoto: v }))} />
                 {([0, 1, 2] as const).map((i) => (
                   <PhotoField
                     key={i}
@@ -1393,36 +1604,65 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* ── MEDIA GRID ── */}
+          {/* ── MEDIA ── */}
           {tab === "media" && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-              {articles
-                .filter((a) => {
-                  const q = search.toLowerCase();
-                  return !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
-                })
-                .map((a) => (
-                  <div key={a.slug} style={{ ...cardStyle, padding: 10, overflow: "hidden" }}>
-                    <div style={{ aspectRatio: "16/9", overflow: "hidden", cursor: "pointer", borderRadius: 14, background: "#e4e5e9" }} onClick={() => openEdit(a)}>
-                      {a.heroPhoto ? (
-                        <img src={U(pid(a.heroPhoto), 480, 270)} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-                        />
-                      ) : (
-                        <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: C.faint, fontSize: 12 }}>No image</div>
-                      )}
-                    </div>
-                    <div style={{ padding: "12px 8px 6px" }}>
-                      <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 }}>{a.title}</p>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={catChip(a.category)}>{a.category}</span>
-                        <button type="button" onClick={() => openEdit(a)} style={{ fontSize: 11, color: "#5f8c00", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontFamily: FONT }}>Edit →</button>
+            <>
+              <LibraryUploader onUploaded={(item) => setLibraryMedia((prev) => [item, ...prev])} />
+
+              <div style={{ ...cardStyle, marginBottom: 16 }}>
+                <p style={sectionLabel}>Library ({libraryMedia.length})</p>
+                {libraryMedia.length === 0 ? (
+                  <p style={{ fontSize: 13, color: C.faint }}>No uploads yet.</p>
+                ) : (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 10 }}>
+                    {libraryMedia.map((m) => (
+                      <div key={m.id} style={{ position: "relative", borderRadius: 10, overflow: "hidden", aspectRatio: "1", background: "#e4e5e9" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={m.url} alt={m.filename} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        <button
+                          type="button"
+                          onClick={() => removeLibraryMedia(m.id)}
+                          aria-label="Remove from library"
+                          style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: 999, border: "none", background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 13, cursor: "pointer", lineHeight: 1 }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <p style={sectionLabel}>Used in articles</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+                {articles
+                  .filter((a) => {
+                    const q = search.toLowerCase();
+                    return !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
+                  })
+                  .map((a) => (
+                    <div key={a.slug} style={{ ...cardStyle, padding: 10, overflow: "hidden" }}>
+                      <div style={{ aspectRatio: "16/9", overflow: "hidden", cursor: "pointer", borderRadius: 14, background: "#e4e5e9" }} onClick={() => openEdit(a)}>
+                        {a.heroPhoto ? (
+                          <img src={U(pid(a.heroPhoto), 480, 270)} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
+                            onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                          />
+                        ) : (
+                          <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center", color: C.faint, fontSize: 12 }}>No image</div>
+                        )}
+                      </div>
+                      <div style={{ padding: "12px 8px 6px" }}>
+                        <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 }}>{a.title}</p>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={catChip(a.category)}>{a.category}</span>
+                          <button type="button" onClick={() => openEdit(a)} style={{ fontSize: 11, color: "#5f8c00", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontFamily: FONT }}>Edit →</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-            </div>
+                  ))}
+              </div>
+            </>
           )}
 
           {/* ── SPONSORS ── */}
@@ -1458,10 +1698,7 @@ export default function AdminPage() {
                     <label style={labelStyle}>Name (Arabic)</label>
                     <input style={inputStyle} dir="rtl" value={sponsorForm.nameAr ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, nameAr: e.target.value }))} placeholder="الاسم بالعربية" />
                   </div>
-                  <div>
-                    <label style={labelStyle}>Logo photo ID</label>
-                    <input style={inputStyle} value={sponsorForm.logo ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, logo: extractPhotoId(e.target.value) }))} placeholder="photo-xxx…" />
-                  </div>
+                  <PhotoField label="Logo" value={sponsorForm.logo ?? ""} onChange={(v) => setSponsorForm(f => ({ ...f, logo: v }))} />
                   <div>
                     <label style={labelStyle}>Website URL</label>
                     <input style={inputStyle} value={sponsorForm.url ?? ""} onChange={(e) => setSponsorForm(f => ({ ...f, url: e.target.value }))} placeholder="https://…" />

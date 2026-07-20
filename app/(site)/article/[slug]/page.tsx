@@ -20,8 +20,12 @@ export async function generateStaticParams() {
   return articles.map((a) => ({ slug: a.slug }));
 }
 
-const U = (id: string, w: number, h: number) =>
-  `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+// `id` is either a bare Unsplash photo ID (legacy content) or a full URL to
+// an uploaded image — pass full URLs through unchanged.
+const U = (id: string, w: number, h: number) => {
+  if (/^https?:\/\//.test(id) || id.startsWith("/")) return id;
+  return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+};
 
 const SAFE_LINK_SCHEMES = /^(https?:|mailto:)/i;
 
@@ -80,7 +84,7 @@ export async function generateMetadata(
   const { slug } = await params;
   const article = await getArticle(slug);
   if (!article) return { title: "Article not found" };
-  const heroUrl = `https://images.unsplash.com/${article.heroPhoto}?w=1200&h=630&fit=crop&auto=format`;
+  const heroUrl = U(article.heroPhoto, 1200, 630);
   return {
     title: article.title,
     description: article.subtitle,
@@ -113,7 +117,7 @@ export default async function ArticleSlugPage(
     ...allArticles.filter(a => a.slug !== slug && a.relatedCategory !== article.relatedCategory),
   ].slice(0, 3);
 
-  const heroUrl = `https://images.unsplash.com/${article.heroPhoto}?w=1200&h=630&fit=crop&auto=format`;
+  const heroUrl = U(article.heroPhoto, 1200, 630);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",

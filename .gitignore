@@ -38,6 +38,10 @@ yarn-error.log*
 /data/contact-requests.json
 /data/subscribers.json
 /data/*.tmp
+/data/media.json
+
+# local-dev media uploads (production uses Vercel Blob instead)
+/public/uploads
 
 # vercel
 .vercel

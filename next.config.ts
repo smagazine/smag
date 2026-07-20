@@ -8,7 +8,7 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://images.unsplash.com https://picsum.photos https://placehold.co",
+  "img-src 'self' data: https://images.unsplash.com https://picsum.photos https://placehold.co https://*.public.blob.vercel-storage.com",
   "font-src 'self'",
   "connect-src 'self'",
   "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "placehold.co" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
     ],
   },
   async headers() {

@@ -6,8 +6,14 @@ import type { Article } from "@/lib/articles";
 // globals.css). Pure presentational components — safe in server and client
 // components alike.
 
-export const U = (id: string, w: number, h: number) =>
-  id ? `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format` : "";
+// `id` is either a bare Unsplash photo ID (legacy content) or a full URL to
+// an uploaded image (Vercel Blob in production, /uploads/ locally) — pass
+// full URLs through unchanged, next/image handles resizing itself.
+export const U = (id: string, w: number, h: number) => {
+  if (!id) return "";
+  if (/^https?:\/\//.test(id) || id.startsWith("/")) return id;
+  return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
+};
 
 export const CAT_AR: Record<string, string> = {
   "Culture": "الثقافة",
