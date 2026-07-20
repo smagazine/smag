@@ -71,8 +71,21 @@ function getArticlesFromFile(): Article[] {
 }
 
 export async function getArticles(): Promise<Article[]> {
-  if (kvConfigured) return kvGetJson<Article[]>(KV_KEY, []);
-  return getArticlesFromFile();
+  if (!kvConfigured) return getArticlesFromFile();
+  try {
+    const articles = await kvGetJson<Article[]>(KV_KEY, []);
+    if (articles.length > 0) return articles;
+    // KV has never been written to (e.g. right after switching this
+    // deployment onto KV) — seed it from the JSON file bundled in the
+    // deployment so existing content isn't lost, then persist it.
+    const seeded = getArticlesFromFile();
+    if (seeded.length > 0) kvSetJson(KV_KEY, seeded).catch(() => {});
+    return seeded;
+  } catch {
+    // KV unreachable: degrade to the bundled file rather than taking the
+    // whole site down.
+    return getArticlesFromFile();
+  }
 }
 
 export async function getArticle(slug: string): Promise<Article | null> {

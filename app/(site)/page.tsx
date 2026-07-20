@@ -26,6 +26,17 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
 
 export default async function HomePage() {
   const articles = await getPublishedArticles();
+  if (articles.length === 0) {
+    return (
+      <main className="page ao-home" id="main-content">
+        <section className="section container">
+          <p className="deck" data-en="No stories published yet." data-ar="لم يتم نشر أي قصص بعد.">
+            No stories published yet.
+          </p>
+        </section>
+      </main>
+    );
+  }
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a.slug !== featured.slug);
 

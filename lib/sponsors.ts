@@ -43,8 +43,20 @@ function readJsonFile<T>(file: string): T[] {
 }
 
 async function readJson<T>(kvKey: string, file: string): Promise<T[]> {
-  if (kvConfigured) return kvGetJson<T[]>(kvKey, []);
-  return readJsonFile<T>(file);
+  if (!kvConfigured) return readJsonFile<T>(file);
+  try {
+    const list = await kvGetJson<T[]>(kvKey, []);
+    if (list.length > 0) return list;
+    // KV has never been written to — seed it from the JSON file bundled in
+    // the deployment so existing content isn't lost, then persist it.
+    const seeded = readJsonFile<T>(file);
+    if (seeded.length > 0) kvSetJson(kvKey, seeded).catch(() => {});
+    return seeded;
+  } catch {
+    // KV unreachable: degrade to the bundled file rather than taking the
+    // whole site down.
+    return readJsonFile<T>(file);
+  }
 }
 
 async function writeJson(kvKey: string, file: string, list: unknown[]): Promise<void> {
