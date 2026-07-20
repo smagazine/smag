@@ -3,7 +3,7 @@ import { isAuthed } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function GET() {
-  const articles = (await isAuthed()) ? getArticles() : getPublishedArticles();
+  const articles = (await isAuthed()) ? await getArticles() : await getPublishedArticles();
   return Response.json(articles);
 }
 

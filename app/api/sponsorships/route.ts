@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   }
   let sponsorship;
   try {
-    sponsorship = normalizeSponsorship(await request.json());
+    sponsorship = await normalizeSponsorship(await request.json());
   } catch (err) {
     const message = err instanceof ValidationError ? err.message : "invalid request body";
     return Response.json({ error: message }, { status: 400 });

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Restaurant openings, chef profiles, and the Gulf's rapidly evolving dining culture.",
 };
 
-export default function FAndBPage() {
+export default async function FAndBPage() {
   return (
     <CategoryView
       config={{
@@ -19,7 +19,7 @@ export default function FAndBPage() {
         deckAr: "افتتاحات المطاعم وملامح الطهاة والسياحة الغذائية وثقافة الطعام في الخليج.",
         headerClass: "page-header--cream",
       }}
-      articles={getPublishedByCategory("f-and-b")}
+      articles={await getPublishedByCategory("f-and-b")}
       route="f-and-b"
     />
   );

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Explore Gulf culture through heritage, contemporary art, design, and performance.",
 };
 
-export default function CulturePage() {
+export default async function CulturePage() {
   return (
     <CategoryView
       config={{
@@ -19,7 +19,7 @@ export default function CulturePage() {
         deckAr: "استكشاف التراث والفن المعاصر والتصميم والأداء والسرد المتطور للشرق الأوسط الحديث.",
         headerClass: "page-header--warm",
       }}
-      articles={getPublishedByCategory("culture")}
+      articles={await getPublishedByCategory("culture")}
       route="culture"
     />
   );

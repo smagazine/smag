@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Breaking news and current affairs from across the Arabian Peninsula.",
 };
 
-export default function HeadlinesPage() {
+export default async function HeadlinesPage() {
   return (
     <CategoryView
       config={{
@@ -19,7 +19,7 @@ export default function HeadlinesPage() {
         deckAr: "أخبار عاجلة وشؤون راهنة من شبه الجزيرة العربية.",
         headerClass: "page-header--dark",
       }}
-      articles={getPublishedByCategory("headlines")}
+      articles={await getPublishedByCategory("headlines")}
       route="headlines"
     />
   );

@@ -34,14 +34,14 @@ A bilingual (EN/AR) magazine site — "SAUDI MAG" — built on the App Router wi
 
 ### Data layer
 
-- All articles live in `data/articles.json`, read/written with `fs` by `lib/articles.ts` (server-only). The canonical `Article` and `BodyBlock` types are defined there. Reads are cached by file mtime; writes are atomic (temp file + rename).
+- Articles/sponsors/sponsorships each have a KV-or-file backend (`lib/kv.ts` + the `kvConfigured` check in `lib/articles.ts`/`lib/sponsors.ts`): when Upstash/Vercel KV env vars are present, the whole entity list is stored as one JSON document in KV (`GET`/`SET`); otherwise falls back to the corresponding `data/*.json` file via `fs` (server-only), read/written by `lib/articles.ts`/`lib/sponsors.ts`. `getArticles()`/`getSponsors()`/`getSponsorships()` are all `async` for this reason — every call site must `await` them (easy to miss since `Response.json()` accepts an unawaited Promise silently). The canonical `Article` and `BodyBlock` types are defined in `lib/articles.ts`. File-mode reads are cached by mtime; file-mode writes are atomic (temp file + rename); all writes (either backend) are serialized per-entity via `lib/file-lock.ts` so concurrent admin saves can't clobber each other.
 - `getPublishedArticles()` filters out `status: "draft"`; use it for public pages, `getArticles()` for admin. `getPublishedByCategory(route)` powers the category pages.
 - Only one article may have `featured: true` — `upsertArticle()` enforces this by unfeaturing others.
 - `normalizeArticle()` validates+sanitizes untrusted write payloads (throws `ValidationError`); the write API routes must run every incoming body through it. Video blocks are passed through `safeEmbedUrl()` (`lib/video.ts`), an allowlist of YouTube/Vimeo hosts — the article page also re-checks with it before rendering the `<iframe>`.
 - Article bodies are arrays of typed blocks (`p`, `h2`, `blockquote`, `video`); paragraph text supports a small inline-markdown subset (`**bold**`, `*italic*`, `[link](url)`) parsed by `parseInline()` in `app/(site)/article/[slug]/page.tsx`.
-- Form submissions persist to `data/contact-requests.json` and `data/subscribers.json` via `lib/submissions.ts` (both git-ignored, contain user data). There is no email/CRM integration — this is a self-contained store.
+- Form submissions persist to `data/contact-requests.json` and `data/subscribers.json` via `lib/submissions.ts` (both git-ignored, contain user data), same KV-or-file pattern as above. There is no email/CRM integration — this is a self-contained store.
 
-> **Deployment caveat:** the JSON files are the database. On read-only/ephemeral serverless filesystems (e.g. Vercel) writes will fail or be lost on redeploy. A durable store is needed before any real multi-writer deployment.
+> **Deployment note:** on read-only/ephemeral serverless filesystems (e.g. Vercel), set the KV/Upstash env vars (`KV_REST_API_URL`/`KV_REST_API_TOKEN` or `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`) so writes go to KV instead of the filesystem — without them, article/sponsor writes will fail there (`StorageError`, surfaced as a 503).
 
 ### Auth
 

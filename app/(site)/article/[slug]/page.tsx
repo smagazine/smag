@@ -15,8 +15,9 @@ import type { Metadata } from "next";
 // (the API calls revalidatePath after each save).
 export const revalidate = 3600;
 
-export function generateStaticParams() {
-  return getPublishedArticles().map((a) => ({ slug: a.slug }));
+export async function generateStaticParams() {
+  const articles = await getPublishedArticles();
+  return articles.map((a) => ({ slug: a.slug }));
 }
 
 const U = (id: string, w: number, h: number) =>
@@ -77,7 +78,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article) return { title: "Article not found" };
   const heroUrl = `https://images.unsplash.com/${article.heroPhoto}?w=1200&h=630&fit=crop&auto=format`;
   return {
@@ -102,11 +103,11 @@ export default async function ArticleSlugPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article || (article.status ?? "published") === "draft") notFound();
 
-  const sponsor = article.sponsored ? getSponsor(article.sponsored.sponsorId) : null;
-  const allArticles = getPublishedArticles();
+  const sponsor = article.sponsored ? await getSponsor(article.sponsored.sponsorId) : null;
+  const allArticles = await getPublishedArticles();
   const related = [
     ...allArticles.filter(a => a.slug !== slug && a.relatedCategory === article.relatedCategory),
     ...allArticles.filter(a => a.slug !== slug && a.relatedCategory !== article.relatedCategory),

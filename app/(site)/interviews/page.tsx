@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "In conversation with the artists, chefs, architects, and voices defining the Gulf.",
 };
 
-export default function InterviewsPage() {
+export default async function InterviewsPage() {
   return (
     <CategoryView
       config={{
@@ -20,7 +20,7 @@ export default function InterviewsPage() {
         headerClass: "page-header--warm",
         italicTitle: true,
       }}
-      articles={getPublishedByCategory("interviews")}
+      articles={await getPublishedByCategory("interviews")}
       route="interviews"
     />
   );

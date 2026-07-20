@@ -28,7 +28,7 @@ function chunk<T>(items: T[], size: number): T[][] {
 
 const SITE_URL = "https://saudimag.com";
 
-export default function CategoryView({
+export default async function CategoryView({
   config,
   articles,
   route,
@@ -39,7 +39,7 @@ export default function CategoryView({
   route?: string;
 }) {
   const [lead, ...rest] = articles;
-  const presenting = route ? getActiveSponsorship(route) : null;
+  const presenting = route ? await getActiveSponsorship(route) : null;
 
   const jsonLd = route
     ? {

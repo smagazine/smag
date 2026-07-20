@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await getArticle(slug);
   if (!article) return Response.json({ error: "not found" }, { status: 404 });
   if (article.status === "draft" && !(await isAuthed())) {
     return Response.json({ error: "not found" }, { status: 404 });
@@ -23,7 +23,7 @@ export async function PUT(
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   const { slug } = await params;
-  const existing = getArticle(slug);
+  const existing = await getArticle(slug);
   let article;
   try {
     article = normalizeArticle({ ...(await request.json()), slug });
@@ -55,7 +55,7 @@ export async function DELETE(
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
   const { slug } = await params;
-  const existing = getArticle(slug);
+  const existing = await getArticle(slug);
   try {
     await deleteArticle(slug);
   } catch (err) {

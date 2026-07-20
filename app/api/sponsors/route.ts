@@ -13,7 +13,8 @@ export async function GET() {
   if (!(await isAuthed())) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
-  return Response.json({ sponsors: getSponsors(), sponsorships: getSponsorships() });
+  const [sponsors, sponsorships] = await Promise.all([getSponsors(), getSponsorships()]);
+  return Response.json({ sponsors, sponsorships });
 }
 
 export async function POST(request: Request) {

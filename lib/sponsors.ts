@@ -3,11 +3,11 @@ import path from "path";
 import { ValidationError } from "@/lib/articles";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
 
 /**
  * Sponsor registry + category sponsorships for the native-advertising model.
- * Same flat-file pattern as lib/articles.ts: JSON under data/, mtime-cached
- * reads, atomic writes. Server-only.
+ * Same KV-with-local-file-fallback pattern as lib/articles.ts. Server-only.
  */
 
 export interface Sponsor {
@@ -30,8 +30,10 @@ export interface CategorySponsorship {
 
 const SPONSORS_PATH = path.join(process.cwd(), "data", "sponsors.json");
 const SPONSORSHIPS_PATH = path.join(process.cwd(), "data", "sponsorships.json");
+const SPONSORS_KV_KEY = "sponsors:data";
+const SPONSORSHIPS_KV_KEY = "sponsorships:data";
 
-function readJson<T>(file: string): T[] {
+function readJsonFile<T>(file: string): T[] {
   try {
     const parsed = JSON.parse(fs.readFileSync(file, "utf-8"));
     return Array.isArray(parsed) ? parsed : [];
@@ -40,29 +42,38 @@ function readJson<T>(file: string): T[] {
   }
 }
 
-function writeJson(file: string, list: unknown[]): void {
+async function readJson<T>(kvKey: string, file: string): Promise<T[]> {
+  if (kvConfigured) return kvGetJson<T[]>(kvKey, []);
+  return readJsonFile<T>(file);
+}
+
+async function writeJson(kvKey: string, file: string, list: unknown[]): Promise<void> {
+  if (kvConfigured) {
+    await kvSetJson(kvKey, list);
+    return;
+  }
   const tmp = `${file}.${process.pid}.tmp`;
   try {
     fs.writeFileSync(tmp, JSON.stringify(list, null, 2), "utf-8");
     fs.renameSync(tmp, file);
   } catch {
     throw new StorageError(
-      "Could not save — the storage is read-only in this environment. " +
-        "A durable multi-writer store (e.g. a database) is required for this deployment."
+      "Could not save — the storage is read-only in this environment and no KV store is configured."
     );
   }
 }
 
-export function getSponsors(): Sponsor[] {
-  return readJson<Sponsor>(SPONSORS_PATH);
+export function getSponsors(): Promise<Sponsor[]> {
+  return readJson<Sponsor>(SPONSORS_KV_KEY, SPONSORS_PATH);
 }
 
-export function getSponsor(id: string): Sponsor | null {
-  return getSponsors().find((s) => s.id === id) ?? null;
+export async function getSponsor(id: string): Promise<Sponsor | null> {
+  const sponsors = await getSponsors();
+  return sponsors.find((s) => s.id === id) ?? null;
 }
 
-export function getSponsorships(): CategorySponsorship[] {
-  return readJson<CategorySponsorship>(SPONSORSHIPS_PATH);
+export function getSponsorships(): Promise<CategorySponsorship[]> {
+  return readJson<CategorySponsorship>(SPONSORSHIPS_KV_KEY, SPONSORSHIPS_PATH);
 }
 
 /** True when today falls inside the (possibly open-ended) run window. */
@@ -74,14 +85,14 @@ export function inRunWindow(startDate?: string, endDate?: string, now = new Date
 }
 
 /** The sponsorship currently presenting a category, with its sponsor. */
-export function getActiveSponsorship(route: string):
-  | { sponsorship: CategorySponsorship; sponsor: Sponsor }
-  | null {
-  const sponsorship = getSponsorships().find(
+export async function getActiveSponsorship(route: string):
+  Promise<{ sponsorship: CategorySponsorship; sponsor: Sponsor } | null> {
+  const sponsorships = await getSponsorships();
+  const sponsorship = sponsorships.find(
     (s) => s.route === route && inRunWindow(s.startDate, s.endDate)
   );
   if (!sponsorship) return null;
-  const sponsor = getSponsor(sponsorship.sponsorId);
+  const sponsor = await getSponsor(sponsorship.sponsorId);
   return sponsor ? { sponsorship, sponsor } : null;
 }
 
@@ -102,7 +113,7 @@ export function normalizeSponsor(input: unknown): Sponsor {
   return { id, name, nameAr: opt("nameAr"), logo: opt("logo"), url: opt("url") };
 }
 
-export function normalizeSponsorship(input: unknown): CategorySponsorship {
+export async function normalizeSponsorship(input: unknown): Promise<CategorySponsorship> {
   if (typeof input !== "object" || input === null) {
     throw new ValidationError("sponsorship must be an object");
   }
@@ -112,7 +123,7 @@ export function normalizeSponsorship(input: unknown): CategorySponsorship {
     throw new ValidationError("sponsorship route must be lowercase kebab-case");
   }
   const sponsorId = typeof raw.sponsorId === "string" ? raw.sponsorId : "";
-  if (!getSponsor(sponsorId)) throw new ValidationError("sponsorId must reference an existing sponsor");
+  if (!(await getSponsor(sponsorId))) throw new ValidationError("sponsorId must reference an existing sponsor");
   const date = (k: string): string | undefined => {
     const v = raw[k];
     if (v === undefined || v === null || v === "") return undefined;
@@ -125,38 +136,41 @@ export function normalizeSponsorship(input: unknown): CategorySponsorship {
 }
 
 export function upsertSponsor(sponsor: Sponsor): Promise<void> {
-  return withLock(SPONSORS_PATH, () => {
-    const list = getSponsors();
+  return withLock(SPONSORS_PATH, async () => {
+    const list = await getSponsors();
     const idx = list.findIndex((s) => s.id === sponsor.id);
     if (idx >= 0) list[idx] = sponsor;
     else list.push(sponsor);
-    writeJson(SPONSORS_PATH, list);
+    await writeJson(SPONSORS_KV_KEY, SPONSORS_PATH, list);
   });
 }
 
 export function deleteSponsor(id: string): Promise<void> {
   return withLock(SPONSORS_PATH, async () => {
-    writeJson(SPONSORS_PATH, getSponsors().filter((s) => s.id !== id));
+    const sponsors = await getSponsors();
+    await writeJson(SPONSORS_KV_KEY, SPONSORS_PATH, sponsors.filter((s) => s.id !== id));
     // A deleted client's category sponsorships go with it.
-    await withLock(SPONSORSHIPS_PATH, () => {
-      writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.sponsorId !== id));
+    await withLock(SPONSORSHIPS_PATH, async () => {
+      const sponsorships = await getSponsorships();
+      await writeJson(SPONSORSHIPS_KV_KEY, SPONSORSHIPS_PATH, sponsorships.filter((s) => s.sponsorId !== id));
     });
   });
 }
 
 /** One sponsorship per category: upsert keyed by route. */
 export function upsertSponsorship(sponsorship: CategorySponsorship): Promise<void> {
-  return withLock(SPONSORSHIPS_PATH, () => {
-    const list = getSponsorships();
+  return withLock(SPONSORSHIPS_PATH, async () => {
+    const list = await getSponsorships();
     const idx = list.findIndex((s) => s.route === sponsorship.route);
     if (idx >= 0) list[idx] = sponsorship;
     else list.push(sponsorship);
-    writeJson(SPONSORSHIPS_PATH, list);
+    await writeJson(SPONSORSHIPS_KV_KEY, SPONSORSHIPS_PATH, list);
   });
 }
 
 export function deleteSponsorship(route: string): Promise<void> {
-  return withLock(SPONSORSHIPS_PATH, () => {
-    writeJson(SPONSORSHIPS_PATH, getSponsorships().filter((s) => s.route !== route));
+  return withLock(SPONSORSHIPS_PATH, async () => {
+    const sponsorships = await getSponsorships();
+    await writeJson(SPONSORSHIPS_KV_KEY, SPONSORSHIPS_PATH, sponsorships.filter((s) => s.route !== route));
   });
 }

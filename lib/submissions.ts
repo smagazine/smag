@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
+import { kvConfigured, kvCommand } from "@/lib/kv";
 
 // Persists form submissions. Two backends:
 //
@@ -14,44 +15,6 @@ import { withLock } from "@/lib/file-lock";
 const DATA_DIR = path.join(process.cwd(), "data");
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/**
- * Find the Upstash REST credentials regardless of the env-var prefix chosen
- * when connecting the store in Vercel (KV_, STORAGE_, UPSTASH_, custom…).
- */
-function resolveKv(): { url?: string; token?: string } {
-  const env = process.env;
-  for (const [u, t] of [
-    ["KV_REST_API_URL", "KV_REST_API_TOKEN"],
-    ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"],
-  ]) {
-    if (env[u] && env[t]) return { url: env[u], token: env[t] };
-  }
-  for (const key of Object.keys(env)) {
-    if (key.endsWith("REST_API_URL") || key.endsWith("REST_URL")) {
-      const tokenKey = key.replace(/URL$/, "TOKEN");
-      if (env[key] && env[tokenKey]) return { url: env[key], token: env[tokenKey] };
-    }
-  }
-  return {};
-}
-
-const { url: KV_URL, token: KV_TOKEN } = resolveKv();
-
-export const kvConfigured = Boolean(KV_URL && KV_TOKEN);
-
-/** Run a single Redis command against the Upstash REST endpoint. */
-async function kvCommand<T>(command: (string | number)[]): Promise<T> {
-  const res = await fetch(KV_URL as string, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify(command),
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`kv command failed: ${res.status}`);
-  const data = (await res.json()) as { result: T };
-  return data.result;
-}
 
 function appendJsonFile(file: string, entry: Record<string, unknown>): void {
   const full = path.join(DATA_DIR, file);

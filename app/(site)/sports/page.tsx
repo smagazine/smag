@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Athletic culture, wellness, and the sporting events drawing global attention to the Gulf.",
 };
 
-export default function SportsPage() {
+export default async function SportsPage() {
   return (
     <CategoryView
       config={{
@@ -19,7 +19,7 @@ export default function SportsPage() {
         deckAr: "الثقافة الرياضية والرياضة النخبوية وحركات العافية والفعاليات العالمية في الخليج.",
         headerClass: "page-header--dark",
       }}
-      articles={getPublishedByCategory("sports")}
+      articles={await getPublishedByCategory("sports")}
       route="sports"
     />
   );

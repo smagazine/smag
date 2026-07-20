@@ -3,8 +3,14 @@ import path from "path";
 import { safeEmbedUrl } from "@/lib/video";
 import { withLock } from "@/lib/file-lock";
 import { StorageError } from "@/lib/storage-error";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
 
 export { StorageError };
+
+// Two backends, same as lib/submissions.ts: Upstash/Vercel KV when configured
+// (required in production — Vercel's filesystem is read-only), else a local
+// JSON file for dev. The whole article list is stored as one JSON document.
+const KV_KEY = "articles:data";
 
 export interface BodyBlock {
   id: string;
@@ -48,9 +54,11 @@ const DATA_PATH = path.join(process.cwd(), "data", "articles.json");
 
 // Cache the parsed file and invalidate on mtime change so we don't re-read and
 // re-parse the entire JSON on every getArticles() call within a request burst.
+// Only used for the local-file fallback; KV reads are cheap enough to always
+// go live (matches lib/submissions.ts, which doesn't cache KV reads either).
 let cache: { mtimeMs: number; articles: Article[] } | null = null;
 
-export function getArticles(): Article[] {
+function getArticlesFromFile(): Article[] {
   try {
     const mtimeMs = fs.statSync(DATA_PATH).mtimeMs;
     if (cache && cache.mtimeMs === mtimeMs) return cache.articles;
@@ -62,8 +70,14 @@ export function getArticles(): Article[] {
   }
 }
 
-export function getArticle(slug: string): Article | null {
-  return getArticles().find((a) => a.slug === slug) ?? null;
+export async function getArticles(): Promise<Article[]> {
+  if (kvConfigured) return kvGetJson<Article[]>(KV_KEY, []);
+  return getArticlesFromFile();
+}
+
+export async function getArticle(slug: string): Promise<Article | null> {
+  const articles = await getArticles();
+  return articles.find((a) => a.slug === slug) ?? null;
 }
 
 /** True when a sponsored post's run window covers today (or it has none). */
@@ -74,19 +88,25 @@ function inSponsoredWindow(a: Article, today: string): boolean {
   return true;
 }
 
-export function getPublishedArticles(): Article[] {
+export async function getPublishedArticles(): Promise<Article[]> {
   const today = new Date().toISOString().slice(0, 10);
-  return getArticles().filter(
+  const articles = await getArticles();
+  return articles.filter(
     (a) => (a.status ?? "published") !== "draft" && inSponsoredWindow(a, today)
   );
 }
 
 /** Published articles in a given category route (e.g. "culture", "sports"). */
-export function getPublishedByCategory(relatedCategory: string): Article[] {
-  return getPublishedArticles().filter((a) => a.relatedCategory === relatedCategory);
+export async function getPublishedByCategory(relatedCategory: string): Promise<Article[]> {
+  const articles = await getPublishedArticles();
+  return articles.filter((a) => a.relatedCategory === relatedCategory);
 }
 
-export function saveArticles(articles: Article[]): void {
+export async function saveArticles(articles: Article[]): Promise<void> {
+  if (kvConfigured) {
+    await kvSetJson(KV_KEY, articles);
+    return;
+  }
   // Atomic write: write to a temp file then rename, so a crash mid-write can't
   // leave data/articles.json truncated or corrupt.
   const tmp = `${DATA_PATH}.${process.pid}.tmp`;
@@ -95,8 +115,7 @@ export function saveArticles(articles: Article[]): void {
     fs.renameSync(tmp, DATA_PATH);
   } catch {
     throw new StorageError(
-      "Could not save articles — the storage is read-only in this environment. " +
-        "A durable multi-writer store (e.g. a database) is required for this deployment."
+      "Could not save articles — the storage is read-only in this environment and no KV store is configured."
     );
   }
   cache = null;
@@ -211,8 +230,8 @@ export function upsertArticle(article: Article): Promise<void> {
   // Locked so the read and the write happen as one uninterrupted step —
   // otherwise two concurrent admin writes could both read the same snapshot
   // and the second save would silently clobber the first.
-  return withLock(DATA_PATH, () => {
-    let articles = getArticles();
+  return withLock(DATA_PATH, async () => {
+    let articles = await getArticles();
     // Only one article can be featured at a time
     if (article.featured) {
       articles = articles.map((a) => a.slug !== article.slug ? { ...a, featured: false } : a);
@@ -223,12 +242,13 @@ export function upsertArticle(article: Article): Promise<void> {
     } else {
       articles.unshift(article);
     }
-    saveArticles(articles);
+    await saveArticles(articles);
   });
 }
 
 export function deleteArticle(slug: string): Promise<void> {
-  return withLock(DATA_PATH, () => {
-    saveArticles(getArticles().filter((a) => a.slug !== slug));
+  return withLock(DATA_PATH, async () => {
+    const articles = await getArticles();
+    await saveArticles(articles.filter((a) => a.slug !== slug));
   });
 }

@@ -24,8 +24,8 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
   );
 }
 
-export default function HomePage() {
-  const articles = getPublishedArticles();
+export default async function HomePage() {
+  const articles = await getPublishedArticles();
   const featured = articles.find((a) => a.featured) ?? articles[0];
   const rest = articles.filter((a) => a.slug !== featured.slug);
 

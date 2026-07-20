@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Cultural gatherings, festivals, and the moments shaping the Gulf's social calendar.",
 };
 
-export default function EventsPage() {
+export default async function EventsPage() {
   return (
     <CategoryView
       config={{
@@ -19,7 +19,7 @@ export default function EventsPage() {
         deckAr: "التجمعات الثقافية والمهرجانات التي تشكّل التقويم الاجتماعي في الخليج.",
         headerClass: "page-header--dark",
       }}
-      articles={getPublishedByCategory("events")}
+      articles={await getPublishedByCategory("events")}
       route="events"
     />
   );

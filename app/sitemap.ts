@@ -16,8 +16,8 @@ function contentLastModified(): Date {
   }
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const articles = getPublishedArticles();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const articles = await getPublishedArticles();
   const lastModified = contentLastModified();
 
   const staticPages: MetadataRoute.Sitemap = [
