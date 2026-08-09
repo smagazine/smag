@@ -1,0 +1,57 @@
+[
+  {
+    "id": "headlines",
+    "label": "Headlines",
+    "labelAr": "الأخبار",
+    "deck": "Breaking news and current affairs from across the Arabian Peninsula.",
+    "deckAr": "أخبار عاجلة وشؤون راهنة من شبه الجزيرة العربية.",
+    "headerClass": "page-header--dark",
+    "order": 1000
+  },
+  {
+    "id": "f-and-b",
+    "label": "F&B",
+    "labelAr": "طعام وشراب",
+    "deck": "Restaurant openings, chef profiles, culinary travel, and the Gulf's rapidly evolving dining culture.",
+    "deckAr": "افتتاحات المطاعم وملامح الطهاة والسياحة الغذائية وثقافة الطعام في الخليج.",
+    "headerClass": "page-header--cream",
+    "order": 2000
+  },
+  {
+    "id": "events",
+    "label": "Events",
+    "labelAr": "الفعاليات",
+    "deck": "Cultural gatherings, festivals, and the moments defining the Gulf's social calendar.",
+    "deckAr": "التجمعات الثقافية والمهرجانات التي تشكّل التقويم الاجتماعي في الخليج.",
+    "headerClass": "page-header--dark",
+    "order": 3000
+  },
+  {
+    "id": "culture",
+    "label": "Culture",
+    "labelAr": "الثقافة",
+    "deck": "Exploring heritage, contemporary art, design, performance, and the evolving narrative of the modern Middle East.",
+    "deckAr": "استكشاف التراث والفن المعاصر والتصميم والأداء والسرد المتطور للشرق الأوسط الحديث.",
+    "headerClass": "page-header--warm",
+    "order": 4000
+  },
+  {
+    "id": "interviews",
+    "label": "Interviews",
+    "labelAr": "مقابلات",
+    "deck": "In conversation with the artists, chefs, architects, entrepreneurs, and cultural voices defining the Gulf's future.",
+    "deckAr": "حوارات مع الفنانين والطهاة والمعماريين وأصحاب المشاريع وأصوات الثقافة التي تصنع مستقبل الخليج.",
+    "headerClass": "page-header--warm",
+    "italicTitle": true,
+    "order": 5000
+  },
+  {
+    "id": "sports",
+    "label": "Sports",
+    "labelAr": "الرياضة",
+    "deck": "Athletic culture, elite sport, wellness movements, and the global events landing in the Gulf.",
+    "deckAr": "الثقافة الرياضية والرياضة النخبوية وحركات العافية والفعاليات العالمية في الخليج.",
+    "headerClass": "page-header--dark",
+    "order": 6000
+  }
+]

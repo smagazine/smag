@@ -9,8 +9,12 @@ const CSP = [
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://images.unsplash.com https://picsum.photos https://placehold.co https://*.public.blob.vercel-storage.com",
+  "media-src 'self' https://*.public.blob.vercel-storage.com",
   "font-src 'self'",
-  "connect-src 'self'",
+  // The admin's video-file upload PUTs bytes directly from the browser to
+  // Blob storage (client-upload pattern), so that host must be allowed here
+  // too, not just in media-src (playback).
+  "connect-src 'self' https://*.public.blob.vercel-storage.com",
   "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",

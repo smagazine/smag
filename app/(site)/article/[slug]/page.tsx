@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticle, getPublishedArticles } from "@/lib/articles";
+import { getArticle, getPublishedArticles, isLive } from "@/lib/articles";
 import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
@@ -108,7 +108,8 @@ export default async function ArticleSlugPage(
 ) {
   const { slug } = await params;
   const article = await getArticle(slug);
-  if (!article || (article.status ?? "published") === "draft") notFound();
+  // isLive() covers drafts and scheduled posts whose publish time hasn't come.
+  if (!article || !isLive(article)) notFound();
 
   const sponsor = article.sponsored ? await getSponsor(article.sponsored.sponsorId) : null;
   const allArticles = await getPublishedArticles();
@@ -200,6 +201,15 @@ export default async function ArticleSlugPage(
                 if (block.type === "blockquote")
                   return <blockquote key={block.id} className="pullquote"><BlockText text={block.text} textAr={block.textAr} /></blockquote>;
                 if (block.type === "video") {
+                  if (block.videoKind === "file") {
+                    if (!block.videoUrl) return null;
+                    return (
+                      <div key={block.id} className="article-video article-video-file">
+                        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                        <video src={block.videoUrl} controls preload="metadata" />
+                      </div>
+                    );
+                  }
                   const embed = safeEmbedUrl(block.videoUrl);
                   if (!embed) return null;
                   return (
@@ -211,6 +221,23 @@ export default async function ArticleSlugPage(
                         allowFullScreen
                       />
                     </div>
+                  );
+                }
+                if (block.type === "image") {
+                  if (!block.imageUrl) return null;
+                  return (
+                    <figure key={block.id} className="article-inline-image">
+                      <Image
+                        src={U(block.imageUrl, 1200, 800)}
+                        alt={block.text || ""}
+                        width={1200}
+                        height={800}
+                        sizes="(max-width: 720px) 100vw, 720px"
+                      />
+                      {block.text && (
+                        <figcaption><BlockText text={block.text} textAr={block.textAr} /></figcaption>
+                      )}
+                    </figure>
                   );
                 }
                 const isFirst = article.body.findIndex((b) => b.type === "p") === idx;

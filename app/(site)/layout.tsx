@@ -4,17 +4,21 @@ import RevealObserver from "@/components/RevealObserver";
 import ScrollToTop from "@/components/ScrollToTop";
 import NewsletterForm from "@/components/NewsletterForm";
 import NewsletterPopup from "@/components/NewsletterPopup";
+import { getCategories } from "@/lib/categories";
 
 // Chrome shared by all public pages. Kept out of the root layout so the root
 // doesn't need to read the request pathname (which would force every route into
 // dynamic rendering). The admin section has its own layout with no chrome.
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+// getCategories() is a file/KV read only (no headers()/cookies()), so this
+// stays static/ISR like every other public page.
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const categories = await getCategories();
   return (
     <>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      <Header />
+      <Header categories={categories} />
       {children}
 
       {/* Grand newsletter panel closing every public page */}

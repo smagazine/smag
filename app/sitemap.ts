@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import fs from "fs";
 import path from "path";
 import { getPublishedArticles } from "@/lib/articles";
+import { getCategories } from "@/lib/categories";
 
 const BASE_URL = "https://saudimag.com";
 
@@ -17,17 +18,19 @@ function contentLastModified(): Date {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const articles = await getPublishedArticles();
+  const [articles, categories] = await Promise.all([getPublishedArticles(), getCategories()]);
   const lastModified = contentLastModified();
+
+  const categoryPages: MetadataRoute.Sitemap = categories.map((c) => ({
+    url: `${BASE_URL}/${c.id}`,
+    lastModified,
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified, changeFrequency: "daily", priority: 1 },
-    { url: `${BASE_URL}/headlines`, lastModified, changeFrequency: "daily", priority: 0.8 },
-    { url: `${BASE_URL}/f-and-b`, lastModified, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/events`, lastModified, changeFrequency: "daily", priority: 0.8 },
-    { url: `${BASE_URL}/culture`, lastModified, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/interviews`, lastModified, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE_URL}/sports`, lastModified, changeFrequency: "weekly", priority: 0.8 },
+    ...categoryPages,
     { url: `${BASE_URL}/search`, lastModified, changeFrequency: "weekly", priority: 0.6 },
     { url: `${BASE_URL}/about`, lastModified, changeFrequency: "monthly", priority: 0.4 },
   ];

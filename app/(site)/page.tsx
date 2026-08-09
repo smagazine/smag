@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getPublishedArticles, type Article } from "@/lib/articles";
+import { getCategories } from "@/lib/categories";
 import { U, CatPill, SponsoredPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
 
 export const revalidate = 3600;
@@ -25,7 +26,7 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
 }
 
 export default async function HomePage() {
-  const articles = await getPublishedArticles();
+  const [articles, categories] = await Promise.all([getPublishedArticles(), getCategories()]);
   if (articles.length === 0) {
     return (
       <main className="page ao-home" id="main-content">
@@ -176,23 +177,16 @@ export default async function HomePage() {
 
       {/* ── Photo-pill category nav ── */}
       <nav className="container ao-catnav reveal" aria-label="Browse categories">
-        {[
-          ["culture", "Culture", "الثقافة"],
-          ["sports", "Sports", "الرياضة"],
-          ["f-and-b", "F&B", "طعام وشراب"],
-          ["events", "Events", "الفعاليات"],
-          ["interviews", "Interviews", "مقابلات"],
-          ["headlines", "Headlines", "الأخبار"],
-        ].map(([route, en, ar], i) => {
-          const photo = articles.find((a) => a.relatedCategory === route)?.heroPhoto;
+        {categories.map((c, i) => {
+          const photo = articles.find((a) => a.relatedCategory === c.id)?.heroPhoto;
           return (
-            <Link key={route} className={`ao-cat-pill${i % 2 ? " filled" : ""}`} href={`/${route}`}>
+            <Link key={c.id} className={`ao-cat-pill${i % 2 ? " filled" : ""}`} href={`/${c.id}`}>
               {photo && (
                 <span className="ao-cat-pill-img">
                   <Image fill src={U(photo, 120, 120)} alt="" sizes="60px" />
                 </span>
               )}
-              <span data-en={en} data-ar={ar}>{en}</span>
+              <span data-en={c.label} data-ar={c.labelAr}>{c.label}</span>
             </Link>
           );
         })}

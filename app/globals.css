@@ -3440,6 +3440,29 @@ dialog.membership-dialog::backdrop {
   border: 0;
   display: block;
 }
+.article-video-file video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+}
+
+/* ─── Article inline image block ─────────────────────────── */
+.article-inline-image {
+  margin: 32px 0;
+}
+.article-inline-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+}
+.article-inline-image figcaption {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+  text-align: center;
+}
 
 /* ─── Load-more button ───────────────────────────────────── */
 .load-more-wrap {

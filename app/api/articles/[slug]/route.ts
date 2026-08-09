@@ -1,4 +1,4 @@
-import { getArticle, upsertArticle, deleteArticle, normalizeArticle, ValidationError, StorageError } from "@/lib/articles";
+import { getArticle, upsertArticle, deleteArticle, normalizeArticle, isLive, ValidationError, StorageError } from "@/lib/articles";
 import { isAuthed } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -9,7 +9,7 @@ export async function GET(
   const { slug } = await params;
   const article = await getArticle(slug);
   if (!article) return Response.json({ error: "not found" }, { status: 404 });
-  if (article.status === "draft" && !(await isAuthed())) {
+  if (!isLive(article) && !(await isAuthed())) {
     return Response.json({ error: "not found" }, { status: 404 });
   }
   return Response.json(article);

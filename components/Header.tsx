@@ -4,18 +4,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import type { Category } from "@/lib/categories";
 
-const NAV_LINKS = [
-  { href: "/headlines", en: "Headlines", ar: "الأخبار" },
-  { href: "/f-and-b", en: "F&B", ar: "طعام وشراب" },
-  { href: "/events", en: "Events", ar: "الفعاليات" },
-  { href: "/culture", en: "Culture", ar: "الثقافة" },
-  { href: "/interviews", en: "Interviews", ar: "مقابلات" },
-  { href: "/sports", en: "Sports", ar: "الرياضة" },
-  { href: "/search", en: "Archive", ar: "الأرشيف" },
-];
-
-export default function Header() {
+export default function Header({ categories }: { categories: Category[] }) {
+  const NAV_LINKS = [
+    ...categories.map((c) => ({ href: `/${c.id}`, en: c.label, ar: c.labelAr })),
+    { href: "/search", en: "Archive", ar: "الأرشيف" },
+  ];
   const pathname = usePathname();
   const router = useRouter();
   const { isDark, toggle: toggleTheme } = useTheme();

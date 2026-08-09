@@ -6,10 +6,12 @@ import { useEffect, useRef, useState, useCallback } from "react";
 
 interface BodyBlock {
   id: string;
-  type: "p" | "h2" | "blockquote" | "video";
+  type: "p" | "h2" | "blockquote" | "video" | "image";
   text: string;
   textAr?: string;
   videoUrl?: string;
+  videoKind?: "file";
+  imageUrl?: string;
 }
 
 interface Article {
@@ -24,13 +26,25 @@ interface Article {
   meta: string;
   heroPhoto: string;
   authorPhoto: string;
-  relatedPhotos: [string, string, string];
   body: BodyBlock[];
   tags: string[];
   relatedCategory: string;
-  status?: "draft" | "published";
+  status?: "draft" | "published" | "scheduled";
+  /** ISO (UTC) go-live time for `scheduled` posts. */
+  publishAt?: string;
   featured?: boolean;
   sponsored?: { sponsorId: string; startDate?: string; endDate?: string };
+}
+
+interface Category {
+  id: string;
+  label: string;
+  labelAr: string;
+  deck: string;
+  deckAr: string;
+  headerClass?: string;
+  italicTitle?: boolean;
+  order: number;
 }
 
 interface Sponsor {
@@ -73,13 +87,13 @@ const CATEGORIES = [
   "Culture",
 ];
 
-const RELATED_CATEGORIES = [
-  { label: "Culture", value: "culture" },
-  { label: "Sports", value: "sports" },
-  { label: "F&B", value: "f-and-b" },
-  { label: "Events", value: "events" },
-  { label: "Interviews", value: "interviews" },
-  { label: "Headlines", value: "headlines" },
+// Fixed set offered in the category admin form — kept intentionally small to
+// avoid arbitrary CSS-class injection via a free-text field.
+const HEADER_CLASSES = [
+  { label: "None", value: "" },
+  { label: "Warm", value: "page-header--warm" },
+  { label: "Cream", value: "page-header--cream" },
+  { label: "Dark", value: "page-header--dark" },
 ];
 
 const CAT_COLOR: Record<string, string> = {
@@ -142,7 +156,6 @@ const BLANK_ARTICLE: Article = {
   meta: "",
   heroPhoto: "",
   authorPhoto: "",
-  relatedPhotos: ["", "", ""],
   body: [{ id: uid(), type: "p", text: "" }],
   tags: [],
   relatedCategory: "culture",
@@ -563,11 +576,63 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
   );
 }
 
+function VideoFileField({ value, onUploaded }: { value: string; onUploaded: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(file: File) {
+    setError("");
+    setUploading(true);
+    setProgress(0);
+    try {
+      const { upload } = await import("@vercel/blob/client");
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/upload/video",
+        onUploadProgress: (p) => setProgress(Math.round(p.percentage)),
+      });
+      onUploaded(blob.url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 4 }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="video/mp4,video/webm"
+        style={{ display: "none" }}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }}
+      />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        style={{ ...pillStyle, width: "100%", justifyContent: "center", padding: "9px 14px", fontSize: 12 }}
+      >
+        {uploading ? `Uploading… ${progress}%` : value ? "Replace uploaded video file" : "Upload a video file (MP4/WebM, up to 200MB)"}
+      </button>
+      {value && !uploading && (
+        <p style={{ fontSize: 11, color: C.sub, marginTop: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          Uploaded: {value}
+        </p>
+      )}
+      {error && <p style={{ fontSize: 11.5, color: C.red, marginTop: 6 }}>{error}</p>}
+    </div>
+  );
+}
+
 const BLOCK_COLORS: Record<string, string> = {
   p: "#64748b",
   h2: "#7ba314",
   blockquote: "#8b5cf6",
   video: "#d97706",
+  image: "#0ea5e9",
 };
 
 function BlockEditor({
@@ -592,6 +657,7 @@ function BlockEditor({
           <option value="h2">Heading H2</option>
           <option value="blockquote">Blockquote</option>
           <option value="video">Video</option>
+          <option value="image">Image</option>
         </select>
         <div style={{ display: "flex", gap: 5, marginLeft: "auto" }}>
           <button type="button" onClick={() => onMove(-1)} disabled={idx === 0} title="Move up"
@@ -611,6 +677,7 @@ function BlockEditor({
           block.type === "p" ? "Paragraph text…" :
           block.type === "h2" ? "Section heading…" :
           block.type === "blockquote" ? "“Quote text…”" :
+          block.type === "image" ? "Caption (optional)…" :
           "Embed title or description…"
         }
         style={{ ...textareaStyle, background: C.card, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
@@ -625,6 +692,7 @@ function BlockEditor({
           placeholder={
             block.type === "p" ? "النص العربي للفقرة…" :
             block.type === "h2" ? "العنوان الفرعي بالعربية…" :
+            block.type === "image" ? "التسمية التوضيحية (اختياري)…" :
             "«نص الاقتباس بالعربية…»"
           }
           style={{ ...textareaStyle, background: C.card, marginTop: 8, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
@@ -637,11 +705,25 @@ function BlockEditor({
         </p>
       )}
       {block.type === "video" && (
-        <input
-          value={block.videoUrl ?? ""}
-          onChange={(e) => onChange({ ...block, videoUrl: e.target.value })}
-          placeholder="https://www.youtube.com/embed/…"
-          style={{ ...inputStyle, background: C.card, marginTop: 8 }}
+        <>
+          <input
+            value={block.videoKind === "file" ? "" : (block.videoUrl ?? "")}
+            onChange={(e) => onChange({ ...block, videoUrl: e.target.value, videoKind: undefined })}
+            placeholder="https://www.youtube.com/embed/…"
+            style={{ ...inputStyle, background: C.card, marginTop: 8 }}
+          />
+          <p style={{ fontSize: 10, color: C.faint, margin: "8px 0 4px", textAlign: "center" }}>— or —</p>
+          <VideoFileField
+            value={block.videoKind === "file" ? (block.videoUrl ?? "") : ""}
+            onUploaded={(url) => onChange({ ...block, videoUrl: url, videoKind: "file" })}
+          />
+        </>
+      )}
+      {block.type === "image" && (
+        <PhotoField
+          label="Image"
+          value={block.imageUrl ?? ""}
+          onChange={(v) => onChange({ ...block, imageUrl: v })}
         />
       )}
     </div>
@@ -650,17 +732,102 @@ function BlockEditor({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors";
+type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors" | "categories";
 
 const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS }[] = [
   { key: "dashboard", label: "Dashboard", icon: "home" },
   { key: "articles", label: "Articles", icon: "doc" },
+  { key: "categories", label: "Categories", icon: "doc" },
   { key: "media", label: "Media", icon: "img" },
   { key: "sponsors", label: "Sponsors", icon: "star" },
   { key: "inbox", label: "Inbox", icon: "inbox" },
 ];
 
+const BLANK_CATEGORY: Category = { id: "", label: "", labelAr: "", deck: "", deckAr: "", headerClass: "", italicTitle: false, order: 0 };
+
 const BLANK_SPONSOR: Sponsor = { id: "", name: "", nameAr: "", logo: "", url: "" };
+
+// ── Scheduling helpers ─────────────────────────────────────────────────────
+// Articles store `publishAt` as UTC ISO; <input type="datetime-local"> speaks
+// naive local time. These convert between the two in the browser's timezone.
+
+/** UTC ISO → "YYYY-MM-DDTHH:mm" in local time, for a datetime-local input. */
+function isoToLocalInput(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** datetime-local value → UTC ISO string (undefined when empty/invalid). */
+function localInputToIso(local: string): string | undefined {
+  if (!local) return undefined;
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+/** "Mon 30 Jul, 09:00" in the admin's own timezone. */
+function formatWhen(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString(undefined, {
+    weekday: "short", day: "numeric", month: "short",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+/** A scheduled post is "pending" until its publish time passes. */
+function isPending(a: Article, now = Date.now()): boolean {
+  return a.status === "scheduled" && Boolean(a.publishAt) && Date.parse(a.publishAt!) > now;
+}
+
+/** Rough countdown ("in 3h 20m") for the editor's schedule hint. */
+function timeUntil(iso?: string): string {
+  if (!iso) return "";
+  const ms = Date.parse(iso) - Date.now();
+  if (Number.isNaN(ms)) return "";
+  if (ms <= 0) return "any moment now";
+  const mins = Math.round(ms / 60000);
+  if (mins < 60) return `in ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `in ${hrs}h ${mins % 60}m`;
+  const days = Math.floor(hrs / 24);
+  return `in ${days}d ${hrs % 24}h`;
+}
+
+const STATUS_COLOR: Record<NonNullable<Article["status"]>, string> = {
+  published: "#5f8c00",
+  scheduled: "#0369a1",
+  draft: "#b45309",
+};
+
+/** One-click schedule shortcuts, all resolved in the admin's local timezone. */
+const SCHEDULE_PRESETS: { label: string; at: () => string }[] = [
+  { label: "In 1 hour", at: () => new Date(Date.now() + 3600_000).toISOString() },
+  {
+    label: "Tomorrow 9am",
+    at: () => defaultPublishAt(),
+  },
+  {
+    label: "Next Monday 9am",
+    at: () => {
+      const d = new Date();
+      d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
+      d.setHours(9, 0, 0, 0);
+      return d.toISOString();
+    },
+  },
+];
+
+/** Tomorrow at 09:00 local, as UTC ISO — the default for a new schedule. */
+function defaultPublishAt(): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  d.setHours(9, 0, 0, 0);
+  return d.toISOString();
+}
 
 /** Campaign status against today's date. */
 function runStatus(startDate?: string, endDate?: string): "active" | "scheduled" | "ended" {
@@ -694,6 +861,9 @@ export default function AdminPage() {
   const [sponsorForm, setSponsorForm] = useState<Sponsor>(BLANK_SPONSOR);
   const [spForm, setSpForm] = useState<CategorySponsorship>({ route: "culture", sponsorId: "" });
   const [libraryMedia, setLibraryMedia] = useState<MediaItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryForm, setCategoryForm] = useState<Category>(BLANK_CATEGORY);
+  const [categoryEditing, setCategoryEditing] = useState<string | null>(null);
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -746,6 +916,67 @@ export default function AdminPage() {
       /* non-fatal */
     }
   }, []);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch("/api/categories");
+      if (!res.ok) return;
+      const d = await res.json();
+      setCategories(Array.isArray(d.categories) ? d.categories : []);
+    } catch {
+      /* non-fatal */
+    }
+  }, []);
+
+  async function saveCategory() {
+    const isNewCategory = categoryEditing === null;
+    if (isNewCategory && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(categoryForm.id)) {
+      return showToast("Id must be lowercase-kebab-case (e.g. f-and-b)", "err");
+    }
+    if (!categoryForm.label.trim()) return showToast("Label is required", "err");
+    const url = isNewCategory ? "/api/categories" : `/api/categories/${categoryEditing}`;
+    const res = await fetch(url, {
+      method: isNewCategory ? "POST" : "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(categoryForm),
+    }).catch(() => null);
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => null);
+      return showToast(d?.error || "Failed to save category", "err");
+    }
+    setCategoryForm(BLANK_CATEGORY);
+    setCategoryEditing(null);
+    await fetchCategories();
+    showToast("Category saved");
+  }
+
+  async function removeCategory(id: string) {
+    const res = await fetch(`/api/categories/${id}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) {
+      const d = await res?.json().catch(() => null);
+      return showToast(d?.error || "Failed to delete category", "err");
+    }
+    await fetchCategories();
+    showToast("Category deleted");
+  }
+
+  async function moveCategory(id: string, dir: -1 | 1) {
+    const idx = categories.findIndex((c) => c.id === id);
+    const target = idx + dir;
+    if (idx < 0 || target < 0 || target >= categories.length) return;
+    const reordered = [...categories];
+    [reordered[idx], reordered[target]] = [reordered[target], reordered[idx]];
+    setCategories(reordered);
+    const res = await fetch("/api/categories", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderedIds: reordered.map((c) => c.id) }),
+    }).catch(() => null);
+    if (!res?.ok) {
+      await fetchCategories();
+      showToast("Failed to reorder categories", "err");
+    }
+  }
 
   async function removeLibraryMedia(id: string) {
     setLibraryMedia((prev) => prev.filter((m) => m.id !== id));
@@ -808,8 +1039,9 @@ export default function AdminPage() {
       fetchSubmissions();
       fetchSponsors();
       fetchMedia();
+      fetchCategories();
     }
-  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia]);
+  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -860,7 +1092,7 @@ export default function AdminPage() {
   }
 
   function openEdit(article: Article) {
-    setDraft({ ...article, relatedPhotos: [...article.relatedPhotos] as [string, string, string] });
+    setDraft({ ...article });
     setIsNew(false);
     setSlugLocked(true);
     setTab("editor");
@@ -870,6 +1102,9 @@ export default function AdminPage() {
   async function save() {
     if (!draft.title.trim()) return showToast("Title is required", "err");
     if (!draft.slug.trim()) return showToast("Slug is required", "err");
+    if (draft.status === "scheduled" && !draft.publishAt) {
+      return showToast("Pick a publish date and time, or switch to Draft", "err");
+    }
     setSaving(true);
     try {
       const method = isNew ? "POST" : "PUT";
@@ -881,12 +1116,33 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error();
       await fetchArticles();
-      showToast(isNew ? "Article created!" : "Article saved!");
+      showToast(
+        draft.status === "scheduled"
+          ? `Scheduled for ${formatWhen(draft.publishAt)}`
+          : isNew ? "Article created!" : "Article saved!"
+      );
       setTab("articles");
     } catch {
       showToast("Save failed", "err");
     } finally {
       setSaving(false);
+    }
+  }
+
+  /** Skip the wait on a scheduled post and put it live immediately. */
+  async function publishNow(article: Article) {
+    const updated = { ...article, status: "published" as const, publishAt: undefined };
+    try {
+      const res = await fetch(`/api/articles/${article.slug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      if (!res.ok) throw new Error();
+      await fetchArticles();
+      showToast("Published");
+    } catch {
+      showToast("Failed to publish", "err");
     }
   }
 
@@ -943,7 +1199,16 @@ export default function AdminPage() {
   function addBlock(type: BodyBlock["type"]) {
     setDraft((d) => ({
       ...d,
-      body: [...d.body, { id: uid(), type, text: "", videoUrl: type === "video" ? "" : undefined }],
+      body: [
+        ...d.body,
+        {
+          id: uid(),
+          type,
+          text: "",
+          videoUrl: type === "video" ? "" : undefined,
+          imageUrl: type === "image" ? "" : undefined,
+        },
+      ],
     }));
   }
 
@@ -958,10 +1223,23 @@ export default function AdminPage() {
   const S = (key: keyof Article) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setDraft((d) => ({ ...d, [key]: e.target.value }));
 
+  /** Save-button copy; `long` is the wider button at the foot of the editor. */
+  const saveLabel = (long: boolean) => {
+    const status = draft.status ?? "published";
+    if (status === "draft") return "Save draft";
+    if (status === "scheduled") return isNew ? "Schedule" : "Save schedule";
+    return isNew ? (long ? "Publish article" : "Publish") : "Save changes";
+  };
+
   const wordCount = draft.body.filter(b => b.type === "p" || b.type === "blockquote").reduce((acc, b) => acc + b.text.split(/\s+/).filter(Boolean).length, 0);
 
-  const published = articles.filter(a => (a.status ?? "published") === "published");
+  // A scheduled post whose time has passed but that the cron hasn't flipped yet
+  // is already serving publicly, so it counts as live here.
+  const published = articles.filter(a => (a.status ?? "published") !== "draft" && !isPending(a));
   const drafts = articles.filter(a => (a.status ?? "published") === "draft");
+  const scheduled = articles
+    .filter(a => isPending(a))
+    .sort((a, b) => Date.parse(a.publishAt!) - Date.parse(b.publishAt!));
   const featured = articles.find(a => a.featured);
   const pubPct = articles.length ? Math.round((published.length / articles.length) * 1000) / 10 : 0;
 
@@ -972,6 +1250,7 @@ export default function AdminPage() {
     media: ["Media", `Hero images across all ${articles.length} articles`],
     sponsors: ["Sponsors", `${sponsors.length} clients · ${sponsorships.length} category sponsorships`],
     inbox: ["Inbox", `${contacts.length} contact requests · ${subscribers.length} subscribers`],
+    categories: ["Categories", `${categories.length} desks · drag order controls the site nav`],
   };
 
   const sponsorName = (id: string) => sponsors.find((s) => s.id === id)?.name ?? id;
@@ -1100,13 +1379,15 @@ export default function AdminPage() {
                 )}
                 <button type="button" onClick={save} disabled={saving}
                   style={{ ...darkPillStyle, opacity: saving ? 0.6 : 1, padding: "10px 20px" }}>
-                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? "Save draft" : isNew ? "Publish" : "Save changes"}
+                  {saving ? "Saving…" : saveLabel(false)}
                 </button>
               </>
             ) : (
               <>
                 <span style={{ ...pillStyle, cursor: "default", color: C.sub }}>
-                  {published.length} live · {drafts.length} draft{drafts.length === 1 ? "" : "s"}
+                  {published.length} live
+                  {scheduled.length > 0 && <> · <strong style={{ color: "#0369a1" }}>{scheduled.length} scheduled</strong></>}
+                  {" "}· {drafts.length} draft{drafts.length === 1 ? "" : "s"}
                 </span>
                 <Link href="/" target="_blank" style={{ ...darkPillStyle, padding: "10px 18px" }}>
                   View site <Ic d={ICONS.arrow} size={13} />
@@ -1203,7 +1484,7 @@ export default function AdminPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
                   {[
                     { label: "Total stories", value: articles.length, seed: 1 },
-                    { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}`, seed: 2, lime: true },
+                    { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}${scheduled.length ? ` · ${scheduled.length} scheduled` : ""}`, seed: 2, lime: true },
                     { label: "Ad campaigns", value: activeCampaigns.length, sub: `${scheduledCampaigns.length} scheduled · ${sponsorships.length} category deals`, seed: 3, lime: activeCampaigns.length > 0 },
                     { label: "Subscribers", value: subscribers.length, sub: `${contacts.length} contact requests`, seed: 4 },
                   ].map((s) => (
@@ -1219,6 +1500,37 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Scheduled queue — only shown when something is waiting */}
+                {scheduled.length > 0 && (
+                  <div style={{ ...cardStyle, padding: "20px 22px", marginBottom: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+                      <p style={{ ...sectionLabel, marginBottom: 0 }}>Publishing queue</p>
+                      <span style={{ ...pillStyle, marginLeft: "auto", cursor: "default", padding: "5px 12px", fontSize: 11, color: "#0369a1" }}>
+                        {scheduled.length} waiting
+                      </span>
+                    </div>
+                    {scheduled.map((a, i) => (
+                      <div key={a.slug} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
+                        <Thumb photo={a.heroPhoto} size={34} />
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontSize: 12.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.title}</p>
+                          <p style={{ fontSize: 10.5, color: C.sub, marginTop: 2 }}>
+                            <span style={{ color: "#0369a1", fontWeight: 700 }}>{formatWhen(a.publishAt)}</span>
+                            {" · "}{timeUntil(a.publishAt)}{" · "}{a.category}
+                            {a.featured && " · takes the homepage hero"}
+                          </p>
+                        </div>
+                        <button type="button" onClick={() => publishNow(a)} style={{ ...pillStyle, padding: "7px 13px", fontSize: 11, color: C.sub }}>
+                          Publish now
+                        </button>
+                        <button type="button" onClick={() => openEdit(a)} style={{ ...darkPillStyle, padding: "7px 14px", fontSize: 11 }}>
+                          Edit
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Bottom row: recent inbox + dark latest-stories panel */}
                 <div style={{ display: "grid", gridTemplateColumns: "330px minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
@@ -1266,6 +1578,9 @@ export default function AdminPage() {
                             <span style={catChip(a.category, true)}>{a.category}</span>
                             {(a.status ?? "published") === "draft" && (
                               <span style={{ fontSize: 9, fontWeight: 800, color: "#f5c451", letterSpacing: "0.08em" }}>DRAFT</span>
+                            )}
+                            {isPending(a) && (
+                              <span title={`Goes live ${formatWhen(a.publishAt)}`} style={{ fontSize: 9, fontWeight: 800, color: "#7cc7ec", letterSpacing: "0.08em" }}>SCHEDULED</span>
                             )}
                           </div>
                           <p style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{a.title}</p>
@@ -1333,6 +1648,12 @@ export default function AdminPage() {
                           <span style={catChip(article.category)}>{article.category}</span>
                           {(article.status ?? "published") === "draft" && (
                             <span style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#fdf0d5", color: "#b45309", letterSpacing: "0.08em" }}>DRAFT</span>
+                          )}
+                          {isPending(article) && (
+                            <span title={`Goes live ${formatWhen(article.publishAt)} (${timeUntil(article.publishAt)})`}
+                              style={{ fontSize: 9, fontWeight: 800, padding: "3px 8px", borderRadius: 999, background: "#e2f1f9", color: "#0369a1", letterSpacing: "0.08em" }}>
+                              SCHEDULED · {formatWhen(article.publishAt).toUpperCase()}
+                            </span>
                           )}
                           {article.sponsored && (
                             <span title={`Sponsored by ${sponsorName(article.sponsored.sponsorId)} — ${runStatus(article.sponsored.startDate, article.sponsored.endDate)}`}
@@ -1422,11 +1743,21 @@ export default function AdminPage() {
                   <div>
                     <label style={labelStyle}>Status</label>
                     <select
-                      style={{ ...selectStyle, width: "100%", fontWeight: 700, color: (draft.status ?? "published") === "draft" ? "#b45309" : "#5f8c00" }}
+                      style={{ ...selectStyle, width: "100%", fontWeight: 700, color: STATUS_COLOR[draft.status ?? "published"] }}
                       value={draft.status ?? "published"}
-                      onChange={(e) => setDraft(d => ({ ...d, status: e.target.value as "draft" | "published" }))}
+                      onChange={(e) => {
+                        const status = e.target.value as Article["status"];
+                        setDraft(d => ({
+                          ...d,
+                          status,
+                          // Default a fresh schedule to tomorrow 09:00 local so the
+                          // field is never empty when the picker opens.
+                          publishAt: status === "scheduled" ? (d.publishAt ?? defaultPublishAt()) : undefined,
+                        }));
+                      }}
                     >
                       <option value="published">Published</option>
+                      <option value="scheduled">Scheduled</option>
                       <option value="draft">Draft</option>
                     </select>
                   </div>
@@ -1442,6 +1773,44 @@ export default function AdminPage() {
                     </label>
                   </div>
                 </div>
+
+                {draft.status === "scheduled" && (
+                  <div style={{ marginTop: 14, padding: "14px 16px", background: "#f0f7fb", border: "1px solid #d6e8f2", borderRadius: 14 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, alignItems: "end" }}>
+                      <div>
+                        <label style={labelStyle}>Publish on</label>
+                        <input
+                          type="datetime-local"
+                          style={inputStyle}
+                          value={isoToLocalInput(draft.publishAt)}
+                          onChange={(e) => setDraft(d => ({ ...d, publishAt: localInputToIso(e.target.value) }))}
+                        />
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingBottom: 2 }}>
+                        {SCHEDULE_PRESETS.map((p) => (
+                          <button key={p.label} type="button" onClick={() => setDraft(d => ({ ...d, publishAt: p.at() }))}
+                            style={{ ...pillStyle, padding: "7px 12px", fontSize: 11, color: C.sub }}>
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p style={{ fontSize: 10.5, color: C.sub, marginTop: 10, lineHeight: 1.55 }}>
+                      {draft.publishAt ? (
+                        <>
+                          Goes live automatically on <strong style={{ color: "#0369a1" }}>{formatWhen(draft.publishAt)}</strong>{" "}
+                          ({timeUntil(draft.publishAt)}) — no need to come back and press publish.
+                          Until then it stays off the site and returns 404.
+                        </>
+                      ) : (
+                        <span style={{ color: C.red }}>Pick a date and time — a scheduled article needs one.</span>
+                      )}
+                    </p>
+                    <p style={{ fontSize: 10, color: C.faint, marginTop: 6 }}>
+                      Times are in your timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). Publishing runs hourly, so it may appear up to an hour after the time you set.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Sponsorship */}
@@ -1512,18 +1881,9 @@ export default function AdminPage() {
               <div style={{ ...cardStyle, marginBottom: 16 }}>
                 <p style={sectionLabel}>Media</p>
                 <PhotoField label="Hero photo" value={draft.heroPhoto} onChange={(v) => setDraft(d => ({ ...d, heroPhoto: v }))} />
-                {([0, 1, 2] as const).map((i) => (
-                  <PhotoField
-                    key={i}
-                    label={`Related photo ${i + 1}`}
-                    value={draft.relatedPhotos[i] ?? ""}
-                    onChange={(v) => {
-                      const rp = [...draft.relatedPhotos] as [string, string, string];
-                      rp[i] = v;
-                      setDraft(d => ({ ...d, relatedPhotos: rp }));
-                    }}
-                  />
-                ))}
+                <p style={{ fontSize: 10.5, color: C.faint, marginTop: -6, lineHeight: 1.5 }}>
+                  To place images inside the article, add an Image block in the Body section below — it can go anywhere between paragraphs.
+                </p>
               </div>
 
               {/* Body */}
@@ -1533,13 +1893,13 @@ export default function AdminPage() {
                     Body — {draft.body.length} block{draft.body.length !== 1 ? "s" : ""} · ~{wordCount} words
                   </p>
                   <div style={{ display: "flex", gap: 6 }}>
-                    {(["p", "h2", "blockquote", "video"] as const).map((t) => (
+                    {(["p", "h2", "blockquote", "video", "image"] as const).map((t) => (
                       <button key={t} type="button" onClick={() => addBlock(t)}
                         style={{
                           ...pillStyle, padding: "5px 12px", fontSize: 10.5, fontWeight: 700,
                           color: BLOCK_COLORS[t], borderColor: `${BLOCK_COLORS[t]}44`,
                         }}>
-                        + {t === "p" ? "Para" : t === "h2" ? "H2" : t === "blockquote" ? "Quote" : "Video"}
+                        + {t === "p" ? "Para" : t === "h2" ? "H2" : t === "blockquote" ? "Quote" : t === "video" ? "Video" : "Image"}
                       </button>
                     ))}
                   </div>
@@ -1580,7 +1940,7 @@ export default function AdminPage() {
                   <div>
                     <label style={labelStyle}>Related category (for &quot;Read Next&quot;)</label>
                     <select style={{ ...selectStyle, width: "100%" }} value={draft.relatedCategory} onChange={S("relatedCategory")}>
-                      {RELATED_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
                   </div>
                 </div>
@@ -1598,7 +1958,7 @@ export default function AdminPage() {
                 </button>
                 <button type="button" onClick={save} disabled={saving}
                   style={{ ...darkPillStyle, padding: "11px 26px", fontSize: 13, opacity: saving ? 0.6 : 1 }}>
-                  {saving ? "Saving…" : (draft.status ?? "published") === "draft" ? "Save draft" : isNew ? "Publish article" : "Save changes"}
+                  {saving ? "Saving…" : saveLabel(true)}
                 </button>
               </div>
             </div>
@@ -1738,7 +2098,7 @@ export default function AdminPage() {
                 <p style={{ ...sectionLabel, color: "rgba(255,255,255,0.55)", marginTop: 20 }}>Assign</p>
                 <div style={{ display: "grid", gap: 10 }}>
                   <select style={{ ...selectStyle, width: "100%" }} value={spForm.route} onChange={(e) => setSpForm(f => ({ ...f, route: e.target.value }))}>
-                    {RELATED_CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                   </select>
                   <select style={{ ...selectStyle, width: "100%" }} value={spForm.sponsorId} onChange={(e) => setSpForm(f => ({ ...f, sponsorId: e.target.value }))}>
                     <option value="">Pick a client…</option>
@@ -1752,6 +2112,103 @@ export default function AdminPage() {
                     Save sponsorship
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── CATEGORIES ── */}
+          {tab === "categories" && (
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+              <div style={cardStyle}>
+                <p style={sectionLabel}>Desks (site sections)</p>
+                {categories.map((c, i) => (
+                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", borderBottom: `1px solid ${C.line}` }}>
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button type="button" onClick={() => moveCategory(c.id, -1)} disabled={i === 0} title="Move up"
+                        style={{ ...iconBtnStyle, width: 26, height: 26, opacity: i === 0 ? 0.35 : 1, fontSize: 11 }}>↑</button>
+                      <button type="button" onClick={() => moveCategory(c.id, 1)} disabled={i === categories.length - 1} title="Move down"
+                        style={{ ...iconBtnStyle, width: 26, height: 26, opacity: i === categories.length - 1 ? 0.35 : 1, fontSize: 11 }}>↓</button>
+                    </div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700 }}>
+                        {c.label} {c.labelAr && <span style={{ color: C.sub, fontWeight: 400 }}>· {c.labelAr}</span>}
+                      </p>
+                      <p style={{ fontSize: 11, color: C.sub }}>/{c.id}</p>
+                    </div>
+                    <button type="button" onClick={() => { setCategoryForm(c); setCategoryEditing(c.id); }} style={{ ...pillStyle, padding: "6px 13px", fontSize: 11 }}>Edit</button>
+                    <button type="button" onClick={() => removeCategory(c.id)} style={{ ...iconBtnStyle, width: 30, height: 30, color: C.red }}>
+                      <Ic d={ICONS.trash} size={12} />
+                    </button>
+                  </div>
+                ))}
+                {categories.length === 0 && <p style={{ fontSize: 12, color: C.faint, padding: "8px 0 14px" }}>No categories yet.</p>}
+
+                <p style={{ ...sectionLabel, marginTop: 22 }}>{categoryEditing ? `Edit — ${categoryForm.label}` : "Add desk"}</p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>
+                      Id / route {categoryEditing && <span style={{ color: C.faint, fontWeight: 400, marginLeft: 6, textTransform: "none", letterSpacing: 0 }}>(read-only)</span>}
+                    </label>
+                    <input
+                      style={{ ...inputStyle, color: categoryEditing ? C.faint : C.text }}
+                      value={categoryForm.id}
+                      readOnly={Boolean(categoryEditing)}
+                      onChange={(e) => setCategoryForm(f => ({ ...f, id: slugify(e.target.value) }))}
+                      placeholder="e.g. f-and-b"
+                    />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Header style</label>
+                    <select style={{ ...selectStyle, width: "100%" }} value={categoryForm.headerClass ?? ""} onChange={(e) => setCategoryForm(f => ({ ...f, headerClass: e.target.value || undefined }))}>
+                      {HEADER_CLASSES.map((h) => <option key={h.value} value={h.value}>{h.label}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Label</label>
+                    <input style={inputStyle} value={categoryForm.label} onChange={(e) => setCategoryForm(f => ({ ...f, label: e.target.value }))} placeholder="F&B" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Label (Arabic)</label>
+                    <input style={inputStyle} dir="rtl" value={categoryForm.labelAr} onChange={(e) => setCategoryForm(f => ({ ...f, labelAr: e.target.value }))} placeholder="طعام وشراب" />
+                  </div>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <label style={labelStyle}>Deck (page subhead)</label>
+                    <textarea style={{ ...textareaStyle, height: 60 }} value={categoryForm.deck} onChange={(e) => setCategoryForm(f => ({ ...f, deck: e.target.value }))} placeholder="One-line description shown on the category page…" />
+                  </div>
+                  <div style={{ gridColumn: "1 / -1" }}>
+                    <label style={labelStyle}>Deck (Arabic)</label>
+                    <textarea style={{ ...textareaStyle, height: 60 }} dir="rtl" value={categoryForm.deckAr} onChange={(e) => setCategoryForm(f => ({ ...f, deckAr: e.target.value }))} placeholder="الوصف بالعربية…" />
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: categoryForm.italicTitle ? "#5f8c00" : C.sub, userSelect: "none" }}>
+                      <input
+                        type="checkbox"
+                        checked={categoryForm.italicTitle ?? false}
+                        onChange={(e) => setCategoryForm(f => ({ ...f, italicTitle: e.target.checked }))}
+                        style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#5f8c00" }}
+                      />
+                      Italic page title
+                    </label>
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                  <button type="button" onClick={saveCategory} style={{ ...darkPillStyle, padding: "9px 20px" }}>
+                    {categoryEditing ? "Save desk" : "Add desk"}
+                  </button>
+                  {categoryEditing && (
+                    <button type="button" onClick={() => { setCategoryForm(BLANK_CATEGORY); setCategoryEditing(null); }} style={pillStyle}>Cancel</button>
+                  )}
+                </div>
+              </div>
+
+              <div style={darkCardStyle}>
+                <p style={{ ...sectionLabel, color: "rgba(255,255,255,0.55)" }}>How ordering works</p>
+                <p style={{ fontSize: 12.5, color: "rgba(255,255,255,0.75)", lineHeight: 1.6 }}>
+                  The order above controls both the header navigation and the homepage category strip. Use the arrows to move a desk up or down — changes apply immediately.
+                </p>
+                <p style={{ fontSize: 11.5, color: "rgba(255,255,255,0.5)", marginTop: 14, lineHeight: 1.6 }}>
+                  A desk can&apos;t be deleted while articles are still assigned to it — reassign or remove those articles first, then delete the desk.
+                </p>
               </div>
             </div>
           )}
