@@ -62,8 +62,17 @@ function writeFile(list: Category[]): void {
 async function readAll(): Promise<Category[]> {
   if (!kvConfigured) return readFile();
   try {
-    return await kvGetJson<Category[]>(CATEGORIES_KV_KEY, []);
+    const categories = await kvGetJson<Category[]>(CATEGORIES_KV_KEY, []);
+    if (categories.length > 0) return categories;
+    // KV has never been written to (e.g. right after switching this
+    // deployment onto KV) — seed it from the bundled JSON file so the site
+    // doesn't come up with zero categories, then persist it.
+    const seeded = readFile();
+    if (seeded.length > 0) kvSetJson(CATEGORIES_KV_KEY, seeded).catch(() => {});
+    return seeded;
   } catch {
+    // KV unreachable: degrade to the bundled file rather than taking the
+    // whole site down.
     return readFile();
   }
 }
