@@ -419,10 +419,193 @@ function MediaLibraryModal({ onSelect, onClose }: { onSelect: (url: string) => v
   );
 }
 
+interface CropRect { x: number; y: number; w: number; h: number }
+
+const CROP_ASPECTS: { label: string; ratio: number | null }[] = [
+  { label: "Free", ratio: null },
+  { label: "Square", ratio: 1 },
+  { label: "4:3", ratio: 4 / 3 },
+  { label: "16:9", ratio: 16 / 9 },
+];
+
+function centeredCropRect(ratio: number | null, dispW: number, dispH: number): CropRect {
+  if (!ratio) return { x: 0, y: 0, w: dispW, h: dispH };
+  let w = dispW;
+  let h = dispW / ratio;
+  if (h > dispH) {
+    h = dispH;
+    w = dispH * ratio;
+  }
+  w *= 0.92;
+  h *= 0.92;
+  return { x: (dispW - w) / 2, y: (dispH - h) / 2, w, h };
+}
+
+/** Crops a freshly-picked File client-side (canvas) before it's uploaded — no
+    server-side image processing exists, so this is the only place a crop can
+    happen. Only applies to local File selections, not already-uploaded/library
+    images, to avoid cross-origin canvas-tainting on remote fetches. */
+function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: () => void; onConfirm: (f: File) => void }) {
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+  const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
+  const [display, setDisplay] = useState<{ w: number; h: number } | null>(null);
+  const [crop, setCrop] = useState<CropRect | null>(null);
+  const [aspect, setAspect] = useState<number | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const dragRef = useRef<{ mode: "move" | "resize"; startX: number; startY: number; start: CropRect } | null>(null);
+
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    setObjectUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  function handleImgLoad() {
+    const img = imgRef.current;
+    if (!img) return;
+    const naturalW = img.naturalWidth;
+    const naturalH = img.naturalHeight;
+    const scale = Math.min(560 / naturalW, 420 / naturalH);
+    const dispW = naturalW * scale;
+    const dispH = naturalH * scale;
+    setNatural({ w: naturalW, h: naturalH });
+    setDisplay({ w: dispW, h: dispH });
+    setCrop(centeredCropRect(null, dispW, dispH));
+  }
+
+  function applyAspect(ratio: number | null) {
+    if (!display) return;
+    setAspect(ratio);
+    setCrop(centeredCropRect(ratio, display.w, display.h));
+  }
+
+  function onPointerDownMove(e: React.PointerEvent) {
+    if (!crop) return;
+    (e.target as Element).setPointerCapture(e.pointerId);
+    dragRef.current = { mode: "move", startX: e.clientX, startY: e.clientY, start: crop };
+  }
+
+  function onPointerDownResize(e: React.PointerEvent) {
+    e.stopPropagation();
+    if (!crop) return;
+    (e.target as Element).setPointerCapture(e.pointerId);
+    dragRef.current = { mode: "resize", startX: e.clientX, startY: e.clientY, start: crop };
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    const drag = dragRef.current;
+    if (!drag || !display) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (drag.mode === "move") {
+      const x = Math.min(Math.max(0, drag.start.x + dx), display.w - drag.start.w);
+      const y = Math.min(Math.max(0, drag.start.y + dy), display.h - drag.start.h);
+      setCrop({ ...drag.start, x, y });
+    } else {
+      let w = Math.max(24, Math.min(drag.start.w + dx, display.w - drag.start.x));
+      let h = Math.max(24, Math.min(drag.start.h + dy, display.h - drag.start.y));
+      if (aspect) {
+        w = Math.min(w, h * aspect);
+        h = w / aspect;
+      }
+      setCrop({ ...drag.start, w, h });
+    }
+  }
+
+  function onPointerUp() {
+    dragRef.current = null;
+  }
+
+  function confirm() {
+    if (!crop || !natural || !display || !imgRef.current) return;
+    const scale = natural.w / display.w;
+    const sx = crop.x * scale;
+    const sy = crop.y * scale;
+    const sw = crop.w * scale;
+    const sh = crop.h * scale;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(sw));
+    canvas.height = Math.max(1, Math.round(sh));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return onCancel();
+    ctx.drawImage(imgRef.current, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    const outType = ["image/jpeg", "image/png", "image/webp"].includes(file.type) ? file.type : "image/jpeg";
+    canvas.toBlob((blob) => {
+      if (!blob) return onCancel();
+      onConfirm(new File([blob], file.name, { type: outType }));
+    }, outType, 0.92);
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(20,20,22,0.55)", zIndex: 1100, display: "grid", placeItems: "center", padding: 24 }}>
+      <div style={{ ...cardStyle, width: "min(640px, 100%)" }}>
+        <p style={{ ...sectionLabel, marginBottom: 12 }}>Crop image</p>
+        {objectUrl ? (
+          <div
+            style={{
+              position: "relative",
+              width: display?.w ?? "auto",
+              maxWidth: 560,
+              maxHeight: 420,
+              margin: "0 auto",
+              background: "#111",
+              touchAction: "none",
+            }}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              ref={imgRef}
+              src={objectUrl}
+              alt=""
+              onLoad={handleImgLoad}
+              draggable={false}
+              style={display ? { width: display.w, height: display.h, display: "block", userSelect: "none" } : { maxWidth: 560, maxHeight: 420, display: "block" }}
+            />
+            {crop && display && (
+              <div
+                onPointerDown={onPointerDownMove}
+                style={{
+                  position: "absolute", left: crop.x, top: crop.y, width: crop.w, height: crop.h,
+                  border: "2px solid #fff", boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)", cursor: "move",
+                }}
+              >
+                <div
+                  onPointerDown={onPointerDownResize}
+                  style={{ position: "absolute", right: -7, bottom: -7, width: 14, height: 14, borderRadius: 999, background: C.lime, border: "2px solid #fff", cursor: "nwse-resize" }}
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <p style={{ fontSize: 13, color: C.sub, padding: "40px 0", textAlign: "center" }}>Loading image…</p>
+        )}
+        {display && (
+          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 14 }}>
+            {CROP_ASPECTS.map((a) => (
+              <button key={a.label} type="button" onClick={() => applyAspect(a.ratio)}
+                style={{ ...pillStyle, padding: "6px 13px", fontSize: 11, background: aspect === a.ratio ? C.ink : C.card, color: aspect === a.ratio ? "#fff" : C.text }}>
+                {a.label}
+              </button>
+            ))}
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
+          <button type="button" onClick={onCancel} style={pillStyle}>Cancel</button>
+          <button type="button" onClick={() => onConfirm(file)} style={pillStyle}>Use original</button>
+          <button type="button" onClick={confirm} disabled={!crop} style={{ ...darkPillStyle, opacity: crop ? 1 : 0.5 }}>Apply crop</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function upload(file: File) {
@@ -448,7 +631,7 @@ function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void
       <div
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) upload(f); }}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) setCropFile(f); }}
         onClick={() => fileInputRef.current?.click()}
         style={{
           padding: 28,
@@ -465,7 +648,7 @@ function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
           style={{ display: "none" }}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) setCropFile(f); e.target.value = ""; }}
         />
         <p style={{ fontSize: 13, fontWeight: 600, color: C.text }}>
           {uploading ? "Uploading…" : "Drop images here, or click to browse"}
@@ -473,6 +656,13 @@ function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void
         <p style={{ fontSize: 11.5, color: C.faint, marginTop: 4 }}>JPEG, PNG, WebP, GIF, or AVIF · up to 8MB</p>
       </div>
       {error && <p style={{ fontSize: 11.5, color: C.red, marginTop: 8 }}>{error}</p>}
+      {cropFile && (
+        <ImageCropModal
+          file={cropFile}
+          onCancel={() => setCropFile(null)}
+          onConfirm={(f) => { setCropFile(null); upload(f); }}
+        />
+      )}
     </div>
   );
 }
@@ -482,6 +672,7 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [showLibrary, setShowLibrary] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previewSrc = value ? U(pid(value), 240, 160) : null;
 
@@ -506,7 +697,7 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files?.[0];
-    if (file) upload(file);
+    if (file) setCropFile(file);
   }
 
   return (
@@ -534,7 +725,7 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
           style={{ display: "none" }}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) setCropFile(f); e.target.value = ""; }}
         />
         <div style={{ width: 82, height: 54, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: "#e4e5e9", display: "grid", placeItems: "center" }}>
           {previewSrc ? (
@@ -570,6 +761,13 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
         <MediaLibraryModal
           onSelect={(url) => { onChange(url); setShowLibrary(false); }}
           onClose={() => setShowLibrary(false)}
+        />
+      )}
+      {cropFile && (
+        <ImageCropModal
+          file={cropFile}
+          onCancel={() => setCropFile(null)}
+          onConfirm={(f) => { setCropFile(null); upload(f); }}
         />
       )}
     </div>
