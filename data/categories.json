@@ -53,5 +53,59 @@
     "deckAr": "الثقافة الرياضية والرياضة النخبوية وحركات العافية والفعاليات العالمية في الخليج.",
     "headerClass": "page-header--dark",
     "order": 6000
+  },
+  {
+    "id": "saudi-news",
+    "label": "Saudi News",
+    "labelAr": "أخبار السعودية",
+    "deck": "The stories, policies, and moments shaping the Kingdom right now.",
+    "deckAr": "القصص والسياسات واللحظات التي تشكّل المملكة الآن.",
+    "headerClass": "page-header--dark",
+    "order": 7000
+  },
+  {
+    "id": "music",
+    "label": "Music",
+    "labelAr": "الموسيقى",
+    "deck": "Artists, releases, and the sound of a region rewriting its own soundtrack.",
+    "deckAr": "الفنانون والإصدارات وصوت منطقة تعيد كتابة موسيقاها الخاصة.",
+    "headerClass": "page-header--warm",
+    "order": 8000
+  },
+  {
+    "id": "fashion-beauty",
+    "label": "Fashion & Beauty",
+    "labelAr": "الموضة والجمال",
+    "deck": "Designers, beauty culture, and the runways and rituals defining Gulf style.",
+    "deckAr": "المصممون وثقافة الجمال وعروض الأزياء والطقوس التي تحدد أسلوب الخليج.",
+    "headerClass": "page-header--cream",
+    "order": 9000
+  },
+  {
+    "id": "lifestyle",
+    "label": "Lifestyle",
+    "labelAr": "نمط الحياة",
+    "deck": "Homes, wellness, and the everyday rituals of modern Gulf living.",
+    "deckAr": "المنازل والعافية وطقوس الحياة اليومية في الخليج الحديث.",
+    "headerClass": "page-header--warm",
+    "order": 10000
+  },
+  {
+    "id": "travel-tourism",
+    "label": "Travel & Tourism",
+    "labelAr": "السفر والسياحة",
+    "deck": "Destinations, hospitality, and the journeys opening up the region to the world.",
+    "deckAr": "الوجهات والضيافة والرحلات التي تفتح المنطقة على العالم.",
+    "headerClass": "page-header--cream",
+    "order": 11000
+  },
+  {
+    "id": "people",
+    "label": "People",
+    "labelAr": "شخصيات",
+    "deck": "Profiles of the figures shaping Gulf culture, business, and public life.",
+    "deckAr": "ملامح الشخصيات التي تشكّل الثقافة والأعمال والحياة العامة في الخليج.",
+    "headerClass": "page-header--dark",
+    "order": 12000
   }
 ]
