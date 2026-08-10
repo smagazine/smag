@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLang } from "@/contexts/LangContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Category } from "@/lib/categories";
+import SocialLinks from "@/components/SocialLinks";
 
 export default function Header({ categories }: { categories: Category[] }) {
   const NAV_LINKS = [
@@ -96,6 +97,7 @@ export default function Header({ categories }: { categories: Category[] }) {
               <span className="brand-mag">MAG</span>
             </Link>
             <div className="nav-actions">
+              <SocialLinks className="site-social" />
               <button
                 className="dark-toggle"
                 type="button"
@@ -158,6 +160,7 @@ export default function Header({ categories }: { categories: Category[] }) {
           <Link className="button" href="/subscribe" style={{ marginTop: 28, width: "100%", justifyContent: "center" }} data-en="Subscribe" data-ar="اشترك">
             Subscribe
           </Link>
+          <SocialLinks className="site-social" />
         </div>
       </div>
 
