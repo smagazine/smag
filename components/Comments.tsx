@@ -59,7 +59,12 @@ export default function Comments({ slug }: { slug: string }) {
 
   return (
     <section className="comments-section reveal" id="comments">
-      <h2 data-en="Comments" data-ar="التعليقات">Comments</h2>
+      <div className="comments-head">
+        <h2 data-en="Comments" data-ar="التعليقات">Comments</h2>
+        {!loading && comments.length > 0 && (
+          <span className="comments-count">{comments.length}</span>
+        )}
+      </div>
 
       {!loading && comments.length > 0 && (
         <ul className="comments-list">
@@ -82,8 +87,8 @@ export default function Comments({ slug }: { slug: string }) {
         </ul>
       )}
 
-      <form className="contact-form comment-form" onSubmit={handleSubmit}>
-        <label>
+      <form className="comment-form" onSubmit={handleSubmit}>
+        <label className="comment-field comment-field--full">
           <span className="form-label" data-en="Comment" data-ar="التعليق">Comment</span>
           <textarea
             required
@@ -94,28 +99,30 @@ export default function Comments({ slug }: { slug: string }) {
             placeholder={t("Add to the conversation…", "أضف إلى النقاش…")}
           />
         </label>
-        <label>
-          <span className="form-label" data-en="Name" data-ar="الاسم">Name</span>
-          <input
-            required
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={80}
-            autoComplete="name"
-          />
-        </label>
-        <label>
-          <span className="form-label" data-en="Email" data-ar="البريد الإلكتروني">Email</span>
-          <input
-            required
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-          />
-        </label>
-        <button className="button" type="submit" disabled={submitting}>
+        <div className="comment-field-row">
+          <label className="comment-field">
+            <span className="form-label" data-en="Name" data-ar="الاسم">Name</span>
+            <input
+              required
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={80}
+              autoComplete="name"
+            />
+          </label>
+          <label className="comment-field">
+            <span className="form-label" data-en="Email" data-ar="البريد الإلكتروني">Email</span>
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+          </label>
+        </div>
+        <button className="button comment-submit" type="submit" disabled={submitting}>
           {t(submitting ? "Posting…" : "Post Comment", submitting ? "جارٍ النشر…" : "نشر التعليق")}
         </button>
         {status === "sent" && (

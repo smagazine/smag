@@ -2794,6 +2794,22 @@ dialog.membership-dialog::backdrop {
   border-top: 1px solid var(--color-line);
 }
 
+.comments-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.comments-head h2 {
+  margin: 0;
+}
+
+.comments-count {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+
 .comments-list {
   list-style: none;
   margin: 24px 0 40px;
@@ -2847,7 +2863,61 @@ dialog.membership-dialog::backdrop {
 }
 
 .comment-form {
-  max-width: 480px;
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+  padding: clamp(20px, 3vw, 30px);
+  background: var(--color-soft);
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+}
+
+.comment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment-field .form-label {
+  margin: 0;
+}
+
+.comment-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.comment-form input,
+.comment-form textarea {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-paper);
+  padding: 12px 14px;
+  outline: 0;
+  font-size: 0.88rem;
+  transition: border-color var(--ease);
+}
+
+.comment-form textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.comment-form input:focus,
+.comment-form textarea:focus {
+  border-color: var(--color-gold);
+}
+
+.comment-submit {
+  justify-self: start;
+}
+
+@media (max-width: 560px) {
+  .comment-field-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ─── Article tags ──────────────────────────────────────────────────────── */
