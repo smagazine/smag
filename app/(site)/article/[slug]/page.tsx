@@ -6,6 +6,7 @@ import { getArticle, getPublishedArticles, isLive } from "@/lib/articles";
 import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
+import Comments from "@/components/Comments";
 import { CatPill, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
 import { getSponsor } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
@@ -269,6 +270,8 @@ export default async function ArticleSlugPage(
               </div>
 
               <ShareButtons title={article.title} />
+
+              <Comments slug={article.slug} />
             </div>
           </div>
         </article>

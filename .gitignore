@@ -37,6 +37,7 @@ yarn-error.log*
 # runtime form submissions (user data) and atomic-write temp files
 /data/contact-requests.json
 /data/subscribers.json
+/data/comments.json
 /data/*.tmp
 /data/media.json
 

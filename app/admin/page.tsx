@@ -75,6 +75,16 @@ interface SubscriberEntry {
   receivedAt?: string;
 }
 
+interface CommentEntry {
+  id: string;
+  slug: string;
+  name: string;
+  email: string;
+  body: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -184,6 +194,7 @@ const ICONS = {
   logout: "M15 4h4v16h-4M10 8l-4 4 4 4M6 12h9",
   star: "m12 3 2.7 5.8 6.3.8-4.6 4.3 1.2 6.1L12 17l-5.6 3 1.2-6.1L3 9.6l6.3-.8z",
   trash: "M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6",
+  chat: "M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z",
 };
 
 // ── Shared style atoms ─────────────────────────────────────────────────────
@@ -930,7 +941,7 @@ function BlockEditor({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors" | "categories";
+type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors" | "categories" | "comments";
 
 const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS }[] = [
   { key: "dashboard", label: "Dashboard", icon: "home" },
@@ -938,6 +949,7 @@ const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICON
   { key: "categories", label: "Categories", icon: "doc" },
   { key: "media", label: "Media", icon: "img" },
   { key: "sponsors", label: "Sponsors", icon: "star" },
+  { key: "comments", label: "Comments", icon: "chat" },
   { key: "inbox", label: "Inbox", icon: "inbox" },
 ];
 
@@ -1062,6 +1074,8 @@ export default function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryForm, setCategoryForm] = useState<Category>(BLANK_CATEGORY);
   const [categoryEditing, setCategoryEditing] = useState<string | null>(null);
+  const [comments, setComments] = useState<CommentEntry[]>([]);
+  const [commentFilter, setCommentFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -1125,6 +1139,35 @@ export default function AdminPage() {
       /* non-fatal */
     }
   }, []);
+
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/comments");
+      if (!res.ok) return;
+      const d = await res.json();
+      setComments(Array.isArray(d.comments) ? d.comments : []);
+    } catch {
+      /* non-fatal */
+    }
+  }, []);
+
+  async function moderateComment(id: string, status: "approved" | "rejected") {
+    const res = await fetch(`/api/comments/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }).catch(() => null);
+    if (!res?.ok) return showToast("Failed to update comment", "err");
+    setComments((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+    showToast(status === "approved" ? "Comment approved" : "Comment rejected");
+  }
+
+  async function removeComment(id: string) {
+    const res = await fetch(`/api/comments/${id}`, { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return showToast("Failed to delete comment", "err");
+    setComments((prev) => prev.filter((c) => c.id !== id));
+    showToast("Comment deleted");
+  }
 
   async function saveCategory() {
     const isNewCategory = categoryEditing === null;
@@ -1238,8 +1281,9 @@ export default function AdminPage() {
       fetchSponsors();
       fetchMedia();
       fetchCategories();
+      fetchComments();
     }
-  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories]);
+  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories, fetchComments]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -1270,6 +1314,7 @@ export default function AdminPage() {
     setArticles([]);
     setContacts([]);
     setSubscribers([]);
+    setComments([]);
     setTab("dashboard");
   }
 
@@ -1449,7 +1494,14 @@ export default function AdminPage() {
     sponsors: ["Sponsors", `${sponsors.length} clients · ${sponsorships.length} category sponsorships`],
     inbox: ["Inbox", `${contacts.length} contact requests · ${subscribers.length} subscribers`],
     categories: ["Categories", `${categories.length} desks · drag order controls the site nav`],
+    comments: ["Comments", `${comments.filter((c) => c.status === "pending").length} awaiting moderation · ${comments.length} total`],
   };
+
+  const pendingComments = comments.filter((c) => c.status === "pending").length;
+  const visibleComments = comments
+    .filter((c) => commentFilter === "all" || c.status === commentFilter)
+    .slice()
+    .reverse();
 
   const sponsorName = (id: string) => sponsors.find((s) => s.id === id)?.name ?? id;
   const sponsoredPosts = articles.filter((a) => a.sponsored);
@@ -1525,6 +1577,11 @@ export default function AdminPage() {
                   {key === "inbox" && contacts.length > 0 && (
                     <span style={{ marginLeft: "auto", background: active ? C.lime : "#e4e5e9", color: active ? "#111" : C.sub, borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "2px 7px" }}>
                       {contacts.length}
+                    </span>
+                  )}
+                  {key === "comments" && pendingComments > 0 && (
+                    <span style={{ marginLeft: "auto", background: active ? C.lime : "#e4e5e9", color: active ? "#111" : C.sub, borderRadius: 999, fontSize: 10, fontWeight: 700, padding: "2px 7px" }}>
+                      {pendingComments}
                     </span>
                   )}
                 </button>
@@ -2408,6 +2465,59 @@ export default function AdminPage() {
                   A desk can&apos;t be deleted while articles are still assigned to it — reassign or remove those articles first, then delete the desk.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* ── COMMENTS ── */}
+          {tab === "comments" && (
+            <div style={cardStyle}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+                {(["pending", "approved", "rejected", "all"] as const).map((f) => (
+                  <button key={f} type="button" onClick={() => setCommentFilter(f)}
+                    style={{
+                      ...pillStyle,
+                      padding: "6px 14px",
+                      background: commentFilter === f ? C.ink : C.card,
+                      color: commentFilter === f ? "#fff" : C.sub,
+                      border: `1px solid ${commentFilter === f ? C.ink : C.line}`,
+                    }}>
+                    {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+                    {f === "pending" && pendingComments > 0 && ` (${pendingComments})`}
+                  </button>
+                ))}
+              </div>
+
+              {visibleComments.length === 0 ? (
+                <p style={{ fontSize: 12.5, color: C.faint, padding: "16px 0" }}>No comments here.</p>
+              ) : (
+                visibleComments.map((c, i) => (
+                  <div key={c.id} style={{ padding: "14px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 7 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 999, background: "#ececef", color: C.sub, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 800, flexShrink: 0 }}>
+                        {(c.name || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</p>
+                        <p style={{ fontSize: 11, color: C.sub }}>{c.email}</p>
+                      </div>
+                      <Link href={`/article/${c.slug}`} target="_blank" style={{ ...pillStyle, marginLeft: "auto", padding: "4px 10px", fontSize: 10.5 }}>
+                        /{c.slug}
+                      </Link>
+                      <span style={{ fontSize: 10.5, color: C.faint, whiteSpace: "nowrap" }}>{new Date(c.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p style={{ fontSize: 12.5, color: "#4b4e55", lineHeight: 1.6, paddingLeft: 44, marginBottom: 10 }}>{c.body}</p>
+                    <div style={{ display: "flex", gap: 8, paddingLeft: 44 }}>
+                      {c.status !== "approved" && (
+                        <button type="button" onClick={() => moderateComment(c.id, "approved")} style={{ ...limePillStyle, padding: "5px 12px", fontSize: 11 }}>Approve</button>
+                      )}
+                      {c.status !== "rejected" && (
+                        <button type="button" onClick={() => moderateComment(c.id, "rejected")} style={{ ...pillStyle, padding: "5px 12px", fontSize: 11 }}>Reject</button>
+                      )}
+                      <button type="button" onClick={() => removeComment(c.id)} style={{ ...pillStyle, padding: "5px 12px", fontSize: 11, color: C.red, border: `1px solid ${C.red}` }}>Delete</button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
