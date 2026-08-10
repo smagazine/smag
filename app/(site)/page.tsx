@@ -178,7 +178,7 @@ export default async function HomePage() {
       {/* ── Photo-pill category nav ── */}
       <nav className="container ao-catnav reveal" aria-label="Browse categories">
         {categories.map((c, i) => {
-          const photo = articles.find((a) => a.relatedCategory === c.id)?.heroPhoto;
+          const photo = c.photo || articles.find((a) => a.relatedCategory === c.id)?.heroPhoto;
           return (
             <Link key={c.id} className={`ao-cat-pill${i % 2 ? " filled" : ""}`} href={`/${c.id}`}>
               {photo && (

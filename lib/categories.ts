@@ -23,6 +23,9 @@ export interface Category {
   headerClass?: string;
   /** Italic page title (used by the Interviews desk). */
   italicTitle?: boolean;
+  /** Bare Unsplash photo ID or uploaded image URL for the homepage pill nav;
+      falls back to a live article's heroPhoto when unset. */
+  photo?: string;
   /** Sort key, ascending. Large gaps left between values so a reorder only
       needs to touch the moved row(s), not renumber the whole list. */
   order: number;
@@ -119,8 +122,9 @@ function normalizeNew(input: unknown, existing: Category[]): Category {
   const deckAr = typeof raw.deckAr === "string" ? raw.deckAr : "";
   const headerClass = typeof raw.headerClass === "string" && raw.headerClass ? raw.headerClass : undefined;
   const italicTitle = raw.italicTitle === true;
+  const photo = typeof raw.photo === "string" && raw.photo ? raw.photo : undefined;
   const maxOrder = existing.reduce((max, c) => Math.max(max, c.order), 0);
-  return { id, label, labelAr, deck, deckAr, headerClass, italicTitle, order: maxOrder + 1000 };
+  return { id, label, labelAr, deck, deckAr, headerClass, italicTitle, photo, order: maxOrder + 1000 };
 }
 
 export function createCategory(input: unknown): Promise<Category> {
@@ -152,6 +156,7 @@ export function updateCategory(id: string, input: unknown): Promise<Category> {
       deckAr: typeof raw.deckAr === "string" ? raw.deckAr : "",
       headerClass: typeof raw.headerClass === "string" && raw.headerClass ? raw.headerClass : undefined,
       italicTitle: raw.italicTitle === true,
+      photo: typeof raw.photo === "string" && raw.photo ? raw.photo : undefined,
     };
     const list = [...existing];
     list[idx] = updated;

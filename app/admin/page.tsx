@@ -44,6 +44,7 @@ interface Category {
   deckAr: string;
   headerClass?: string;
   italicTitle?: boolean;
+  photo?: string;
   order: number;
 }
 
@@ -953,7 +954,7 @@ const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICON
   { key: "inbox", label: "Inbox", icon: "inbox" },
 ];
 
-const BLANK_CATEGORY: Category = { id: "", label: "", labelAr: "", deck: "", deckAr: "", headerClass: "", italicTitle: false, order: 0 };
+const BLANK_CATEGORY: Category = { id: "", label: "", labelAr: "", deck: "", deckAr: "", headerClass: "", italicTitle: false, photo: "", order: 0 };
 
 const BLANK_SPONSOR: Sponsor = { id: "", name: "", nameAr: "", logo: "", url: "" };
 
@@ -2384,6 +2385,11 @@ export default function AdminPage() {
                       <button type="button" onClick={() => moveCategory(c.id, 1)} disabled={i === categories.length - 1} title="Move down"
                         style={{ ...iconBtnStyle, width: 26, height: 26, opacity: i === categories.length - 1 ? 0.35 : 1, fontSize: 11 }}>↓</button>
                     </div>
+                    {c.photo ? (
+                      <img src={U(pid(c.photo), 60, 60)} alt="" style={{ width: 34, height: 34, borderRadius: 10, objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: 34, height: 34, borderRadius: 10, background: "#ececef", flexShrink: 0 }} />
+                    )}
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <p style={{ fontSize: 13, fontWeight: 700 }}>
                         {c.label} {c.labelAr && <span style={{ color: C.sub, fontWeight: 400 }}>· {c.labelAr}</span>}
@@ -2427,6 +2433,9 @@ export default function AdminPage() {
                     <input style={inputStyle} dir="rtl" value={categoryForm.labelAr} onChange={(e) => setCategoryForm(f => ({ ...f, labelAr: e.target.value }))} placeholder="طعام وشراب" />
                   </div>
                   <div style={{ gridColumn: "1 / -1" }}>
+                    <PhotoField label="Pill photo (homepage category nav)" value={categoryForm.photo ?? ""} onChange={(v) => setCategoryForm(f => ({ ...f, photo: v }))} />
+                  </div>
+                  <div style={{ gridColumn: "1 / -1" }}>
                     <label style={labelStyle}>Deck (page subhead)</label>
                     <textarea style={{ ...textareaStyle, height: 60 }} value={categoryForm.deck} onChange={(e) => setCategoryForm(f => ({ ...f, deck: e.target.value }))} placeholder="One-line description shown on the category page…" />
                   </div>
@@ -2463,6 +2472,9 @@ export default function AdminPage() {
                 </p>
                 <p style={{ fontSize: 11.5, color: "rgba(255,255,255,0.5)", marginTop: 14, lineHeight: 1.6 }}>
                   A desk can&apos;t be deleted while articles are still assigned to it — reassign or remove those articles first, then delete the desk.
+                </p>
+                <p style={{ fontSize: 11.5, color: "rgba(255,255,255,0.5)", marginTop: 14, lineHeight: 1.6 }}>
+                  If a desk has no pill photo set, the homepage falls back to a live article&apos;s hero photo — set one explicitly for desks with no articles yet.
                 </p>
               </div>
             </div>
