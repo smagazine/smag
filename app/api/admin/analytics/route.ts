@@ -2,7 +2,7 @@ import { isAuthed } from "@/lib/auth";
 import { getAnalytics } from "@/lib/analytics";
 import { getArticles } from "@/lib/articles";
 
-const DAYS_IN_SERIES = 14;
+const DAYS_IN_SERIES = 30;
 
 function dateKey(daysAgo: number): string {
   const d = new Date();
@@ -34,7 +34,7 @@ export async function GET() {
       return { slug, views, title: article?.title ?? slug, category: article?.category ?? "" };
     })
     .sort((a, b) => b.views - a.views)
-    .slice(0, 8);
+    .slice(0, 20);
 
   return Response.json({ totalViews, viewsToday, viewsLast7Days, daily, topArticles });
 }
