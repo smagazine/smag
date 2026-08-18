@@ -1051,6 +1051,7 @@ function runStatus(startDate?: string, endDate?: string): "active" | "scheduled"
 export default function AdminPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [navOpen, setNavOpen] = useState(false);
   const [draft, setDraft] = useState<Article>(BLANK_ARTICLE);
   const [isNew, setIsNew] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1522,7 +1523,7 @@ export default function AdminPage() {
   if (!authed) {
     return (
       <div style={{ minHeight: "100svh", background: `radial-gradient(120% 120% at 20% 0%, #e9eaee 0%, ${C.page} 60%, #cfd1d7 100%)`, display: "grid", placeItems: "center", fontFamily: FONT }}>
-        <form onSubmit={login} style={{ width: 340, background: C.card, borderRadius: 26, padding: "30px 28px", display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 24px 70px rgba(20,20,22,0.18)" }}>
+        <form onSubmit={login} style={{ width: "min(340px, 92vw)", boxSizing: "border-box", background: C.card, borderRadius: 26, padding: "30px 28px", display: "flex", flexDirection: "column", gap: 14, boxShadow: "0 24px 70px rgba(20,20,22,0.18)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 6 }}>
             <BrandMark />
             <div>
@@ -1546,24 +1547,29 @@ export default function AdminPage() {
   const [title, subtitle] = TITLES[tab];
 
   return (
-    <div style={{ minHeight: "100svh", background: `radial-gradient(130% 110% at 15% -10%, #eceef1 0%, ${C.page} 55%, #cccdd3 100%)`, padding: "clamp(10px, 2vw, 24px)", fontFamily: FONT, color: C.text, boxSizing: "border-box" }}>
-      <div style={{ maxWidth: 1440, margin: "0 auto", height: "calc(100svh - clamp(20px, 4vw, 48px))", minHeight: 620, background: C.frame, borderRadius: 30, boxShadow: "0 30px 90px rgba(20,20,22,0.22), inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", overflow: "hidden" }}>
+    <div className="admin-shell" style={{ minHeight: "100svh", background: `radial-gradient(130% 110% at 15% -10%, #eceef1 0%, ${C.page} 55%, #cccdd3 100%)`, padding: "clamp(10px, 2vw, 24px)", fontFamily: FONT, color: C.text, boxSizing: "border-box" }}>
+      <div className="admin-frame" style={{ maxWidth: 1440, margin: "0 auto", height: "calc(100svh - clamp(20px, 4vw, 48px))", minHeight: 620, background: C.frame, borderRadius: 30, boxShadow: "0 30px 90px rgba(20,20,22,0.22), inset 0 1px 0 rgba(255,255,255,0.8)", display: "flex", overflow: "hidden" }}>
+
+        {navOpen && <div className="admin-scrim" onClick={() => setNavOpen(false)} />}
 
         {/* ── Sidebar rail ── */}
-        <aside style={{ width: 218, flexShrink: 0, display: "flex", flexDirection: "column", padding: "26px 18px 20px", borderRight: `1px solid ${C.line}` }}>
+        <aside className={`admin-sidebar${navOpen ? " admin-sidebar--open" : ""}`} style={{ width: 218, flexShrink: 0, display: "flex", flexDirection: "column", padding: "26px 18px 20px", borderRight: `1px solid ${C.line}`, background: C.frame }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px", marginBottom: 34 }}>
             <BrandMark />
             <div>
               <BrandWord />
               <div style={{ fontSize: 10, color: C.sub }}>Newsroom</div>
             </div>
+            <button type="button" className="admin-sidebar-close" onClick={() => setNavOpen(false)} aria-label="Close menu" style={{ ...iconBtnStyle, marginLeft: "auto" }}>
+              ×
+            </button>
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {NAV.map(({ key, label, icon }) => {
               const active = activeNav === key;
               return (
-                <button key={key} onClick={() => setTab(key)}
+                <button key={key} onClick={() => { setTab(key); setNavOpen(false); }}
                   style={{
                     display: "flex", alignItems: "center", gap: 11, padding: "11px 16px",
                     borderRadius: 999, border: "none", cursor: "pointer", textAlign: "left",
@@ -1590,7 +1596,7 @@ export default function AdminPage() {
             })}
           </nav>
 
-          <button type="button" onClick={openNew} style={{ ...limePillStyle, justifyContent: "center", marginTop: 18, padding: "11px 16px", boxShadow: "0 10px 24px rgba(166,214,31,0.4)" }}>
+          <button type="button" onClick={() => { openNew(); setNavOpen(false); }} style={{ ...limePillStyle, justifyContent: "center", marginTop: 18, padding: "11px 16px", boxShadow: "0 10px 24px rgba(166,214,31,0.4)" }}>
             <Ic d={ICONS.plus} size={14} /> New Article
           </button>
 
@@ -1610,17 +1616,20 @@ export default function AdminPage() {
         </aside>
 
         {/* ── Main area ── */}
-        <main ref={editorRef} style={{ flex: 1, overflowY: "auto", padding: "26px 30px 34px", position: "relative" }}>
+        <main ref={editorRef} className="admin-main" style={{ flex: 1, overflowY: "auto", padding: "26px 30px 34px", position: "relative" }}>
 
           {/* Header row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+          <div className="admin-header-row" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+            <button type="button" className="admin-hamburger" onClick={() => setNavOpen(true)} aria-label="Open menu" style={{ ...iconBtnStyle, width: 38, height: 38 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+            </button>
             <div style={{ marginRight: "auto" }}>
               <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.02em", margin: 0, fontFamily: FONT }}>{title}</h1>
               <p style={{ fontSize: 12, color: C.sub, marginTop: 3 }}>{subtitle}</p>
             </div>
 
             {(tab === "articles" || tab === "media") && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.card, borderRadius: 999, padding: "9px 16px", border: `1px solid ${C.line}`, minWidth: 220 }}>
+              <div className="admin-search" style={{ display: "flex", alignItems: "center", gap: 8, background: C.card, borderRadius: 999, padding: "9px 16px", border: `1px solid ${C.line}`, minWidth: 220 }}>
                 <span style={{ color: C.faint, display: "inline-flex" }}><Ic d={ICONS.search} size={14} /></span>
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Type searching…"
                   style={{ border: "none", outline: "none", background: "transparent", fontSize: 12.5, fontFamily: FONT, color: C.text, width: "100%" }} />
@@ -1658,7 +1667,7 @@ export default function AdminPage() {
               <p style={{ color: C.sub, textAlign: "center", padding: 60, fontSize: 13 }}>Loading…</p>
             ) : (
               <>
-                <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 330px", gap: 18, alignItems: "start" }}>
+                <div className="admin-grid-main-330" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 330px", gap: 18, alignItems: "start" }}>
                   {/* Categories "schedule" card */}
                   <div style={{ ...cardStyle, padding: "22px 24px" }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
@@ -1672,7 +1681,7 @@ export default function AdminPage() {
                         .sort((a, b) => b.items.length - a.items.length);
                       const max = rows.length ? rows[0].items.length : 1;
                       return rows.map(({ cat, items }) => (
-                        <div key={cat} style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 14, marginBottom: 12 }}>
+                        <div key={cat} className="admin-desk-row" style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 14, marginBottom: 12 }}>
                           <span style={{ fontSize: 11.5, color: C.sub, fontWeight: 600, display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
                             <span style={{ width: 7, height: 7, borderRadius: 999, background: CAT_COLOR[cat] ?? "#888", flexShrink: 0 }} />
                             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat}</span>
@@ -1737,7 +1746,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Stat strip */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
+                <div className="admin-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
                   {[
                     { label: "Total stories", value: articles.length, seed: 1 },
                     { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}${scheduled.length ? ` · ${scheduled.length} scheduled` : ""}`, seed: 2, lime: true },
@@ -1789,7 +1798,7 @@ export default function AdminPage() {
                 )}
 
                 {/* Bottom row: recent inbox + dark latest-stories panel */}
-                <div style={{ display: "grid", gridTemplateColumns: "330px minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+                <div className="admin-grid-330-main" style={{ display: "grid", gridTemplateColumns: "330px minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
                   <div style={{ ...cardStyle, padding: "20px 22px" }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
                       <p style={{ ...sectionLabel, marginBottom: 0 }}>Latest inbox</p>
@@ -1826,7 +1835,7 @@ export default function AdminPage() {
                         All articles
                       </button>
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 14 }}>
+                    <div className="admin-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 14 }}>
                       {articles.slice(0, 3).map((a) => (
                         <div key={a.slug} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: 16, padding: 14, display: "flex", flexDirection: "column", minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -1884,6 +1893,7 @@ export default function AdminPage() {
                   {filtered.map((article, i) => (
                     <div
                       key={article.slug}
+                      className="admin-article-row"
                       style={{
                         display: "grid", gridTemplateColumns: "62px minmax(0,1fr) auto", gap: 14,
                         padding: "12px 12px", alignItems: "center", borderRadius: 16,
@@ -1898,7 +1908,7 @@ export default function AdminPage() {
                           <img src={U(pid(article.heroPhoto), 112, 84)} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         )}
                       </div>
-                      <div style={{ minWidth: 0 }}>
+                      <div className="admin-row-body" style={{ minWidth: 0 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{article.title}</p>
                         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                           <span style={catChip(article.category)}>{article.category}</span>
@@ -1922,7 +1932,7 @@ export default function AdminPage() {
                           <span style={{ fontSize: 11, color: C.sub }}>{article.meta.split("·")[0]?.trim()}</span>
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <div className="admin-row-actions" style={{ display: "flex", gap: 6, alignItems: "center" }}>
                         <button type="button" onClick={() => toggleFeatured(article)}
                           title={article.featured ? "Featured homepage hero" : "Set as featured"}
                           style={{ ...iconBtnStyle, color: article.featured ? "#8fbc12" : C.faint, background: article.featured ? "#f2f8dd" : C.card, borderColor: article.featured ? "#dcebae" : C.line }}>
@@ -1974,7 +1984,7 @@ export default function AdminPage() {
                   <label style={labelStyle}>Subtitle (Arabic)</label>
                   <textarea style={{ ...textareaStyle, height: 72 }} dir="rtl" value={draft.subtitleAr ?? ""} onChange={(e) => setDraft(d => ({ ...d, subtitleAr: e.target.value || undefined }))} placeholder="الوصف بالعربية…" />
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>
                       Slug
@@ -1995,7 +2005,7 @@ export default function AdminPage() {
                     </select>
                   </div>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
                   <div>
                     <label style={labelStyle}>Status</label>
                     <select
@@ -2032,7 +2042,7 @@ export default function AdminPage() {
 
                 {draft.status === "scheduled" && (
                   <div style={{ marginTop: 14, padding: "14px 16px", background: "#f0f7fb", border: "1px solid #d6e8f2", borderRadius: 14 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, alignItems: "end" }}>
+                    <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, alignItems: "end" }}>
                       <div>
                         <label style={labelStyle}>Publish on</label>
                         <input
@@ -2082,7 +2092,7 @@ export default function AdminPage() {
                   Sponsored post (client content, labeled on the site)
                 </label>
                 {draft.sponsored && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+                  <div className="admin-grid-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                     <div>
                       <label style={labelStyle}>Client</label>
                       <select
@@ -2116,7 +2126,7 @@ export default function AdminPage() {
               {/* Author */}
               <div style={{ ...cardStyle, marginBottom: 16 }}>
                 <p style={sectionLabel}>Author</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
                   <div>
                     <label style={labelStyle}>Author name</label>
                     <input style={inputStyle} value={draft.author} onChange={S("author")} placeholder="Full name" />
@@ -2183,7 +2193,7 @@ export default function AdminPage() {
               {/* Metadata */}
               <div style={{ ...cardStyle, marginBottom: 16 }}>
                 <p style={sectionLabel}>Metadata</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>Tags (comma-separated)</label>
                     <input
@@ -2203,7 +2213,7 @@ export default function AdminPage() {
               </div>
 
               {/* Bottom save bar */}
-              <div style={{ position: "sticky", bottom: -34, background: C.frame, padding: "14px 0 20px", display: "flex", justifyContent: "flex-end", gap: 8, borderTop: `1px solid ${C.line}` }}>
+              <div className="admin-save-bar" style={{ position: "sticky", bottom: -34, background: C.frame, padding: "14px 0 20px", display: "flex", justifyContent: "flex-end", gap: 8, borderTop: `1px solid ${C.line}` }}>
                 {!isNew && (
                   <button type="button" onClick={() => setDeleteConfirm(draft.slug)} style={{ ...pillStyle, color: C.red, padding: "11px 20px" }}>
                     Delete article
@@ -2283,7 +2293,7 @@ export default function AdminPage() {
 
           {/* ── SPONSORS ── */}
           {tab === "sponsors" && (
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+            <div className="admin-grid-main-side" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
               {/* Clients */}
               <div style={cardStyle}>
                 <p style={sectionLabel}>Clients</p>
@@ -2305,7 +2315,7 @@ export default function AdminPage() {
                 {sponsors.length === 0 && <p style={{ fontSize: 12, color: C.faint, padding: "8px 0 14px" }}>No clients yet.</p>}
 
                 <p style={{ ...sectionLabel, marginTop: 22 }}>{sponsorForm.id ? `Edit — ${sponsorForm.name}` : "Add client"}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={labelStyle}>Name</label>
                     <input style={inputStyle} value={sponsorForm.name} onChange={(e) => setSponsorForm(f => ({ ...f, name: e.target.value }))} placeholder="Client name" />
@@ -2360,7 +2370,7 @@ export default function AdminPage() {
                     <option value="">Pick a client…</option>
                     {sponsors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <input type="date" style={inputStyle} value={spForm.startDate ?? ""} onChange={(e) => setSpForm(f => ({ ...f, startDate: e.target.value || undefined }))} />
                     <input type="date" style={inputStyle} value={spForm.endDate ?? ""} onChange={(e) => setSpForm(f => ({ ...f, endDate: e.target.value || undefined }))} />
                   </div>
@@ -2374,7 +2384,7 @@ export default function AdminPage() {
 
           {/* ── CATEGORIES ── */}
           {tab === "categories" && (
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+            <div className="admin-grid-main-side" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
               <div style={cardStyle}>
                 <p style={sectionLabel}>Desks (site sections)</p>
                 {categories.map((c, i) => (
@@ -2405,7 +2415,7 @@ export default function AdminPage() {
                 {categories.length === 0 && <p style={{ fontSize: 12, color: C.faint, padding: "8px 0 14px" }}>No categories yet.</p>}
 
                 <p style={{ ...sectionLabel, marginTop: 22 }}>{categoryEditing ? `Edit — ${categoryForm.label}` : "Add desk"}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label style={labelStyle}>
                       Id / route {categoryEditing && <span style={{ color: C.faint, fontWeight: 400, marginLeft: 6, textTransform: "none", letterSpacing: 0 }}>(read-only)</span>}
@@ -2535,7 +2545,7 @@ export default function AdminPage() {
 
           {/* ── INBOX ── */}
           {tab === "inbox" && (
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+            <div className="admin-grid-main-side" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.5fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
               <div style={cardStyle}>
                 <p style={sectionLabel}>Contact requests</p>
                 {contacts.length === 0 ? (
@@ -2609,7 +2619,7 @@ export default function AdminPage() {
 
       {/* Toast notification */}
       {toast && (
-        <div style={{
+        <div className="admin-toast" style={{
           position: "fixed", bottom: 28, right: 28, zIndex: 200,
           background: toast.type === "ok" ? C.ink : C.red,
           color: "#fff",
@@ -2623,7 +2633,84 @@ export default function AdminPage() {
         </div>
       )}
 
-      <style>{`@keyframes adminFadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }`}</style>
+      <style>{`
+        @keyframes adminFadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+
+        .admin-hamburger, .admin-sidebar-close, .admin-scrim { display: none; }
+
+        @media (max-width: 860px) {
+          .admin-shell { padding: 0 !important; }
+          .admin-frame {
+            border-radius: 0 !important;
+            height: 100svh !important;
+            min-height: 100svh !important;
+            max-width: 100% !important;
+            box-shadow: none !important;
+          }
+
+          .admin-hamburger { display: inline-flex !important; }
+          .admin-sidebar-close { display: inline-flex !important; }
+
+          .admin-scrim {
+            display: block;
+            position: fixed; inset: 0; background: rgba(20,20,22,0.45);
+            z-index: 400;
+          }
+
+          .admin-sidebar {
+            position: fixed !important;
+            top: 0; bottom: 0; left: 0;
+            width: 240px !important;
+            z-index: 450;
+            transform: translateX(-100%);
+            transition: transform 0.22s ease;
+            box-shadow: 20px 0 50px rgba(20,20,22,0.25);
+          }
+          .admin-sidebar--open { transform: translateX(0); }
+
+          .admin-main { padding: 16px 14px 28px !important; }
+
+          .admin-header-row { gap: 10px !important; }
+          .admin-header-row h1 { font-size: 20px !important; }
+          .admin-search { flex: 1 1 100% !important; order: 3; min-width: 0 !important; }
+
+          .admin-grid-main-330,
+          .admin-grid-330-main,
+          .admin-grid-main-side,
+          .admin-grid-2col,
+          .admin-grid-3col,
+          .admin-grid-3 {
+            grid-template-columns: 1fr !important;
+          }
+
+          .admin-grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+
+          .admin-desk-row { grid-template-columns: 1fr !important; gap: 6px !important; }
+
+          .admin-article-row {
+            grid-template-columns: 48px minmax(0,1fr) !important;
+            gap: 10px !important;
+          }
+          .admin-row-actions {
+            grid-column: 1 / -1 !important;
+            flex-wrap: wrap !important;
+            justify-content: flex-end !important;
+            margin-top: 8px;
+          }
+
+          .admin-save-bar { flex-wrap: wrap !important; bottom: 0 !important; }
+          .admin-save-bar button { flex: 1 1 auto !important; }
+
+          .admin-toast {
+            left: 14px !important; right: 14px !important; bottom: 14px !important;
+            justify-content: center !important; text-align: center;
+          }
+        }
+
+        @media (max-width: 520px) {
+          .admin-grid-4 { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
