@@ -76,6 +76,14 @@ interface SubscriberEntry {
   receivedAt?: string;
 }
 
+interface AnalyticsSummary {
+  totalViews: number;
+  viewsToday: number;
+  viewsLast7Days: number;
+  daily: { date: string; views: number }[];
+  topArticles: { slug: string; views: number; title: string; category: string }[];
+}
+
 interface CommentEntry {
   id: string;
   slug: string;
@@ -341,13 +349,26 @@ function BrandWord() {
   );
 }
 
-/** Deterministic mini sparkline (no randomness → stable across renders). */
-function Spark({ seed, color = C.ink, w = 84, h = 26 }: { seed: number; color?: string; w?: number; h?: number }) {
+/**
+ * Mini sparkline. Pass `data` (a real series, e.g. daily pageviews) to plot
+ * it directly; otherwise falls back to a deterministic decorative curve
+ * derived from `seed` (no randomness → stable across renders).
+ */
+function Spark({ seed, data, color = C.ink, w = 84, h = 26 }: { seed: number; data?: number[]; color?: string; w?: number; h?: number }) {
   const pts: string[] = [];
-  const n = 12;
-  for (let i = 0; i < n; i++) {
-    const y = h / 2 + Math.sin(i * 1.1 + seed) * (h / 3.2) + Math.cos(i * 0.6 + seed * 2) * (h / 6);
-    pts.push(`${(i / (n - 1)) * w},${Math.max(2, Math.min(h - 2, y)).toFixed(1)}`);
+  if (data && data.length > 0) {
+    const max = Math.max(1, ...data);
+    data.forEach((v, i) => {
+      const x = data.length === 1 ? w : (i / (data.length - 1)) * w;
+      const y = h - 2 - (v / max) * (h - 4);
+      pts.push(`${x.toFixed(1)},${Math.max(2, Math.min(h - 2, y)).toFixed(1)}`);
+    });
+  } else {
+    const n = 12;
+    for (let i = 0; i < n; i++) {
+      const y = h / 2 + Math.sin(i * 1.1 + seed) * (h / 3.2) + Math.cos(i * 0.6 + seed * 2) * (h / 6);
+      pts.push(`${(i / (n - 1)) * w},${Math.max(2, Math.min(h - 2, y)).toFixed(1)}`);
+    }
   }
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden>
@@ -958,6 +979,8 @@ const BLANK_CATEGORY: Category = { id: "", label: "", labelAr: "", deck: "", dec
 
 const BLANK_SPONSOR: Sponsor = { id: "", name: "", nameAr: "", logo: "", url: "" };
 
+const BLANK_ANALYTICS: AnalyticsSummary = { totalViews: 0, viewsToday: 0, viewsLast7Days: 0, daily: [], topArticles: [] };
+
 // ── Scheduling helpers ─────────────────────────────────────────────────────
 // Articles store `publishAt` as UTC ISO; <input type="datetime-local"> speaks
 // naive local time. These convert between the two in the browser's timezone.
@@ -1078,6 +1101,7 @@ export default function AdminPage() {
   const [categoryEditing, setCategoryEditing] = useState<string | null>(null);
   const [comments, setComments] = useState<CommentEntry[]>([]);
   const [commentFilter, setCommentFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
+  const [analytics, setAnalytics] = useState<AnalyticsSummary>(BLANK_ANALYTICS);
 
   const showToast = useCallback((msg: string, type: "ok" | "err" = "ok") => {
     setToast({ msg, type });
@@ -1150,6 +1174,16 @@ export default function AdminPage() {
       setComments(Array.isArray(d.comments) ? d.comments : []);
     } catch {
       /* non-fatal */
+    }
+  }, []);
+
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/analytics");
+      if (!res.ok) return;
+      setAnalytics(await res.json());
+    } catch {
+      /* dashboard extra — non-fatal */
     }
   }, []);
 
@@ -1284,8 +1318,9 @@ export default function AdminPage() {
       fetchMedia();
       fetchCategories();
       fetchComments();
+      fetchAnalytics();
     }
-  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories, fetchComments]);
+  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories, fetchComments, fetchAnalytics]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -1746,10 +1781,15 @@ export default function AdminPage() {
                 </div>
 
                 {/* Stat strip */}
-                <div className="admin-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
+                <div className="admin-grid-5" style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0,1fr))", gap: 18, margin: "18px 0" }}>
                   {[
+                    {
+                      label: "Page views", value: analytics.totalViews.toLocaleString(),
+                      sub: `${analytics.viewsToday.toLocaleString()} today · ${analytics.viewsLast7Days.toLocaleString()} last 7d`,
+                      seed: 0, lime: true, data: analytics.daily.map((d) => d.views),
+                    },
                     { label: "Total stories", value: articles.length, seed: 1 },
-                    { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}${scheduled.length ? ` · ${scheduled.length} scheduled` : ""}`, seed: 2, lime: true },
+                    { label: "Published", value: `${pubPct}%`, sub: `${published.length} of ${articles.length}${scheduled.length ? ` · ${scheduled.length} scheduled` : ""}`, seed: 2 },
                     { label: "Ad campaigns", value: activeCampaigns.length, sub: `${scheduledCampaigns.length} scheduled · ${sponsorships.length} category deals`, seed: 3, lime: activeCampaigns.length > 0 },
                     { label: "Subscribers", value: subscribers.length, sub: `${contacts.length} contact requests`, seed: 4 },
                   ].map((s) => (
@@ -1760,11 +1800,42 @@ export default function AdminPage() {
                         {s.sub && <p style={{ fontSize: 10.5, color: C.faint, marginTop: 5 }}>{s.sub}</p>}
                       </div>
                       <div style={{ marginLeft: "auto", flexShrink: 0 }}>
-                        <Spark seed={s.seed} color={s.lime ? "#7ba314" : C.faint} w={64} h={30} />
+                        <Spark seed={s.seed} data={s.data} color={s.lime ? "#7ba314" : C.faint} w={64} h={30} />
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* Most viewed articles — only shown once there's at least one view */}
+                {analytics.topArticles.length > 0 && (
+                  <div style={{ ...cardStyle, padding: "20px 22px", marginBottom: 18 }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 14 }}>
+                      <p style={{ ...sectionLabel, marginBottom: 0 }}>Most viewed articles</p>
+                      <span style={{ marginLeft: "auto", fontSize: 11.5, color: C.sub }}>last {analytics.daily.length} days · site pageviews</span>
+                    </div>
+                    {analytics.topArticles.map((t, i) => {
+                      const article = articles.find((a) => a.slug === t.slug);
+                      return (
+                        <div key={t.slug} className="admin-top-article-row" style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
+                          <span style={{ width: 18, textAlign: "center", fontSize: 11, fontWeight: 700, color: C.faint, flexShrink: 0 }}>{i + 1}</span>
+                          {article && <Thumb photo={article.heroPhoto} size={34} />}
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <p style={{ fontSize: 12.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</p>
+                            {t.category && <span style={catChip(t.category)}>{t.category}</span>}
+                          </div>
+                          <span style={{ ...pillStyle, cursor: "default", padding: "6px 13px", fontSize: 11, color: C.sub }}>
+                            {t.views.toLocaleString()} view{t.views === 1 ? "" : "s"}
+                          </span>
+                          {article && (
+                            <button type="button" onClick={() => openEdit(article)} style={{ ...darkPillStyle, padding: "7px 14px", fontSize: 11 }}>
+                              Edit
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Scheduled queue — only shown when something is waiting */}
                 {scheduled.length > 0 && (
@@ -2683,7 +2754,7 @@ export default function AdminPage() {
             grid-template-columns: 1fr !important;
           }
 
-          .admin-grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+          .admin-grid-5 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
 
           .admin-desk-row { grid-template-columns: 1fr !important; gap: 6px !important; }
 
@@ -2698,6 +2769,8 @@ export default function AdminPage() {
             margin-top: 8px;
           }
 
+          .admin-top-article-row { flex-wrap: wrap !important; }
+
           .admin-save-bar { flex-wrap: wrap !important; bottom: 0 !important; }
           .admin-save-bar button { flex: 1 1 auto !important; }
 
@@ -2708,7 +2781,7 @@ export default function AdminPage() {
         }
 
         @media (max-width: 520px) {
-          .admin-grid-4 { grid-template-columns: 1fr !important; }
+          .admin-grid-5 { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

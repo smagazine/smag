@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RevealObserver from "@/components/RevealObserver";
 import ScrollToTop from "@/components/ScrollToTop";
+import PageViewTracker from "@/components/PageViewTracker";
 import NewsletterForm from "@/components/NewsletterForm";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import { getCategories } from "@/lib/categories";
@@ -45,6 +46,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <RevealObserver />
       <ScrollToTop />
       <NewsletterPopup />
+      <PageViewTracker />
     </>
   );
 }
