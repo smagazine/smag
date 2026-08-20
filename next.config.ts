@@ -8,7 +8,9 @@ const CSP = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://images.unsplash.com https://picsum.photos https://placehold.co https://*.public.blob.vercel-storage.com",
+  // blob: is for the admin's local image-crop preview (URL.createObjectURL
+  // on the file the user just picked, before it's ever uploaded anywhere).
+  "img-src 'self' data: blob: https://images.unsplash.com https://picsum.photos https://placehold.co https://*.public.blob.vercel-storage.com",
   "media-src 'self' https://*.public.blob.vercel-storage.com",
   "font-src 'self'",
   // The admin's video-file upload PUTs bytes directly from the browser to

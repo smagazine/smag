@@ -156,6 +156,57 @@ const pid = (raw: string) =>
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
+/**
+ * Client-side downscale/compress before upload. Phone-camera photos are
+ * routinely 3–10MB, which is what stalls "Uploading…" forever on mobile —
+ * either the connection is too slow to push that much data, or it exceeds
+ * the platform's request-body limit and the connection dies mid-send with
+ * no response for `fetch` to resolve on. Shrinking here keeps uploads fast
+ * and small regardless of network quality. Falls back to the original file
+ * on any failure (e.g. a format the browser can't decode).
+ */
+async function shrinkForUpload(file: File, maxDim = 2400, quality = 0.85): Promise<File> {
+  if (file.type === "image/gif") return file; // preserve animation
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size <= 2 * 1024 * 1024) return file; // already small enough
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    const outType = file.type === "image/png" || file.type === "image/webp" ? file.type : "image/jpeg";
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, outType, quality));
+    if (!blob || blob.size >= file.size) return file;
+    const ext = outType === "image/png" ? ".png" : outType === "image/webp" ? ".webp" : ".jpg";
+    const name = file.name.replace(/\.[a-z0-9]+$/i, "") + ext;
+    return new File([blob], name, { type: outType });
+  } catch {
+    return file;
+  }
+}
+
+/** Wraps an upload POST with a hard timeout so a stalled mobile connection
+    surfaces a retry-able error instead of spinning on "Uploading…" forever. */
+async function uploadWithTimeout(url: string, form: FormData, timeoutMs = 45_000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { method: "POST", body: form, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Upload timed out — check your connection and try again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function slugify(s: string) {
   return s
     .toLowerCase()
@@ -646,9 +697,10 @@ function LibraryUploader({ onUploaded }: { onUploaded: (item: MediaItem) => void
     setError("");
     setUploading(true);
     try {
+      const compact = await shrinkForUpload(file);
       const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      form.append("file", compact);
+      const res = await uploadWithTimeout("/api/admin/upload", form);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "upload failed");
       onUploaded(data.media);
@@ -714,9 +766,10 @@ function PhotoField({ label, value, onChange }: { label: string; value: string; 
     setError("");
     setUploading(true);
     try {
+      const compact = await shrinkForUpload(file);
       const form = new FormData();
-      form.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+      form.append("file", compact);
+      const res = await uploadWithTimeout("/api/admin/upload", form);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "upload failed");
       onChange(data.media.url);
