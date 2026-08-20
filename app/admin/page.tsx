@@ -545,18 +545,46 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
+  // Available space is the viewport minus the modal's own padding/chrome —
+  // not a fixed 560×420, which is wider than most phone screens and was
+  // what pushed the image (and the action buttons below it) off-screen.
+  function maxDisplaySize(): { w: number; h: number } {
+    return {
+      w: Math.min(560, window.innerWidth - 64),
+      h: Math.min(420, window.innerHeight * 0.5),
+    };
+  }
+
+  function fitDisplay(naturalW: number, naturalH: number): { w: number; h: number } {
+    const { w: maxW, h: maxH } = maxDisplaySize();
+    const scale = Math.min(maxW / naturalW, maxH / naturalH, 1);
+    return { w: naturalW * scale, h: naturalH * scale };
+  }
+
   function handleImgLoad() {
     const img = imgRef.current;
     if (!img) return;
     const naturalW = img.naturalWidth;
     const naturalH = img.naturalHeight;
-    const scale = Math.min(560 / naturalW, 420 / naturalH);
-    const dispW = naturalW * scale;
-    const dispH = naturalH * scale;
+    const { w: dispW, h: dispH } = fitDisplay(naturalW, naturalH);
     setNatural({ w: naturalW, h: naturalH });
     setDisplay({ w: dispW, h: dispH });
     setCrop(centeredCropRect(null, dispW, dispH));
   }
+
+  // Recompute on rotation/resize so the modal never re-overflows after the
+  // viewport changes mid-crop; re-centers the crop rect at the same aspect.
+  useEffect(() => {
+    function onResize() {
+      if (!natural) return;
+      const { w: dispW, h: dispH } = fitDisplay(natural.w, natural.h);
+      setDisplay({ w: dispW, h: dispH });
+      setCrop(centeredCropRect(aspect, dispW, dispH));
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [natural, aspect]);
 
   function applyAspect(ratio: number | null) {
     if (!display) return;
@@ -622,16 +650,15 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(20,20,22,0.55)", zIndex: 1100, display: "grid", placeItems: "center", padding: 24 }}>
-      <div style={{ ...cardStyle, width: "min(640px, 100%)" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(20,20,22,0.55)", zIndex: 1100, display: "grid", placeItems: "center", padding: 16 }}>
+      <div style={{ ...cardStyle, width: "min(640px, 100%)", maxHeight: "92vh", overflowY: "auto", boxSizing: "border-box" }}>
         <p style={{ ...sectionLabel, marginBottom: 12 }}>Crop image</p>
         {objectUrl ? (
           <div
             style={{
               position: "relative",
               width: display?.w ?? "auto",
-              maxWidth: 560,
-              maxHeight: 420,
+              maxWidth: "100%",
               margin: "0 auto",
               background: "#111",
               touchAction: "none",
@@ -646,7 +673,7 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
               alt=""
               onLoad={handleImgLoad}
               draggable={false}
-              style={display ? { width: display.w, height: display.h, display: "block", userSelect: "none" } : { maxWidth: 560, maxHeight: 420, display: "block" }}
+              style={display ? { width: display.w, height: display.h, maxWidth: "100%", display: "block", userSelect: "none" } : { maxWidth: "100%", maxHeight: 420, display: "block" }}
             />
             {crop && display && (
               <div
@@ -654,12 +681,18 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
                 style={{
                   position: "absolute", left: crop.x, top: crop.y, width: crop.w, height: crop.h,
                   border: "2px solid #fff", boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)", cursor: "move",
+                  touchAction: "none",
                 }}
               >
                 <div
                   onPointerDown={onPointerDownResize}
-                  style={{ position: "absolute", right: -7, bottom: -7, width: 14, height: 14, borderRadius: 999, background: C.lime, border: "2px solid #fff", cursor: "nwse-resize" }}
-                />
+                  style={{
+                    position: "absolute", right: -16, bottom: -16, width: 32, height: 32,
+                    display: "grid", placeItems: "center", cursor: "nwse-resize", touchAction: "none",
+                  }}
+                >
+                  <div style={{ width: 14, height: 14, borderRadius: 999, background: C.lime, border: "2px solid #fff", pointerEvents: "none" }} />
+                </div>
               </div>
             )}
           </div>
@@ -667,7 +700,7 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
           <p style={{ fontSize: 13, color: C.sub, padding: "40px 0", textAlign: "center" }}>Loading image…</p>
         )}
         {display && (
-          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 14 }}>
+          <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 14, flexWrap: "wrap" }}>
             {CROP_ASPECTS.map((a) => (
               <button key={a.label} type="button" onClick={() => applyAspect(a.ratio)}
                 style={{ ...pillStyle, padding: "6px 13px", fontSize: 11, background: aspect === a.ratio ? C.ink : C.card, color: aspect === a.ratio ? "#fff" : C.text }}>
@@ -676,10 +709,10 @@ function ImageCropModal({ file, onCancel, onConfirm }: { file: File; onCancel: (
             ))}
           </div>
         )}
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18 }}>
-          <button type="button" onClick={onCancel} style={pillStyle}>Cancel</button>
-          <button type="button" onClick={() => onConfirm(file)} style={pillStyle}>Use original</button>
-          <button type="button" onClick={confirm} disabled={!crop} style={{ ...darkPillStyle, opacity: crop ? 1 : 0.5 }}>Apply crop</button>
+        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 18, flexWrap: "wrap" }}>
+          <button type="button" onClick={onCancel} style={{ ...pillStyle, justifyContent: "center" }}>Cancel</button>
+          <button type="button" onClick={() => onConfirm(file)} style={{ ...pillStyle, justifyContent: "center" }}>Use original</button>
+          <button type="button" onClick={confirm} disabled={!crop} style={{ ...darkPillStyle, justifyContent: "center", opacity: crop ? 1 : 0.5 }}>Apply crop</button>
         </div>
       </div>
     </div>
