@@ -207,6 +207,29 @@ async function uploadWithTimeout(url: string, form: FormData, timeoutMs = 45_000
   }
 }
 
+/** fetch() has no upload-progress event, so video uploads (direct-to-bucket
+    PUT, and the local-dev FormData fallback) go through XHR instead. */
+function xhrUpload(
+  method: "PUT" | "POST",
+  url: string,
+  body: File | FormData,
+  opts: { contentType?: string; onProgress?: (pct: number) => void; timeoutMs?: number } = {}
+): Promise<{ status: number; body: string }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.timeout = opts.timeoutMs ?? 5 * 60_000;
+    if (opts.contentType) xhr.setRequestHeader("Content-Type", opts.contentType);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && opts.onProgress) opts.onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => resolve({ status: xhr.status, body: xhr.responseText });
+    xhr.onerror = () => reject(new Error("Upload failed — check your connection and try again."));
+    xhr.ontimeout = () => reject(new Error("Upload timed out — check your connection and try again."));
+    xhr.send(body);
+  });
+}
+
 function slugify(s: string) {
   return s
     .toLowerCase()
@@ -905,13 +928,40 @@ function VideoFileField({ value, onUploaded }: { value: string; onUploaded: (url
     setUploading(true);
     setProgress(0);
     try {
-      const { upload } = await import("@vercel/blob/client");
-      const blob = await upload(file.name, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/upload/video",
-        onUploadProgress: (p) => setProgress(Math.round(p.percentage)),
+      const startRes = await fetch("/api/admin/upload/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
       });
-      onUploaded(blob.url);
+      const start = await startRes.json();
+      if (!startRes.ok) throw new Error(start.error || "upload failed");
+
+      if (start.direct) {
+        // Firebase Storage configured: PUT straight to the signed URL, then
+        // tell the server to register the finished upload.
+        const put = await xhrUpload("PUT", start.uploadUrl, file, {
+          contentType: start.contentType,
+          onProgress: setProgress,
+        });
+        if (put.status < 200 || put.status >= 300) throw new Error("upload failed");
+        const confirmRes = await fetch("/api/admin/upload/video/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: start.key, filename: file.name }),
+        });
+        const confirmed = await confirmRes.json();
+        if (!confirmRes.ok) throw new Error(confirmed.error || "upload failed");
+        onUploaded(confirmed.media.url);
+      } else {
+        // Local dev without Firebase configured: upload the file straight
+        // through the server (only works under `next dev`).
+        const form = new FormData();
+        form.append("file", file);
+        const res = await xhrUpload("POST", "/api/admin/upload/video/local", form, { onProgress: setProgress });
+        const data = JSON.parse(res.body || "{}");
+        if (res.status < 200 || res.status >= 300) throw new Error(data.error || "upload failed");
+        onUploaded(data.media.url);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "upload failed");
     } finally {

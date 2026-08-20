@@ -1,5 +1,5 @@
 import { isAuthed } from "@/lib/auth";
-import { uploadImage } from "@/lib/blob";
+import { uploadImage } from "@/lib/storage";
 import { addMedia } from "@/lib/media";
 import { StorageError } from "@/lib/storage-error";
 import { rateLimit, clientIp } from "@/lib/rate-limit";

@@ -248,7 +248,7 @@ export function normalizeArticle(input: unknown): Article {
         } catch {
           throw new ValidationError(`body[${i}].videoUrl is not a valid URL`);
         }
-        if (parsed.protocol !== "https:" || !parsed.hostname.endsWith(".public.blob.vercel-storage.com")) {
+        if (parsed.protocol !== "https:" || parsed.hostname !== "storage.googleapis.com") {
           throw new ValidationError(`body[${i}].videoUrl must be an uploaded video file URL`);
         }
         block.videoUrl = url;

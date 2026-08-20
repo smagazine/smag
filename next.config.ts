@@ -10,13 +10,14 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   // blob: is for the admin's local image-crop preview (URL.createObjectURL
   // on the file the user just picked, before it's ever uploaded anywhere).
-  "img-src 'self' data: blob: https://images.unsplash.com https://picsum.photos https://placehold.co https://*.public.blob.vercel-storage.com",
-  "media-src 'self' https://*.public.blob.vercel-storage.com",
+  // storage.googleapis.com serves uploaded media (Firebase Cloud Storage).
+  "img-src 'self' data: blob: https://images.unsplash.com https://picsum.photos https://placehold.co https://storage.googleapis.com",
+  "media-src 'self' https://storage.googleapis.com",
   "font-src 'self'",
   // The admin's video-file upload PUTs bytes directly from the browser to
-  // Blob storage (client-upload pattern), so that host must be allowed here
-  // too, not just in media-src (playback).
-  "connect-src 'self' https://*.public.blob.vercel-storage.com",
+  // Cloud Storage (signed-URL client-upload pattern), so that host must be
+  // allowed here too, not just in media-src (playback).
+  "connect-src 'self' https://storage.googleapis.com",
   "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
   "frame-ancestors 'self'",
   "base-uri 'self'",
@@ -29,7 +30,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "placehold.co" },
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "**.public.blob.vercel-storage.com" },
+      { protocol: "https", hostname: "storage.googleapis.com" },
     ],
   },
   async headers() {

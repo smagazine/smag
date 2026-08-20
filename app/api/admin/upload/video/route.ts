@@ -1,48 +1,48 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { isAuthed } from "@/lib/auth";
-import { addMedia } from "@/lib/media";
+import { createSignedUploadUrl } from "@/lib/storage";
+import { firebaseConfigured } from "@/lib/firebase-admin";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 
-// Video files are far larger than Vercel's serverless request body limit, so
-// unlike /api/admin/upload (images, server-side), this route only issues a
-// short-lived client upload token — the browser PUTs the bytes straight to
-// Blob storage. See @vercel/blob/client's handleUpload().
-const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm"];
-const MAX_VIDEO_BYTES = 200 * 1024 * 1024; // 200MB
+// Video files are far larger than a serverless function's request-body
+// limit, so unlike /api/admin/upload (images, server-side), this route only
+// issues a short-lived signed URL — the browser PUTs the bytes straight to
+// Cloud Storage. The client then calls /api/admin/upload/video/confirm to
+// register the finished upload (Cloud Storage has no server-callback
+// equivalent of Vercel Blob's onUploadCompleted).
+const ALLOWED_VIDEO_TYPES = new Set(["video/mp4", "video/webm"]);
 
 export async function POST(request: Request) {
+  if (!(await isAuthed())) {
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
   if (!rateLimit(`upload-video:${clientIp(request)}`, 10, 60_000)) {
     return Response.json({ error: "too many uploads, try again later" }, { status: 429 });
   }
 
-  const body = (await request.json()) as HandleUploadBody;
+  let body: { filename?: unknown; contentType?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "invalid body" }, { status: 400 });
+  }
+
+  const filename = typeof body.filename === "string" ? body.filename : "";
+  const contentType = typeof body.contentType === "string" ? body.contentType : "";
+  if (!ALLOWED_VIDEO_TYPES.has(contentType)) {
+    return Response.json({ error: "only MP4 or WebM videos are allowed" }, { status: 400 });
+  }
+
+  // Local dev without Firebase configured: no cloud bucket to sign a URL
+  // against, so tell the client to fall back to a direct server upload
+  // (only viable under `next dev`, same constraint as the image path).
+  if (!firebaseConfigured) {
+    return Response.json({ direct: false });
+  }
 
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => {
-        // Only the token-issuance step is a real user action from the admin's
-        // browser; the completed-upload callback below is called by Vercel's
-        // own infrastructure and can't carry our session cookie.
-        if (!(await isAuthed())) {
-          throw new Error("unauthorized");
-        }
-        return {
-          allowedContentTypes: ALLOWED_VIDEO_TYPES,
-          maximumSizeInBytes: MAX_VIDEO_BYTES,
-          addRandomSuffix: true,
-        };
-      },
-      onUploadCompleted: async ({ blob }) => {
-        // Not reachable from localhost in dev (Vercel platform limitation) —
-        // dev-uploaded videos just won't show up in the media library until
-        // this deploys; the upload itself still works.
-        await addMedia({ url: blob.url, filename: blob.pathname });
-      },
-    });
-    return Response.json(jsonResponse);
+    const { uploadUrl, key, publicUrl } = await createSignedUploadUrl(filename, contentType);
+    return Response.json({ direct: true, uploadUrl, key, publicUrl, contentType });
   } catch (err) {
-    return Response.json({ error: err instanceof Error ? err.message : "upload failed" }, { status: 400 });
+    return Response.json({ error: err instanceof Error ? err.message : "could not start upload" }, { status: 503 });
   }
 }
