@@ -76,6 +76,19 @@ interface SubscriberEntry {
   receivedAt?: string;
 }
 
+interface SessionUser {
+  id: string;
+  username: string;
+  role: "admin" | "editor";
+}
+
+interface AdminUser {
+  id: string;
+  username: string;
+  role: "admin" | "editor";
+  createdAt: string;
+}
+
 interface AnalyticsSummary {
   totalViews: number;
   viewsToday: number;
@@ -279,6 +292,7 @@ const ICONS = {
   trash: "M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6",
   chat: "M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z",
   chart: "M4 20V10M11 20V4M18 20v-7M3 20h18",
+  users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
 };
 
 // ── Shared style atoms ─────────────────────────────────────────────────────
@@ -1100,9 +1114,9 @@ function BlockEditor({
 
 // ── Main Component ─────────────────────────────────────────────────────────
 
-type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors" | "categories" | "comments" | "analytics";
+type Tab = "dashboard" | "articles" | "editor" | "media" | "inbox" | "sponsors" | "categories" | "comments" | "analytics" | "users";
 
-const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS }[] = [
+const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICONS; adminOnly?: boolean }[] = [
   { key: "dashboard", label: "Dashboard", icon: "home" },
   { key: "articles", label: "Articles", icon: "doc" },
   { key: "categories", label: "Categories", icon: "doc" },
@@ -1111,6 +1125,7 @@ const NAV: { key: Exclude<Tab, "editor">; label: string; icon: keyof typeof ICON
   { key: "comments", label: "Comments", icon: "chat" },
   { key: "inbox", label: "Inbox", icon: "inbox" },
   { key: "analytics", label: "Analytics", icon: "chart" },
+  { key: "users", label: "Users", icon: "users", adminOnly: true },
 ];
 
 const BLANK_CATEGORY: Category = { id: "", label: "", labelAr: "", deck: "", deckAr: "", headerClass: "", italicTitle: false, photo: "", order: 0 };
@@ -1224,9 +1239,14 @@ export default function AdminPage() {
   const [slugLocked, setSlugLocked] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [me, setMe] = useState<SessionUser | null>(null);
+  const [uname, setUname] = useState("");
   const [pwd, setPwd] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userForm, setUserForm] = useState({ username: "", password: "", role: "editor" as "admin" | "editor" });
+  const [userErr, setUserErr] = useState("");
   const [contacts, setContacts] = useState<ContactEntry[]>([]);
   const [subscribers, setSubscribers] = useState<SubscriberEntry[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
@@ -1440,8 +1460,19 @@ export default function AdminPage() {
   useEffect(() => {
     fetch("/api/admin/login")
       .then((r) => r.json())
-      .then((d) => setAuthed(Boolean(d.authed)))
+      .then((d) => { setAuthed(Boolean(d.authed)); setMe(d.user ?? null); })
       .catch(() => setAuthed(false));
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (!res.ok) return;
+      const d = await res.json();
+      setUsers(Array.isArray(d.users) ? d.users : []);
+    } catch {
+      /* non-fatal */
+    }
   }, []);
 
   useEffect(() => {
@@ -1457,8 +1488,9 @@ export default function AdminPage() {
       fetchCategories();
       fetchComments();
       fetchAnalytics();
+      if (me?.role === "admin") fetchUsers();
     }
-  }, [authed, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories, fetchComments, fetchAnalytics]);
+  }, [authed, me, fetchArticles, fetchSubmissions, fetchSponsors, fetchMedia, fetchCategories, fetchComments, fetchAnalytics, fetchUsers]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -1468,13 +1500,16 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pwd }),
+        body: JSON.stringify({ username: uname, password: pwd }),
       });
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setLoginErr("Incorrect password");
+        setLoginErr(data?.error || "Incorrect username or password");
         return;
       }
+      setUname("");
       setPwd("");
+      setMe(data.user ?? null);
       setAuthed(true);
     } catch {
       setLoginErr("Login failed");
@@ -1486,11 +1521,41 @@ export default function AdminPage() {
   async function logout() {
     await fetch("/api/admin/login", { method: "DELETE" }).catch(() => {});
     setAuthed(false);
+    setMe(null);
     setArticles([]);
     setContacts([]);
     setSubscribers([]);
     setComments([]);
+    setUsers([]);
     setTab("dashboard");
+  }
+
+  async function createAdminUser() {
+    setUserErr("");
+    if (!/^[a-zA-Z0-9_.-]{3,32}$/.test(userForm.username)) {
+      return setUserErr("Username must be 3-32 characters (letters, numbers, _ . -)");
+    }
+    if (userForm.password.length < 8) {
+      return setUserErr("Password must be at least 8 characters");
+    }
+    const res = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userForm),
+    }).catch(() => null);
+    const data = await res?.json().catch(() => null);
+    if (!res?.ok) return setUserErr(data?.error || "Failed to create user");
+    setUserForm({ username: "", password: "", role: "editor" });
+    await fetchUsers();
+    showToast("User created");
+  }
+
+  async function removeAdminUser(id: string) {
+    const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" }).catch(() => null);
+    const data = await res?.json().catch(() => null);
+    if (!res?.ok) return showToast(data?.error || "Failed to delete user", "err");
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    showToast("User deleted");
   }
 
   // Auto-slug from title when creating new article
@@ -1671,6 +1736,7 @@ export default function AdminPage() {
     categories: ["Categories", `${categories.length} desks · drag order controls the site nav`],
     comments: ["Comments", `${comments.filter((c) => c.status === "pending").length} awaiting moderation · ${comments.length} total`],
     analytics: ["Analytics", `${analytics.totalViews.toLocaleString()} page views · ${analytics.topArticles.length} articles with traffic`],
+    users: ["Users", `${users.length} account${users.length === 1 ? "" : "s"} · manage who can access this console`],
   };
 
   const pendingComments = comments.filter((c) => c.status === "pending").length;
@@ -1705,8 +1771,10 @@ export default function AdminPage() {
               <div style={{ fontSize: 10.5, color: C.sub }}>Newsroom console</div>
             </div>
           </div>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>Admin password</label>
-          <input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} autoFocus style={inputStyle} />
+          <label style={{ ...labelStyle, marginBottom: 0 }}>Username <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(leave blank for the shared admin password)</span></label>
+          <input type="text" value={uname} onChange={(e) => setUname(e.target.value)} autoComplete="username" autoFocus style={inputStyle} />
+          <label style={{ ...labelStyle, marginBottom: 0 }}>Password</label>
+          <input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} autoComplete="current-password" style={inputStyle} />
           {loginErr && <p style={{ fontSize: 12, color: C.red, margin: 0 }}>{loginErr}</p>}
           <button type="submit" disabled={loggingIn}
             style={{ ...darkPillStyle, justifyContent: "center", padding: "12px 16px", fontSize: 13, opacity: loggingIn ? 0.6 : 1 }}>
@@ -1740,7 +1808,7 @@ export default function AdminPage() {
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {NAV.map(({ key, label, icon }) => {
+            {NAV.filter((n) => !n.adminOnly || me?.role === "admin").map(({ key, label, icon }) => {
               const active = activeNav === key;
               return (
                 <button key={key} onClick={() => { setTab(key); setNavOpen(false); }}
@@ -1777,9 +1845,13 @@ export default function AdminPage() {
           <div style={{ marginTop: "auto" }}>
             <div style={{ borderTop: `1px solid ${C.line}`, margin: "0 6px 14px" }} />
             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 8px" }}>
-              <div style={{ width: 36, height: 36, borderRadius: 999, background: `linear-gradient(135deg, ${C.lime}, #5f8c00)`, display: "grid", placeItems: "center", fontWeight: 800, fontSize: 13, color: "#111", flexShrink: 0 }}>A</div>
+              <div style={{ width: 36, height: 36, borderRadius: 999, background: `linear-gradient(135deg, ${C.lime}, #5f8c00)`, display: "grid", placeItems: "center", fontWeight: 800, fontSize: 13, color: "#111", flexShrink: 0 }}>
+                {(me?.username ?? "A").charAt(0).toUpperCase()}
+              </div>
               <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 700 }}>Admin</div>
+                <div style={{ fontSize: 12, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {me?.username ?? "Admin"}{me?.role === "editor" && <span style={{ color: C.sub, fontWeight: 400 }}> · editor</span>}
+                </div>
                 <Link href="/" style={{ fontSize: 10.5, color: C.sub, textDecoration: "none" }}>View site ↗</Link>
               </div>
               <button type="button" onClick={logout} title="Log out" style={{ ...iconBtnStyle, width: 30, height: 30 }}>
@@ -2855,6 +2927,73 @@ export default function AdminPage() {
                 )}
               </div>
             </div>
+          )}
+
+          {/* ── USERS ── */}
+          {tab === "users" && (
+            me?.role !== "admin" ? (
+              <p style={{ color: C.sub, textAlign: "center", padding: 60, fontSize: 13 }}>
+                You need admin access to manage users.
+              </p>
+            ) : (
+              <div className="admin-grid-main-side" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr)", gap: 18, alignItems: "start" }}>
+                <div style={cardStyle}>
+                  <p style={sectionLabel}>Accounts</p>
+                  {users.map((u) => (
+                    <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${C.line}` }}>
+                      <div style={{ width: 34, height: 34, borderRadius: 999, background: u.role === "admin" ? "rgba(166,214,31,0.18)" : "#ececef", color: u.role === "admin" ? "#5f8c00" : C.sub, display: "grid", placeItems: "center", fontSize: 13, fontWeight: 800, flexShrink: 0 }}>
+                        {u.username.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <p style={{ fontSize: 13, fontWeight: 700 }}>
+                          {u.username} {u.id === me.id && <span style={{ color: C.sub, fontWeight: 400 }}>(you)</span>}
+                        </p>
+                        <p style={{ fontSize: 11, color: C.sub, textTransform: "capitalize" }}>
+                          {u.role} · joined {new Date(u.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button type="button" onClick={() => removeAdminUser(u.id)} disabled={u.id === me.id}
+                        title={u.id === me.id ? "You can't delete your own account while logged in" : "Delete account"}
+                        style={{ ...iconBtnStyle, width: 30, height: 30, color: C.red, opacity: u.id === me.id ? 0.35 : 1, cursor: u.id === me.id ? "default" : "pointer" }}>
+                        <Ic d={ICONS.trash} size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {users.length === 0 && <p style={{ fontSize: 12, color: C.faint, padding: "8px 0 14px" }}>No named accounts yet — everyone's still logging in with the shared admin password.</p>}
+                </div>
+
+                <div style={darkCardStyle}>
+                  <p style={{ ...sectionLabel, color: "rgba(255,255,255,0.55)" }}>Add account</p>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ ...labelStyle, color: "rgba(255,255,255,0.5)" }}>Username</label>
+                    <input style={inputStyle} value={userForm.username}
+                      onChange={(e) => setUserForm((f) => ({ ...f, username: e.target.value }))}
+                      placeholder="e.g. sara" />
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ ...labelStyle, color: "rgba(255,255,255,0.5)" }}>Password</label>
+                    <input type="password" style={inputStyle} value={userForm.password}
+                      onChange={(e) => setUserForm((f) => ({ ...f, password: e.target.value }))}
+                      placeholder="At least 8 characters" />
+                  </div>
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ ...labelStyle, color: "rgba(255,255,255,0.5)" }}>Role</label>
+                    <select style={{ ...selectStyle, width: "100%" }} value={userForm.role}
+                      onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value as "admin" | "editor" }))}>
+                      <option value="editor">Editor — full CMS access, can't manage users</option>
+                      <option value="admin">Admin — full CMS access, can manage users</option>
+                    </select>
+                  </div>
+                  {userErr && <p style={{ fontSize: 11.5, color: "#ff8a80", marginBottom: 10 }}>{userErr}</p>}
+                  <button type="button" onClick={createAdminUser} style={{ ...limePillStyle, justifyContent: "center", width: "100%", padding: "10px 16px" }}>
+                    Create account
+                  </button>
+                  <p style={{ fontSize: 10.5, color: "rgba(255,255,255,0.45)", marginTop: 14, lineHeight: 1.6 }}>
+                    The shared admin password (set via <code>ADMIN_PASSWORD</code>) still works as a login with no username — handy for recovery, but named accounts are the better day-to-day option.
+                  </p>
+                </div>
+              </div>
+            )
           )}
         </main>
       </div>

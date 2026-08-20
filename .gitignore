@@ -41,6 +41,7 @@ yarn-error.log*
 /data/*.tmp
 /data/media.json
 /data/analytics.json
+/data/users.json
 
 # local-dev media uploads (production uses Vercel Blob instead)
 /public/uploads

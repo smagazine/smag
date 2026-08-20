@@ -46,9 +46,12 @@ A bilingual (EN/AR) magazine site — "SAUDI MAG" — built on the App Router wi
 
 ### Auth
 
-- The write API (`POST/PUT/DELETE`) and the `/admin` UI are gated by a single shared password. `lib/auth.ts` verifies an httpOnly session cookie (an HMAC of the password + secret, so it's stateless — no session store). Set `ADMIN_PASSWORD` and `ADMIN_SECRET` (see `.env.example`); without them it falls back to insecure dev defaults.
+- The write API (`POST/PUT/DELETE`) and the `/admin` UI are gated by a session cookie, stateless by design — `lib/auth.ts` signs the cookie's payload (an HMAC over `{id, username, role}` keyed by `ADMIN_SECRET`) rather than looking anything up, so it verifies with no session store. Two ways to obtain one:
+  - **Named accounts** (`lib/users.ts`, KV-or-file like the rest of the data layer): username + password, checked against a per-user scrypt hash. Roles are `admin` (full CMS access, can manage other users via the admin `Users` tab and `/api/admin/users`) and `editor` (full CMS access, can't manage users).
+  - **The legacy shared password** (`ADMIN_PASSWORD`, no username): always available as a break-glass login, treated as an implicit admin. It's what bootstraps the very first named account, and doubles as recovery if every named account gets locked out.
+  Set `ADMIN_PASSWORD` and `ADMIN_SECRET` (see `.env.example`); without them it falls back to insecure dev defaults.
 - `CRON_SECRET` gates `/api/cron/publish` separately (Vercel Cron sends it as a bearer token); with no `CRON_SECRET` set the route rejects everything but a logged-in admin.
-- Every write route must call `isAuthed()` and 401 on failure. `/api/admin/login` handles `GET` (session check), `POST` (login), `DELETE` (logout). Same-origin admin `fetch` calls send the cookie automatically.
+- Every write route must call `isAuthed()` and 401 on failure; routes that manage users additionally check `getSession()?.role === "admin"` and 403 otherwise. `/api/admin/login` handles `GET` (session check, returns the current user), `POST` (login), `DELETE` (logout). Same-origin admin `fetch` calls send the cookie automatically.
 
 ### Routes
 
