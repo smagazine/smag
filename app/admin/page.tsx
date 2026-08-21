@@ -2319,7 +2319,7 @@ export default function AdminPage() {
                       )}
                     </p>
                     <p style={{ fontSize: 10, color: C.faint, marginTop: 6 }}>
-                      Times are in your timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). Publishing runs hourly, so it may appear up to an hour after the time you set.
+                      Times are in your timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). Publishing runs once daily, so it may appear up to a day after the time you set.
                     </p>
                   </div>
                 )}
