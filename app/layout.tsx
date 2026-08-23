@@ -69,18 +69,20 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="en"
-      dir="ltr"
+      lang="ar"
+      dir="rtl"
       className={`${newsreader.variable} ${jost.variable} ${cairo.variable} ${materialSymbols.variable}`}
     >
       <head>
         {/* Apply saved theme + language before first paint to avoid a
-            light/LTR flash for dark-mode / Arabic users. Keep the storage keys
-            in sync with ThemeContext (saudi-mag-dark-mode) and LangContext
-            (saudi-mag-lang). */}
+            flash of the wrong mode. Arabic/RTL is the default (matches the
+            lang/dir set on <html> above); this only needs to override back
+            to English for a visitor who's explicitly switched to it. Keep
+            the storage keys in sync with ThemeContext (saudi-mag-dark-mode)
+            and LangContext (saudi-mag-lang). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement;if(localStorage.getItem('saudi-mag-dark-mode')==='1')d.dataset.theme='dark';if(localStorage.getItem('saudi-mag-lang')==='ar'){d.lang='ar';d.dir='rtl';}}catch(e){}})();`,
+            __html: `(function(){try{var d=document.documentElement;if(localStorage.getItem('saudi-mag-dark-mode')==='1')d.dataset.theme='dark';if(localStorage.getItem('saudi-mag-lang')==='en'){d.lang='en';d.dir='ltr';}}catch(e){}})();`,
           }}
         />
         <meta name="theme-color" content="#000000" />

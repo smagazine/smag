@@ -3655,7 +3655,11 @@ dialog.membership-dialog::backdrop {
 }
 
 .ao-media img {
-  object-fit: cover;
+  /* Cards keep their fixed aspect-ratio box (grid alignment depends on it),
+     but the photo itself is no longer cropped to fill it — contain shows
+     the whole image, letterboxed on --color-soft (set on .ao-media above)
+     when its aspect ratio doesn't match the box. */
+  object-fit: contain;
   transition: transform 500ms ease;
 }
 

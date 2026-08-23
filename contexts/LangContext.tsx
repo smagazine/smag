@@ -6,7 +6,7 @@ const LANG_KEY = "saudi-mag-lang";
 type Lang = "en" | "ar";
 type LangCtx = { lang: Lang; toggle: () => void; t: (en: string, ar: string) => string };
 
-const LangContext = createContext<LangCtx>({ lang: "en", toggle: () => {}, t: (en) => en });
+const LangContext = createContext<LangCtx>({ lang: "ar", toggle: () => {}, t: (_en, ar) => ar });
 
 function applyLang(lang: Lang) {
   const html = document.documentElement;
@@ -40,17 +40,20 @@ function applyLang(lang: Lang) {
 }
 
 export function LangProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Lang>("en");
+  // Arabic is the default (matches the lang/dir SSR'd on <html> in
+  // app/layout.tsx) — only a visitor who's explicitly switched to English
+  // before should start there instead.
+  const [lang, setLang] = useState<Lang>("ar");
   const pathname = usePathname();
 
   // Restore persisted language on mount. Reads localStorage/DOM, both
   // unavailable at render time (SSR) — this can't be computed without an effect.
   useEffect(() => {
-    const saved = (localStorage.getItem(LANG_KEY) ?? "en") as Lang;
-    if (saved === "ar") {
+    const saved = localStorage.getItem(LANG_KEY) as Lang | null;
+    if (saved === "en") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLang("ar");
-      applyLang("ar");
+      setLang("en");
+      applyLang("en");
     }
   }, []);
 
