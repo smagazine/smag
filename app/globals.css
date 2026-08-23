@@ -217,9 +217,29 @@ button {
 
 .site-nav {
   display: flex;
-  justify-content: center;
+  /* `safe` keeps the current centered look when everything fits, but falls
+     back to start-alignment instead of centering once content overflows —
+     without it, centering an overflowing flex row leaves equal (invisible,
+     unreachable-by-scrolling-to-start) overflow on both sides, so the row
+     opens already scrolled into the middle with both edges cut off. */
+  justify-content: safe center;
   gap: clamp(20px, 4vw, 54px);
-  padding: 15px 0 17px;
+  padding: 15px 20px 17px;
+  /* More desks than fit in one row (client-added categories) used to just
+     clip on both edges. Let it scroll horizontally instead — nowrap +
+     flex-shrink:0 on the links so they never wrap/compress, a hidden
+     scrollbar since the fade mask below is the affordance, and the mask
+     itself hints there's more to scroll to without needing extra markup. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+}
+
+.site-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .site-nav a,
@@ -243,6 +263,7 @@ button {
   position: relative;
   padding-block: 4px;
   transition: color var(--ease);
+  flex-shrink: 0;
 }
 
 .site-nav a::after {
