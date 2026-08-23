@@ -17,6 +17,23 @@ export const kvConfigured = firebaseConfigured;
 
 const COLLECTION = "kv_data";
 
+// Every entity in this codebase (Article, Category, Sponsor, …) has optional
+// fields that end up `undefined` rather than omitted (e.g. `photo:
+// typeof x === "string" && x ? x : undefined`) — plain Firestore rejects
+// writing those outright. ignoreUndefinedProperties makes it behave like
+// JSON.stringify instead (drops them), matching what every call site
+// already assumes. Firestore only allows this to be set once, before the
+// first real operation, hence the lazy one-time init.
+let db: ReturnType<typeof getFirestore> | null = null;
+
+function getDb() {
+  if (!db) {
+    db = getFirestore(getFirebaseApp());
+    db.settings({ ignoreUndefinedProperties: true });
+  }
+  return db;
+}
+
 // Firestore document IDs can't contain "/"; every key used in this codebase
 // is already a plain slug ("articles:data", "contact-requests", …) so this
 // is just a defensive guard, not something expected to ever fire.
@@ -25,7 +42,7 @@ function docId(key: string): string {
 }
 
 function ref(key: string) {
-  return getFirestore(getFirebaseApp()).collection(COLLECTION).doc(docId(key));
+  return getDb().collection(COLLECTION).doc(docId(key));
 }
 
 export async function kvGetJson<T>(key: string, fallback: T): Promise<T> {
