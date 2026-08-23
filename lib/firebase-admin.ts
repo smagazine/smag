@@ -2,17 +2,19 @@ import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 
 /**
- * Firebase Admin bootstrap for server-side file storage (images/videos).
- * Needs a service-account key — create one in the Firebase console under
- * Project settings → Service accounts → Generate new private key — and set:
+ * Firebase Admin bootstrap — backs both file storage (images/videos, see
+ * lib/storage.ts) and the JSON data layer (articles/sponsors/etc, see
+ * lib/firestore.ts). Needs a service-account key — create one in the
+ * Firebase console under Project settings → Service accounts → Generate
+ * new private key — and set:
  *
  *   FIREBASE_PROJECT_ID
  *   FIREBASE_CLIENT_EMAIL
  *   FIREBASE_PRIVATE_KEY       (keep the literal \n line breaks; see .env.example)
  *   FIREBASE_STORAGE_BUCKET    (e.g. your-project.appspot.com)
  *
- * Without these, uploads fall back to public/uploads/ under `npm run dev`
- * only, same as the rest of this app's storage layer (see lib/storage.ts).
+ * Without these, both fall back to the local filesystem (public/uploads/,
+ * data/*.json) under `npm run dev` only.
  */
 
 export const firebaseConfigured = Boolean(
@@ -24,7 +26,7 @@ export const firebaseConfigured = Boolean(
 
 let app: App | null = null;
 
-function getFirebaseApp(): App {
+export function getFirebaseApp(): App {
   if (app) return app;
   const existing = getApps();
   if (existing.length > 0) {

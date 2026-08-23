@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { withLock } from "@/lib/file-lock";
-import { kvConfigured, kvCommand } from "@/lib/kv";
+import { kvConfigured, kvCommand } from "@/lib/firestore";
 
 /**
  * Pageview counters for the admin dashboard: total site views, a per-day

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
-import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
 
 /**
  * Category "desks" that power the public nav, homepage pill nav, and the

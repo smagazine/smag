@@ -3,7 +3,7 @@ import path from "path";
 import { safeEmbedUrl } from "@/lib/video";
 import { withLock } from "@/lib/file-lock";
 import { StorageError } from "@/lib/storage-error";
-import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
 
 export { StorageError };
 

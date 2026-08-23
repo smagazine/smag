@@ -3,7 +3,7 @@ import path from "path";
 import crypto from "crypto";
 import { withLock } from "@/lib/file-lock";
 import { StorageError } from "@/lib/storage-error";
-import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
 import { EMAIL_RE } from "@/lib/submissions";
 
 export { StorageError };

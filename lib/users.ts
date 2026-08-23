@@ -3,7 +3,7 @@ import path from "path";
 import crypto from "crypto";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
-import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
 
 /**
  * Named admin-panel accounts, on top of the legacy shared ADMIN_PASSWORD

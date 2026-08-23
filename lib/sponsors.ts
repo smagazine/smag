@@ -3,7 +3,7 @@ import path from "path";
 import { ValidationError } from "@/lib/articles";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
-import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/kv";
+import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
 
 /**
  * Sponsor registry + category sponsorships for the native-advertising model.

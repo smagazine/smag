@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { StorageError } from "@/lib/storage-error";
 import { withLock } from "@/lib/file-lock";
-import { kvConfigured, kvCommand } from "@/lib/kv";
+import { kvConfigured, kvCommand } from "@/lib/firestore";
 
 // Persists form submissions. Two backends:
 //
