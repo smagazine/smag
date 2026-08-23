@@ -356,6 +356,15 @@ button {
   transition: transform 800ms ease, filter 800ms ease;
 }
 
+/* The hero frame is tall and full-width, so a portrait-oriented photo (a
+   headshot, say) gets cropped hard by object-fit: cover. Anchoring above
+   center instead of dead-center keeps faces in frame without needing a
+   manual 16:9 crop for every upload — not perfect for every composition,
+   but right far more often than a centered crop is. */
+.article-hero img {
+  object-position: 50% 22%;
+}
+
 .hero-media:hover img,
 .article-card:hover .card-media img,
 .collection-card:hover img,
