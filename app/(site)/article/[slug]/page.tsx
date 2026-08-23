@@ -147,7 +147,16 @@ export default async function ArticleSlugPage(
 
         <article>
           <figure className="article-hero reveal">
-            <Image fill priority src={U(article.heroPhoto, 1920, 1080)} alt={article.title} data-article-hero="" sizes="100vw" />
+            <Image
+              priority
+              src={U(article.heroPhoto, 1920, 1080)}
+              alt={article.title}
+              data-article-hero=""
+              sizes="100vw"
+              width={1920}
+              height={1080}
+              style={{ width: "100%", height: "auto" }}
+            />
           </figure>
 
           <header className="article-header container reveal">

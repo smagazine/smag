@@ -369,21 +369,21 @@ button {
 .hero-media img,
 .image-frame img,
 .card-media img,
-.collection-card img,
-.article-hero img {
+.collection-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 800ms ease, filter 800ms ease;
 }
 
-/* The hero frame is tall and full-width, so a portrait-oriented photo (a
-   headshot, say) gets cropped hard by object-fit: cover. Anchoring above
-   center instead of dead-center keeps faces in frame without needing a
-   manual 16:9 crop for every upload — not perfect for every composition,
-   but right far more often than a centered crop is. */
+/* Unlike the cropped hero-style images above, the article hero shows the
+   photo in full — no crop, no fixed box to fill. It's rendered at its
+   natural aspect ratio (width:100%, height:auto), so the frame's height
+   just follows whatever that works out to at the current viewport width. */
 .article-hero img {
-  object-position: 50% 22%;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .hero-media:hover img,
@@ -1057,9 +1057,6 @@ p {
 }
 
 .article-hero {
-  height: min(78svh, 820px);
-  min-height: 520px;
-  overflow: hidden;
   background: var(--color-soft);
 }
 
@@ -1781,11 +1778,6 @@ dialog.membership-dialog::backdrop {
   .collection-card.large,
   .collection-card {
     min-height: 260px;
-  }
-
-  .article-hero {
-    min-height: 280px;
-    height: 46svh;
   }
 
   /* Tighter article header on phones */
@@ -2582,13 +2574,6 @@ dialog.membership-dialog::backdrop {
   color: var(--color-gold-soft);
 }
 
-/* ─── Article hero — taller ───────────────────────────────────────────── */
-
-.article-hero {
-  height: min(88svh, 900px);
-  min-height: 560px;
-}
-
 /* ─── Responsive overrides (layout redesign) ──────────────────────────── */
 
 @media (max-width: 980px) {
@@ -2626,11 +2611,6 @@ dialog.membership-dialog::backdrop {
 
   .news-grid {
     grid-template-columns: 1fr;
-  }
-
-  .article-hero {
-    height: 44svh;
-    min-height: 240px;
   }
 }
 
