@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -109,16 +109,6 @@ interface CommentEntry {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const CATEGORIES = [
-  "Architecture & Design",
-  "Sports",
-  "F&B",
-  "Events",
-  "Interviews",
-  "Headlines",
-  "Culture",
-];
-
 // Fixed set offered in the category admin form — kept intentionally small to
 // avoid arbitrary CSS-class injection via a free-text field.
 const HEADER_CLASSES = [
@@ -128,6 +118,8 @@ const HEADER_CLASSES = [
   { label: "Dark", value: "page-header--dark" },
 ];
 
+// Hand-picked colours for the original desks; any desk added later gets a
+// stable colour derived from its label by catColor() below.
 const CAT_COLOR: Record<string, string> = {
   "Culture": "#8b5cf6",
   "Sports": "#16a34a",
@@ -137,6 +129,16 @@ const CAT_COLOR: Record<string, string> = {
   "Headlines": "#dc2626",
   "Architecture & Design": "#64748b",
 };
+
+/** Deterministic per-label colour so new desks don't all render slate grey. */
+function catColor(cat: string): string {
+  const seeded = CAT_COLOR[cat];
+  if (seeded) return seeded;
+  if (!cat) return "#64748b";
+  let h = 0;
+  for (let i = 0; i < cat.length; i++) h = (h * 31 + cat.charCodeAt(i)) % 360;
+  return `hsl(${h}, 52%, 42%)`;
+}
 
 // Palette for the light "floating frame" admin shell.
 const C = {
@@ -404,13 +406,13 @@ const sectionLabel: React.CSSProperties = {
 };
 
 function catChip(cat: string, dark = false): React.CSSProperties {
-  const col = CAT_COLOR[cat] ?? "#64748b";
+  const col = catColor(cat);
   return {
     fontSize: 10,
     fontWeight: 700,
     padding: "3px 9px",
     borderRadius: 999,
-    background: dark ? "rgba(255,255,255,0.12)" : `${col}16`,
+    background: dark ? "rgba(255,255,255,0.12)" : col.startsWith("#") ? `${col}16` : col.replace("hsl(", "hsla(").replace(")", ", 0.09)"),
     color: dark ? "#e5e5e5" : col,
     whiteSpace: "nowrap",
   };
@@ -1695,6 +1697,17 @@ export default function AdminPage() {
     }));
   }
 
+  /** Desk labels offered in the UI: the live Categories tab list, plus any
+      legacy label still attached to an article so nothing drops out of the
+      filters or the dashboard breakdown. */
+  const catLabels = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const c of categories) if (c.label && !seen.has(c.label)) { seen.add(c.label); out.push(c.label); }
+    for (const a of articles) if (a.category && !seen.has(a.category)) { seen.add(a.category); out.push(a.category); }
+    return out;
+  }, [categories, articles]);
+
   const filtered = articles.filter((a) => {
     const q = search.toLowerCase();
     return (
@@ -1918,10 +1931,10 @@ export default function AdminPage() {
                   <div style={{ ...cardStyle, padding: "22px 24px" }}>
                     <div style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
                       <p style={{ ...sectionLabel, marginBottom: 0 }}>Desks</p>
-                      <span style={{ marginLeft: "auto", fontSize: 11.5, color: C.sub }}>{articles.length} stories across {CATEGORIES.filter(c => articles.some(a => a.category === c)).length} desks</span>
+                      <span style={{ marginLeft: "auto", fontSize: 11.5, color: C.sub }}>{articles.length} stories across {catLabels.filter(c => articles.some(a => a.category === c)).length} desks</span>
                     </div>
                     {(() => {
-                      const rows = CATEGORIES
+                      const rows = catLabels
                         .map(c => ({ cat: c, items: articles.filter(a => a.category === c) }))
                         .filter(r => r.items.length > 0)
                         .sort((a, b) => b.items.length - a.items.length);
@@ -1929,7 +1942,7 @@ export default function AdminPage() {
                       return rows.map(({ cat, items }) => (
                         <div key={cat} className="admin-desk-row" style={{ display: "grid", gridTemplateColumns: "150px 1fr", alignItems: "center", gap: 14, marginBottom: 12 }}>
                           <span style={{ fontSize: 11.5, color: C.sub, fontWeight: 600, display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                            <span style={{ width: 7, height: 7, borderRadius: 999, background: CAT_COLOR[cat] ?? "#888", flexShrink: 0 }} />
+                            <span style={{ width: 7, height: 7, borderRadius: 999, background: catColor(cat), flexShrink: 0 }} />
                             <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat}</span>
                           </span>
                           <div style={{ display: "flex", alignItems: "center" }}>
@@ -2113,7 +2126,7 @@ export default function AdminPage() {
           {tab === "articles" && (
             <div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
-                {["All", ...CATEGORIES].map((c) => {
+                {["All", ...catLabels].map((c) => {
                   const active = filterCat === c;
                   return (
                     <button key={c} type="button" onClick={() => setFilterCat(c)}
@@ -2246,8 +2259,21 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label style={labelStyle}>Category</label>
-                    <select style={{ ...selectStyle, width: "100%" }} value={draft.category} onChange={S("category")}>
-                      {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    {/* One control for both fields: `relatedCategory` is the desk
+                        route, `category` the badge label shown on cards. */}
+                    <select
+                      style={{ ...selectStyle, width: "100%" }}
+                      value={draft.relatedCategory}
+                      onChange={(e) => {
+                        const id = e.target.value;
+                        const cat = categories.find((c) => c.id === id);
+                        setDraft((d) => ({ ...d, relatedCategory: id, category: cat ? cat.label : d.category }));
+                      }}
+                    >
+                      {!categories.some((c) => c.id === draft.relatedCategory) && (
+                        <option value={draft.relatedCategory}>{draft.category || draft.relatedCategory}</option>
+                      )}
+                      {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
                   </div>
                 </div>
@@ -2439,22 +2465,14 @@ export default function AdminPage() {
               {/* Metadata */}
               <div style={{ ...cardStyle, marginBottom: 16 }}>
                 <p style={sectionLabel}>Metadata</p>
-                <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-                  <div>
-                    <label style={labelStyle}>Tags (comma-separated)</label>
-                    <input
-                      style={inputStyle}
-                      value={draft.tags.join(", ")}
-                      onChange={(e) => setDraft(d => ({ ...d, tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean) }))}
-                      placeholder="Culture, Design, Riyadh"
-                    />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Related category (for &quot;Read Next&quot;)</label>
-                    <select style={{ ...selectStyle, width: "100%" }} value={draft.relatedCategory} onChange={S("relatedCategory")}>
-                      {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-                    </select>
-                  </div>
+                <div>
+                  <label style={labelStyle}>Tags (comma-separated)</label>
+                  <input
+                    style={inputStyle}
+                    value={draft.tags.join(", ")}
+                    onChange={(e) => setDraft(d => ({ ...d, tags: e.target.value.split(",").map(t => t.trim()).filter(Boolean) }))}
+                    placeholder="Culture, Design, Riyadh"
+                  />
                 </div>
               </div>
 
