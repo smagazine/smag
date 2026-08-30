@@ -81,7 +81,7 @@ export default function NewsletterPopup() {
           ✕
         </button>
         <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
-        <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
+        <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار السعودية في صندوقك.">Get the Gulf in your inbox.</h2>
         <p className="nl-popup-deck" data-en="The morning read for people following the region's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة المنطقة ومدنها وأفكارها. مجاني، كل يوم عمل.">
           The morning read for people following the region&apos;s culture, cities, and ideas. Free, every weekday.
         </p>
