@@ -68,8 +68,8 @@ export default async function HomePage() {
             <p className="ao-spot-role">{spotlight.authorRole}</p>
           </div>
         </div>
-        <p className="ao-spot-bio" data-en="Contributing to SAUDI MAG's long-form coverage of Gulf culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة لثقافة الخليج ومدنه والحياة المعاصرة.">
-          Contributing to SAUDI MAG&apos;s long-form coverage of Gulf culture, cities, and contemporary life.
+        <p className="ao-spot-bio" data-en="Contributing to SAUDI MAG's long-form coverage of Saudi culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة للثقافة السعودية ومدنها والحياة المعاصرة.">
+          Contributing to SAUDI MAG&apos;s long-form coverage of Saudi culture, cities, and contemporary life.
         </p>
         <Link className="ao-spot-link" href={`/article/${spotlight.slug}`} data-en="Read their latest" data-ar="اقرأ أحدث مقالاتهم">Read their latest</Link>
       </div>

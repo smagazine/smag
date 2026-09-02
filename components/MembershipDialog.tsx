@@ -72,8 +72,8 @@ const MembershipDialog = forwardRef<MembershipDialogHandle>((_, ref) => {
       </button>
       <span className="label eyebrow" data-en="Reader's Majlis" data-ar="مجلس القراء">Reader&apos;s Majlis</span>
       <h2 id="membership-dialog-title" data-en="Start your membership" data-ar="ابدأ عضويتك">Start your membership</h2>
-      <p className="deck" data-en="Join SAUDI MAG for independent Gulf culture, cities, and ideas." data-ar="انضم إلى المجلة السعودية لثقافة الخليج المستقلة.">
-        Join SAUDI MAG for independent Gulf culture, cities, and ideas.
+      <p className="deck" data-en="Join SAUDI MAG for independent Saudi culture, cities, and ideas." data-ar="انضم إلى المجلة السعودية لتغطية مستقلة للثقافة السعودية والمدن والأفكار.">
+        Join SAUDI MAG for independent Saudi culture, cities, and ideas.
       </p>
       {!submitted ? (
         <form className="membership-form" onSubmit={handleSubmit}>

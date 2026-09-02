@@ -39,25 +39,25 @@ const SITE_OG_IMAGE = "https://images.unsplash.com/photo-1486325212027-8081e4852
 
 export const metadata: Metadata = {
   title: {
-    default: "SAUDI MAG | Gulf Culture & Ideas",
+    default: "SAUDI MAG | Saudi Culture & Ideas",
     template: "%s | SAUDI MAG",
   },
   description:
-    "An independent editorial platform covering Gulf culture, cities, architecture, business, design, and contemporary life.",
+    "An independent editorial platform covering Saudi culture, cities, architecture, business, design, and contemporary life.",
   metadataBase: new URL(SITE_URL),
   openGraph: {
     type: "website",
     siteName: "SAUDI MAG",
-    title: "SAUDI MAG | Gulf Culture & Ideas",
+    title: "SAUDI MAG | Saudi Culture & Ideas",
     description:
-      "An independent editorial platform covering Gulf culture, cities, architecture, business, design, and contemporary life.",
-    images: [{ url: SITE_OG_IMAGE, width: 1200, height: 630, alt: "SAUDI MAG — Gulf Culture & Ideas" }],
+      "An independent editorial platform covering Saudi culture, cities, architecture, business, design, and contemporary life.",
+    images: [{ url: SITE_OG_IMAGE, width: 1200, height: 630, alt: "SAUDI MAG — Saudi Culture & Ideas" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SAUDI MAG | Gulf Culture & Ideas",
+    title: "SAUDI MAG | Saudi Culture & Ideas",
     description:
-      "An independent editorial platform covering Gulf culture, cities, architecture, business, design, and contemporary life.",
+      "An independent editorial platform covering Saudi culture, cities, architecture, business, design, and contemporary life.",
     images: [SITE_OG_IMAGE],
   },
 };

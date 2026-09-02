@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About | SAUDI MAG",
   description:
-    "SAUDI MAG is an editorial platform covering Gulf culture, architecture, business, hospitality, and design from the region's perspective.",
+    "SAUDI MAG is an editorial platform covering Saudi culture, architecture, business, hospitality, and design from the Kingdom's perspective.",
 };
 
 export default function AboutPage() {
@@ -13,9 +13,9 @@ export default function AboutPage() {
         <div className="about-contact">
           <div className="reveal">
             <span className="label eyebrow" data-en="About the Magazine" data-ar="عن المجلة">About the Magazine</span>
-            <h1 data-en="An original editorial lens on the Gulf's cultural moment." data-ar="عدسة تحريرية أصيلة على اللحظة الثقافية للخليج.">An original editorial lens on the Gulf&apos;s cultural moment.</h1>
-            <p className="deck" data-en="SAUDI MAG is a polished digital magazine demo inspired by contemporary Gulf-region publishing: image-led, useful, warm, and focused on architecture, culture, business, hospitality, and design." data-ar="SAUDI MAG نموذج مجلة رقمية مصقول مستوحى من النشر المعاصر في منطقة الخليج: يقوده الصورة، نافع، دافئ، ومركّز على العمارة والثقافة والأعمال والضيافة والتصميم.">
-              SAUDI MAG is a polished digital magazine demo inspired by contemporary Gulf-region
+            <h1 data-en="An original editorial lens on Saudi Arabia's cultural moment." data-ar="عدسة تحريرية أصيلة على اللحظة الثقافية السعودية.">An original editorial lens on Saudi Arabia&apos;s cultural moment.</h1>
+            <p className="deck" data-en="SAUDI MAG is a polished digital magazine demo inspired by contemporary Saudi publishing: image-led, useful, warm, and focused on architecture, culture, business, hospitality, and design." data-ar="SAUDI MAG نموذج مجلة رقمية مصقول مستوحى من النشر المعاصر في السعودية: يقوده الصورة، نافع، دافئ، ومركّز على العمارة والثقافة والأعمال والضيافة والتصميم.">
+              SAUDI MAG is a polished digital magazine demo inspired by contemporary Saudi
               publishing: image-led, useful, warm, and focused on architecture, culture, business,
               hospitality, and design.
             </p>

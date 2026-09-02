@@ -27,9 +27,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <div className="newsletter-strip nl-grand reveal">
           <div>
             <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
-            <h2 data-en="Get the Gulf in your inbox." data-ar="احصل على أخبار الخليج في صندوقك.">Get the Gulf in your inbox.</h2>
-            <p className="deck" data-en="The morning read for people following the region's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة المنطقة ومدنها وأفكارها. مجاني، كل يوم عمل.">
-              The morning read for people following the region&apos;s culture, cities, and ideas. Free, every weekday.
+            <h2 data-en="Get Saudi Arabia in your inbox." data-ar="احصل على أخبار السعودية في صندوقك.">Get Saudi Arabia in your inbox.</h2>
+            <p className="deck" data-en="The morning read for people following Saudi Arabia's culture, cities, and ideas. Free, every weekday." data-ar="القراءة الصباحية لمتابعي ثقافة السعودية ومدنها وأفكارها. مجاني، كل يوم عمل.">
+              The morning read for people following Saudi Arabia&apos;s culture, cities, and ideas. Free, every weekday.
             </p>
           </div>
           <NewsletterForm />

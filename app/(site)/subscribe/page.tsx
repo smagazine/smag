@@ -22,8 +22,8 @@ export default function SubscribePage() {
               <h1 data-en="Join the Reader's Majlis." data-ar="انضم إلى مجلس القراء.">
                 Join the Reader&apos;s Majlis.
               </h1>
-              <p className="deck" data-en="Curated intelligence, thoughtful access, and editorial depth for readers following the Gulf's cultural shift." data-ar="ذكاء انتقائي وعمق تحريري لقراء يتابعون التحول الثقافي في الخليج.">
-                Curated intelligence, thoughtful access, and editorial depth for readers following the Gulf&apos;s cultural shift.
+              <p className="deck" data-en="Curated intelligence, thoughtful access, and editorial depth for readers following Saudi Arabia's cultural shift." data-ar="ذكاء انتقائي وعمق تحريري لقراء يتابعون التحول الثقافي في السعودية.">
+                Curated intelligence, thoughtful access, and editorial depth for readers following Saudi Arabia&apos;s cultural shift.
               </p>
               <p className="mt-lg">
                 <a className="button" href="#tiers" data-en="View membership tiers" data-ar="عرض مستويات العضوية">

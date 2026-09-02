@@ -274,7 +274,7 @@ export default async function ArticleSlugPage(
                 <div>
                   <span className="author-bio-role">{article.authorRole}</span>
                   <h3 className="author-bio-name">{article.author}</h3>
-                  <p data-en="Contributing to SAUDI MAG's long-form coverage of Gulf culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة لثقافة الخليج ومدنه والحياة المعاصرة.">Contributing to SAUDI MAG&apos;s long-form coverage of Gulf culture, cities, and contemporary life.</p>
+                  <p data-en="Contributing to SAUDI MAG's long-form coverage of Saudi culture, cities, and contemporary life." data-ar="يساهم في تغطية SAUDI MAG المطوّلة للثقافة السعودية ومدنها والحياة المعاصرة.">Contributing to SAUDI MAG&apos;s long-form coverage of Saudi culture, cities, and contemporary life.</p>
                 </div>
               </div>
 
