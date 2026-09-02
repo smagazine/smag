@@ -34,10 +34,6 @@ const materialSymbols = localFont({
   weight: "300 500",
   variable: "--font-material-symbols",
 });
-// S. monogram from the brand sheet: bold white S on black, lime dot.
-const FAVICON =
-  "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23000'/><text x='29' y='46' font-size='40' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial,sans-serif'>S</text><circle cx='48' cy='44' r='6' fill='%23a5ce39'/></svg>";
-
 const SITE_URL = "https://saudimag.com";
 const SITE_OG_IMAGE = "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&h=630&fit=crop&auto=format";
 
@@ -86,7 +82,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <meta name="theme-color" content="#000000" />
-        <link rel="icon" href={FAVICON} />
       </head>
       <body>
         <ThemeProvider>
