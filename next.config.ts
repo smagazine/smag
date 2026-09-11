@@ -26,6 +26,17 @@ const CSP = [
 
 const nextConfig: NextConfig = {
   images: {
+    // Vercel's image optimizer is capped by a per-plan transformation quota.
+    // Once it's exhausted, /_next/image returns 402 (Payment Required) for any
+    // image it hasn't already cached — so existing pictures keep serving while
+    // every newly uploaded one renders blank. Serving the origin URLs directly
+    // sidesteps the quota entirely, and costs little here: admin uploads are
+    // already downscaled to 2400px @ q0.85 client-side (shrinkForUpload in
+    // app/admin/page.tsx) before they ever reach Cloud Storage, and the legacy
+    // Unsplash IDs are requested through U() with explicit w/h params, so both
+    // sources arrive pre-sized. remotePatterns is kept below so that flipping
+    // this back (e.g. on a plan with a larger quota) needs no other change.
+    unoptimized: true,
     remotePatterns: [
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "placehold.co" },
