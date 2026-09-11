@@ -1,5 +1,5 @@
 "use client";
-import { showDemoToast } from "@/components/DemoToast";
+import { showToast } from "@/components/Toast";
 
 export default function ShareButtons({ title }: { title: string }) {
   const handleShare = (platform: string) => {
@@ -22,9 +22,9 @@ export default function ShareButtons({ title }: { title: string }) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      showDemoToast("Link copied.");
+      showToast("Link copied.");
     } catch {
-      showDemoToast("Copy the URL from your browser.");
+      showToast("Copy the URL from your browser.");
     }
   };
 

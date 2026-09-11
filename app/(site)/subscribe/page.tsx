@@ -57,17 +57,20 @@ export default function SubscribePage() {
         <section className="section soft" id="tiers">
           <div className="container">
             <div className="stats-row reveal">
+              {/* Qualitative on purpose. The numbers that used to sit here
+                  (200+ stories, 12K+ readers, 4 issues a year) were not
+                  backed by anything in the data store. */}
               <div className="stat-item">
-                <span className="stat-number">200+</span>
-                <span className="stat-label" data-en="Stories Published" data-ar="قصة منشورة">Stories Published</span>
+                <span className="stat-number" data-en="Daily" data-ar="يومياً">Daily</span>
+                <span className="stat-label" data-en="New Stories" data-ar="قصص جديدة">New Stories</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">12K+</span>
-                <span className="stat-label" data-en="Active Readers" data-ar="قارئ نشط">Active Readers</span>
+                <span className="stat-number" data-en="EN / AR" data-ar="إنجليزي / عربي">EN / AR</span>
+                <span className="stat-label" data-en="Every Story, Both Languages" data-ar="كل قصة، باللغتين">Every Story, Both Languages</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">4×</span>
-                <span className="stat-label" data-en="Issues Per Year" data-ar="عدد سنوياً">Issues Per Year</span>
+                <span className="stat-number" data-en="Independent" data-ar="مستقلة">Independent</span>
+                <span className="stat-label" data-en="Reader-Supported" data-ar="مدعومة من القراء">Reader-Supported</span>
               </div>
             </div>
             <div className="section-header reveal">
@@ -81,7 +84,7 @@ export default function SubscribePage() {
                 <div>
                   <span className="meta" data-en="Essential" data-ar="أساسي">Essential</span>
                   <h3 data-en="Digital" data-ar="رقمي">Digital</h3>
-                  <span className="price">$15/month</span>
+                  <span className="price" data-en="$15/month" data-ar="١٥$ شهرياً">$15/month</span>
                   <ul>
                     <li data-en="Unlimited digital articles" data-ar="مقالات رقمية غير محدودة">Unlimited digital articles</li>
                     <li data-en="Daily briefing newsletter" data-ar="نشرة إخبارية يومية">Daily briefing newsletter</li>
@@ -102,7 +105,7 @@ export default function SubscribePage() {
                 <div>
                   <span className="meta" data-en="Complete" data-ar="شامل">Complete</span>
                   <h3 data-en="Print & Digital" data-ar="مطبوع ورقمي">Print &amp; Digital</h3>
-                  <span className="price">$45/month</span>
+                  <span className="price" data-en="$45/month" data-ar="٤٥$ شهرياً">$45/month</span>
                   <ul>
                     <li data-en="Everything in Digital" data-ar="كل ما في الرقمي">Everything in Digital</li>
                     <li data-en="Quarterly print edition delivered" data-ar="النسخة المطبوعة الفصلية تُسلَّم">Quarterly print edition delivered</li>
@@ -141,10 +144,10 @@ export default function SubscribePage() {
         </section>
 
         <section className="section container text-center">
-          <blockquote className="pullquote reveal" data-en="&ldquo;SAUDI MAG has redefined what it means to document our cultural renaissance. The print edition is a collector's item.&rdquo;" data-ar="&ldquo;أعادت SAUDI MAG تعريف معنى توثيق نهضتنا الثقافية. النسخة المطبوعة قطعة للاقتناء.&rdquo;">
-            &ldquo;SAUDI MAG has redefined what it means to document our cultural renaissance. The print edition is a collector&apos;s item.&rdquo;
+          <blockquote className="pullquote reveal" data-en="Independent journalism about Saudi Arabia, written in both of its reading languages. Membership is what keeps it that way." data-ar="صحافة مستقلة عن السعودية، تُكتب بلغتي القراءة فيها. العضوية هي ما يُبقيها كذلك.">
+            Independent journalism about Saudi Arabia, written in both of its reading languages.
+            Membership is what keeps it that way.
           </blockquote>
-          <span className="label eyebrow" data-en="Nouf Al-Saud · Creative Director" data-ar="نوف آل سعود · المديرة الإبداعية">Nouf Al-Saud · Creative Director</span>
         </section>
       </main>
 

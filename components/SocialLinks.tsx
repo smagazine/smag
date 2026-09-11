@@ -1,6 +1,12 @@
+import { SOCIAL_URLS } from "@/lib/site";
+
+// Hrefs come from lib/site.ts so the visible icon row and the JSON-LD
+// `sameAs` list can never drift apart.
+const [INSTAGRAM_URL, X_URL, TIKTOK_URL] = SOCIAL_URLS;
+
 const SOCIAL_LINKS = [
   {
-    href: "https://www.instagram.com/saudi.mag?igsh=dDN4cGVhOXgwcjQ2&utm_source=qr",
+    href: INSTAGRAM_URL,
     label: "Instagram",
     icon: (
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -11,7 +17,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    href: "https://x.com/saudimag_?s=11",
+    href: X_URL,
     label: "X / Twitter",
     icon: (
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -20,7 +26,7 @@ const SOCIAL_LINKS = [
     ),
   },
   {
-    href: "https://www.tiktok.com/@saudi.mag?_r=1&_t=ZS-98lzrNnT9rI",
+    href: TIKTOK_URL,
     label: "TikTok",
     icon: (
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

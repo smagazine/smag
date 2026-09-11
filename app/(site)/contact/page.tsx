@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { EMAIL_EDITORIAL, EMAIL_PARTNERSHIPS } from "@/lib/site";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -37,20 +38,26 @@ export default function ContactPage() {
           <div className="reveal">
             <span className="label eyebrow" data-en="Contact" data-ar="تواصل معنا">Contact</span>
             <h1 data-en="Editorial, partnerships, and membership inquiries." data-ar="استفسارات التحرير والشراكات والعضوية.">Editorial, partnerships, and membership inquiries.</h1>
-            <p className="deck" data-en="Use this demo form for editorial pitches, partnership requests, membership support, and advertising conversations." data-ar="استخدم هذا النموذج التجريبي لمقترحات التحرير وطلبات الشراكة ودعم العضوية والمحادثات الإعلانية.">
-              Use this demo form for editorial pitches, partnership requests, membership support,
-              and advertising conversations.
+            <p className="deck" data-en="Send us editorial pitches, partnership requests, membership questions, and advertising enquiries. We read everything and reply to what we can." data-ar="أرسل إلينا مقترحات التحرير وطلبات الشراكة وأسئلة العضوية واستفسارات الإعلان. نقرأ كل رسالة ونرد على ما نستطيع.">
+              Send us editorial pitches, partnership requests, membership questions, and
+              advertising enquiries. We read everything and reply to what we can.
             </p>
             <div className="contact-detail">
               <p>
                 <span className="meta" data-en="Editorial" data-ar="التحرير">Editorial</span>
                 <br />
-                editorial@saudimagazine.example
+                {/* The address is identical in both languages, so it is safe as
+                    its own leaf — LangContext only swaps childless elements. */}
+                <a href={`mailto:${EMAIL_EDITORIAL}`} data-en={EMAIL_EDITORIAL} data-ar={EMAIL_EDITORIAL}>
+                  {EMAIL_EDITORIAL}
+                </a>
               </p>
               <p className="mt-md">
                 <span className="meta" data-en="Partnerships" data-ar="الشراكات">Partnerships</span>
                 <br />
-                partnerships@saudimagazine.example
+                <a href={`mailto:${EMAIL_PARTNERSHIPS}`} data-en={EMAIL_PARTNERSHIPS} data-ar={EMAIL_PARTNERSHIPS}>
+                  {EMAIL_PARTNERSHIPS}
+                </a>
               </p>
             </div>
           </div>
@@ -69,7 +76,7 @@ export default function ContactPage() {
               <input required type="email" name="email" autoComplete="email"
                 placeholder="your@email.com"
                 data-placeholder-en="your@email.com"
-                data-placeholder-ar="بريدك@الإلكتروني.com"
+                data-placeholder-ar="your@email.com"
               />
             </label>
             <label>

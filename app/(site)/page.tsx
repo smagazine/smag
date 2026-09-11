@@ -97,13 +97,16 @@ export default async function HomePage() {
   return (
     <main className="page ao-home" id="main-content">
 
-      {/* ── Issue strip + top-stories ticker ── */}
+      {/* ── Masthead strip + top-stories ticker ──
+          Deliberately carries no issue number or month: there is no numbered
+          print run, and a hardcoded date silently goes stale (this read
+          "Issue 12 · June 2026" long after June). */}
       <div className="issue-strip">
-        <span className="issue-num" data-en="Issue 12" data-ar="العدد 12">Issue 12</span>
+        <span className="issue-num" data-en="Daily Edition" data-ar="النشرة اليومية">Daily Edition</span>
         <span className="issue-dot" aria-hidden="true" />
-        <span data-en="June 2026" data-ar="يونيو 2026">June 2026</span>
+        <span data-en="English &amp; Arabic" data-ar="إنجليزي وعربي">English &amp; Arabic</span>
         <span className="issue-dot" aria-hidden="true" />
-        <span data-en="Cities &amp; Culture" data-ar="المدن والثقافة">Cities &amp; Culture</span>
+        <span data-en="From the Kingdom" data-ar="من المملكة">From the Kingdom</span>
       </div>
 
       <div className="ticker-band ao-ticker reveal">

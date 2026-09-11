@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LangProvider } from "@/contexts/LangContext";
+import { SITE_URL } from "@/lib/site";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -34,7 +35,6 @@ const materialSymbols = localFont({
   weight: "300 500",
   variable: "--font-material-symbols",
 });
-const SITE_URL = "https://saudimag.com";
 const SITE_OG_IMAGE = "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&h=630&fit=crop&auto=format";
 
 export const metadata: Metadata = {

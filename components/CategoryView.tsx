@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { U, AoCard, AoLead } from "@/components/Editorial";
 import { getActiveSponsorship } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
+import { ORG_ID, SITE_URL, WEBSITE_ID } from "@/lib/site";
 import type { Article } from "@/lib/articles";
 
 export interface CategoryConfig {
@@ -26,7 +27,6 @@ function chunk<T>(items: T[], size: number): T[][] {
   return out;
 }
 
-const SITE_URL = "https://saudimag.com";
 
 export default async function CategoryView({
   config,
@@ -48,6 +48,10 @@ export default async function CategoryView({
         name: config.title,
         description: config.deck,
         url: `${SITE_URL}/${route}`,
+        // Reference the site-wide nodes emitted by app/(site)/layout.tsx
+        // rather than restating the publisher on every category page.
+        isPartOf: { "@id": WEBSITE_ID },
+        publisher: { "@id": ORG_ID },
         mainEntity: {
           "@type": "ItemList",
           itemListElement: articles.map((a, i) => ({
@@ -92,23 +96,35 @@ export default async function CategoryView({
               <p className="deck" data-en={config.deck} data-ar={config.deckAr}>
                 {config.deck}
               </p>
-              {presenting && (
-                <a
-                  className="ao-presented"
-                  href={presenting.sponsor.url ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                >
-                  {presenting.sponsor.logo && (
-                    <span className="ao-presented-logo">
-                      <Image fill src={U(presenting.sponsor.logo, 96, 96)} alt="" sizes="28px" />
+              {presenting && (() => {
+                const credit = (
+                  <>
+                    {presenting.sponsor.logo && (
+                      <span className="ao-presented-logo">
+                        <Image fill src={U(presenting.sponsor.logo, 96, 96)} alt="" sizes="28px" />
+                      </span>
+                    )}
+                    <span data-en={`Presented by ${presenting.sponsor.name}`} data-ar={`برعاية ${presenting.sponsor.nameAr ?? presenting.sponsor.name}`}>
+                      Presented by {presenting.sponsor.name}
                     </span>
-                  )}
-                  <span data-en={`Presented by ${presenting.sponsor.name}`} data-ar={`برعاية ${presenting.sponsor.nameAr ?? presenting.sponsor.name}`}>
-                    Presented by {presenting.sponsor.name}
-                  </span>
-                </a>
-              )}
+                  </>
+                );
+                // A sponsor with no URL used to render href="#", i.e. a link
+                // that silently jumps the reader to the top of the page.
+                // Credit them in plain text instead.
+                return presenting.sponsor.url ? (
+                  <a
+                    className="ao-presented"
+                    href={presenting.sponsor.url}
+                    target="_blank"
+                    rel="noopener noreferrer sponsored"
+                  >
+                    {credit}
+                  </a>
+                ) : (
+                  <span className="ao-presented">{credit}</span>
+                );
+              })()}
             </div>
             <CategoryFilters />
           </div>

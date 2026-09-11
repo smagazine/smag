@@ -18,8 +18,8 @@ export default function Footer() {
         </nav>
         <SocialLinks className="footer-social" />
         <nav className="footer-legal" aria-label="Legal">
-          <Link href="/about" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</Link>
-          <Link href="/about" data-en="Terms of Use" data-ar="شروط الاستخدام">Terms of Use</Link>
+          <Link href="/privacy" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</Link>
+          <Link href="/terms" data-en="Terms of Use" data-ar="شروط الاستخدام">Terms of Use</Link>
         </nav>
         <p
           className="copyright meta"

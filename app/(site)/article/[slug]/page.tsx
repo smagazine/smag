@@ -10,6 +10,7 @@ import Comments from "@/components/Comments";
 import { CatPill, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
 import { getSponsor } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
+import { ORG_ID, SITE_NAME, SITE_URL, WEBSITE_ID } from "@/lib/site";
 import type { Metadata } from "next";
 
 // Statically prerender every published article; revalidate hourly and on write
@@ -127,9 +128,13 @@ export default async function ArticleSlugPage(
     description: article.subtitle,
     image: heroUrl,
     author: { "@type": "Person", name: article.author, jobTitle: article.authorRole },
-    publisher: { "@type": "Organization", name: "SAUDI MAG" },
+    // @id resolves to the full Organization node emitted site-wide by
+    // app/(site)/layout.tsx; name is kept so the block still validates on its
+    // own in tools that don't follow cross-node references.
+    publisher: { "@type": "Organization", "@id": ORG_ID, name: SITE_NAME },
+    isPartOf: { "@id": WEBSITE_ID },
     datePublished: article.meta,
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://saudimag.com/article/${article.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/article/${article.slug}` },
   };
 
   return (

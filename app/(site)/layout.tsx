@@ -6,6 +6,8 @@ import PageViewTracker from "@/components/PageViewTracker";
 import NewsletterForm from "@/components/NewsletterForm";
 import NewsletterPopup from "@/components/NewsletterPopup";
 import { getCategories } from "@/lib/categories";
+import { safeJsonLd } from "@/lib/json-ld";
+import { SITE_GRAPH } from "@/lib/site-schema";
 
 // Chrome shared by all public pages. Kept out of the root layout so the root
 // doesn't need to read the request pathname (which would force every route into
@@ -16,6 +18,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const categories = await getCategories();
   return (
     <>
+      {/* Publisher identity for every public page. Mounted here rather than in
+          the root layout because the root also wraps /admin, which has no
+          business advertising structured data. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(SITE_GRAPH) }} />
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>

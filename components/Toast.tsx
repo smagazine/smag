@@ -2,12 +2,13 @@
 
 let toastTimer: ReturnType<typeof setTimeout>;
 
-export function showDemoToast(message: string) {
-  let toast = document.querySelector<HTMLElement>("[data-demo-toast]");
+/** Transient status message, bottom-anchored. Used for share/copy feedback. */
+export function showToast(message: string) {
+  let toast = document.querySelector<HTMLElement>("[data-toast]");
   if (!toast) {
     toast = document.createElement("div");
-    toast.className = "demo-toast";
-    toast.dataset.demoToast = "";
+    toast.className = "toast";
+    toast.dataset.toast = "";
     toast.setAttribute("role", "status");
     document.body.append(toast);
   }
@@ -17,6 +18,6 @@ export function showDemoToast(message: string) {
   toastTimer = setTimeout(() => toast!.classList.remove("show"), 2600);
 }
 
-export default function DemoToast() {
+export default function Toast() {
   return null;
 }

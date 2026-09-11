@@ -1154,6 +1154,25 @@ p {
   font-size: clamp(2rem, 4vw, 3rem);
 }
 
+/* Privacy / Terms. Narrower measure and smaller headings than .article-body —
+   these are reference documents to be scanned, not features read straight through. */
+.legal-prose {
+  max-width: 68ch;
+  margin-top: 48px;
+  font-size: clamp(1rem, 1.4vw, 1.08rem);
+  line-height: 1.8;
+}
+
+.legal-prose h2 {
+  margin-top: 44px;
+  margin-bottom: 12px;
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+}
+
+.legal-prose p + p {
+  margin-top: 16px;
+}
+
 .drop-cap::first-letter {
   float: left;
   margin: 0.1em 0.12em 0 0;
@@ -1347,7 +1366,7 @@ dialog.membership-dialog::backdrop {
 }
 
 .form-success,
-.demo-toast {
+.toast {
   padding: 14px 16px;
   border-left: 3px solid var(--color-gold);
   background: var(--color-soft);
@@ -1355,7 +1374,7 @@ dialog.membership-dialog::backdrop {
   font-size: 0.88rem;
 }
 
-.demo-toast {
+.toast {
   position: fixed;
   right: 20px;
   bottom: 20px;
@@ -1366,7 +1385,7 @@ dialog.membership-dialog::backdrop {
   transition: opacity var(--ease), transform var(--ease);
 }
 
-.demo-toast.show {
+.toast.show {
   opacity: 1;
   transform: translateY(0);
 }
@@ -3440,7 +3459,7 @@ dialog.membership-dialog::backdrop {
 /* Membership success + form success — mirror border */
 [dir="rtl"] .membership-success,
 [dir="rtl"] .form-success,
-[dir="rtl"] .demo-toast {
+[dir="rtl"] .toast {
   border-left: 0;
   border-right: 3px solid var(--color-gold);
 }
