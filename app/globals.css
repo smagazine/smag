@@ -376,9 +376,13 @@ button {
   transition: transform 800ms ease, filter 800ms ease;
 }
 
-/* Unlike the cropped hero-style images above, the article hero shows the
-   photo in full — no crop, no fixed box to fill. It's rendered at its
-   natural aspect ratio (width:100%, height:auto), so the frame's height
+/* Unlike the cropped hero-style images above,
+the article hero shows the
+   photo in full — no crop,
+no fixed box to fill. It's rendered at its
+   natural aspect ratio (width:100%,
+height:auto),
+so the frame's height
    just follows whatever that works out to at the current viewport width. */
 .article-hero img {
   display: block;
@@ -1155,7 +1159,8 @@ p {
 }
 
 /* Privacy / Terms. Narrower measure and smaller headings than .article-body —
-   these are reference documents to be scanned, not features read straight through. */
+   these are reference documents to be scanned,
+not features read straight through. */
 .legal-prose {
   max-width: 68ch;
   margin-top: 48px;
@@ -1206,7 +1211,7 @@ p {
   aspect-ratio: auto;
 }
 
-.membership-card {
+.briefing-card {
   align-self: center;
   margin-inline-start: clamp(-90px, -6vw, -44px);
   padding: clamp(30px, 5vw, 58px);
@@ -1214,128 +1219,20 @@ p {
   border: 1px solid var(--color-line);
 }
 
-.benefits,
-.tiers {
+.benefits {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: clamp(22px, 3vw, 34px);
 }
 
-.benefit,
-.tier {
+.benefit {
   border-top: 1px solid var(--color-line);
   padding: 28px 0 0;
-}
-
-.tier {
-  display: flex;
-  min-height: 520px;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid var(--color-line);
-  padding: clamp(24px, 3vw, 34px);
-  background: #fff;
-}
-
-.tier.featured {
-  background: var(--color-ink);
-  color: #fff;
-  transform: translateY(-14px);
-}
-
-.tier.featured .meta,
-.tier.featured p,
-.tier.featured li {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.tier.featured .button {
-  background: var(--color-gold);
-  border-color: var(--color-gold);
-  color: #fff;
-}
-
-.tier.featured .button:hover {
-  background: #fff;
-  border-color: #fff;
-  color: var(--color-ink);
-}
-
-.tier ul {
-  padding: 0;
-  margin: 28px 0;
-  list-style: none;
-}
-
-.tier li + li {
-  margin-top: 13px;
-}
-
-.price {
-  display: block;
-  margin-top: 12px;
-  font-family: var(--font-serif);
-  font-size: 2.25rem;
-}
-
-dialog.membership-dialog {
-  position: fixed;
-  margin: auto;
-  width: min(calc(100% - 32px), 560px);
-  max-height: calc(100svh - 32px);
-  overflow-y: auto;
-  padding: clamp(26px, 5vw, 44px);
-  border: 1px solid var(--color-line);
-  border-radius: 0;
-  background: var(--color-paper);
-  color: var(--color-ink);
-}
-
-dialog.membership-dialog[open] {
-  animation: dialog-appear 220ms ease forwards;
-}
-
-dialog.membership-dialog::backdrop {
-  background: rgba(23, 33, 29, 0.48);
 }
 
 @keyframes dialog-appear {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-.membership-dialog-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-}
-
-.membership-form {
-  display: grid;
-  gap: 18px;
-  margin-top: 28px;
-}
-
-.membership-form input {
-  width: 100%;
-  padding: 13px 0;
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  outline: 0;
-  background: transparent;
-}
-
-.membership-form input:focus {
-  border-color: var(--color-gold);
-}
-
-.membership-success {
-  margin-top: 24px;
-  padding: 16px;
-  border-left: 3px solid var(--color-gold);
-  background: var(--color-soft);
-  color: var(--color-sage);
 }
 
 .about-contact {
@@ -1542,7 +1439,7 @@ dialog.membership-dialog::backdrop {
 }
 
 [dir="rtl"] .hero-copy,
-[dir="rtl"] .membership-card {
+[dir="rtl"] .briefing-card {
   margin-inline-start: 0;
   margin-inline-end: clamp(-120px, -7vw, -48px);
   border-left: 0;
@@ -1576,8 +1473,8 @@ dialog.membership-dialog::backdrop {
 
 @media (prefers-reduced-motion: reduce) {
   *,
-  *::before,
-  *::after {
+*::before,
+*::after {
     scroll-behavior: auto !important;
     transition-duration: 0.001ms !important;
     animation-duration: 0.001ms !important;
@@ -1586,9 +1483,9 @@ dialog.membership-dialog::backdrop {
 
 @media (max-width: 980px) {
   .nav-left .search-trigger span:last-child,
-  .nav-actions .button,
-  .nav-actions .site-social,
-  .site-nav {
+.nav-actions .button,
+.nav-actions .site-social,
+.site-nav {
     display: none;
   }
 
@@ -1617,11 +1514,11 @@ dialog.membership-dialog::backdrop {
   }
 
   .hero,
-  .feature-band,
-  .collection-grid,
-  .subscription-hero,
-  .about-contact,
-  .article-card.feature-row {
+.feature-band,
+.collection-grid,
+.subscription-hero,
+.about-contact,
+.article-card.feature-row {
     grid-template-columns: 1fr;
   }
 
@@ -1635,9 +1532,9 @@ dialog.membership-dialog::backdrop {
   }
 
   .hero-copy,
-  .membership-card,
-  [dir="rtl"] .hero-copy,
-  [dir="rtl"] .membership-card {
+.briefing-card,
+[dir="rtl"] .hero-copy,
+[dir="rtl"] .briefing-card {
     margin: -62px var(--gutter) 0;
     border-left: 1px solid var(--color-gold);
     border-right: 0;
@@ -1648,11 +1545,11 @@ dialog.membership-dialog::backdrop {
   }
 
   .span-3,
-  .span-4,
-  .span-5,
-  .span-6,
-  .span-7,
-  .span-8 {
+.span-4,
+.span-5,
+.span-6,
+.span-7,
+.span-8 {
     grid-column: 1 / -1;
   }
 
@@ -1672,17 +1569,12 @@ dialog.membership-dialog::backdrop {
     display: none;
   }
 
-  .benefits,
-  .tiers {
+  .benefits {
     grid-template-columns: 1fr;
   }
 
-  .tier.featured {
-    transform: none;
-  }
-
   .issue,
-  .issue:nth-child(even) {
+.issue:nth-child(even) {
     grid-template-columns: 1fr;
   }
 
@@ -1695,9 +1587,9 @@ dialog.membership-dialog::backdrop {
   }
 
   .lead-layout,
-  .news-layout,
-  .video-layout,
-  .issue-tags {
+.news-layout,
+.video-layout,
+.issue-tags {
     grid-template-columns: 1fr;
   }
 
@@ -1727,15 +1619,15 @@ dialog.membership-dialog::backdrop {
   }
 
   .icon-button,
-  .language-toggle,
-  .search-trigger,
-  .menu-trigger {
+.language-toggle,
+.search-trigger,
+.menu-trigger {
     min-width: 44px;
     min-height: 44px;
   }
 
   .nav-left,
-  .nav-actions {
+.nav-actions {
     gap: 2px;
   }
 
@@ -1759,20 +1651,20 @@ dialog.membership-dialog::backdrop {
   }
 
   .hero-copy,
-  .membership-card,
-  [dir="rtl"] .hero-copy,
-  [dir="rtl"] .membership-card {
+.briefing-card,
+[dir="rtl"] .hero-copy,
+[dir="rtl"] .briefing-card {
     margin-inline: 16px;
     padding: 20px;
   }
 
   h2,
-  .headline-xl {
+.headline-xl {
     font-size: clamp(1.6rem, 8vw, 2.2rem);
   }
 
   h3,
-  .headline-md {
+.headline-md {
     font-size: clamp(1.15rem, 5.5vw, 1.6rem);
   }
 
@@ -1790,12 +1682,12 @@ dialog.membership-dialog::backdrop {
   }
 
   .feature-band .image-frame,
-  .subscription-hero .image-frame {
+.subscription-hero .image-frame {
     min-height: 260px;
   }
 
   .collection-card.large,
-  .collection-card {
+.collection-card {
     min-height: 260px;
   }
 
@@ -1805,13 +1697,13 @@ dialog.membership-dialog::backdrop {
   }
 
   .article-header h1,
-  .main-lead h1 {
+.main-lead h1 {
     font-size: clamp(1.9rem, 9vw, 2.8rem);
     line-height: 1;
   }
 
   .article-subtitle,
-  .deck {
+.deck {
     font-size: 0.97rem;
     line-height: 1.6;
   }
@@ -1938,18 +1830,12 @@ dialog.membership-dialog::backdrop {
     padding: 28px 16px 32px;
   }
 
-  .tier {
-    min-height: auto;
-    padding: 20px;
-  }
-
   .benefit {
     padding-top: 16px;
   }
 
   .contact-form input,
-  .contact-form textarea,
-  .membership-form input {
+.contact-form textarea {
     font-size: 1rem;
   }
 
@@ -2034,7 +1920,7 @@ dialog.membership-dialog::backdrop {
   }
 
   .nav-left,
-  .nav-actions {
+.nav-actions {
     gap: 0;
   }
 
@@ -2048,7 +1934,7 @@ dialog.membership-dialog::backdrop {
   }
 
   .main-lead h1,
-  h1 {
+h1 {
     font-size: clamp(1.75rem, 11vw, 2.5rem);
   }
 
@@ -2057,9 +1943,9 @@ dialog.membership-dialog::backdrop {
   }
 
   .hero-copy,
-  .membership-card,
-  [dir="rtl"] .hero-copy,
-  [dir="rtl"] .membership-card {
+.briefing-card,
+[dir="rtl"] .hero-copy,
+[dir="rtl"] .briefing-card {
     margin-inline: 12px;
     padding: 16px;
   }
@@ -2235,9 +2121,9 @@ dialog.membership-dialog::backdrop {
 
 /* ─── Utility classes ───────────────────────────────────────────────────────── */
 
-.mt-sm  { margin-top: 18px; }
-.mt-md  { margin-top: 24px; }
-.mt-lg  { margin-top: 28px; }
+.mt-sm { margin-top: 18px; }
+.mt-md { margin-top: 24px; }
+.mt-lg { margin-top: 28px; }
 
 /* ─── Scroll to top ─────────────────────────────────────────────────────────── */
 
@@ -2314,7 +2200,7 @@ dialog.membership-dialog::backdrop {
     grid-template-columns: 1fr;
   }
   .newsletter-form,
-  .newsletter-success {
+.newsletter-success {
     grid-column: 1;
   }
   .newsletter-form {
@@ -2654,27 +2540,6 @@ dialog.membership-dialog::backdrop {
 
 [data-theme="dark"] .site-footer {
   background: #050505;
-}
-
-[data-theme="dark"] .tier {
-  background: #111;
-  border-color: #252525;
-}
-
-[data-theme="dark"] .tier.featured {
-  background: var(--color-charcoal);
-}
-
-[data-theme="dark"] .membership-dialog {
-  background: #111;
-  border-color: #252525;
-  color: var(--color-ink);
-}
-
-[data-theme="dark"] dialog.membership-dialog input {
-  background: #1a1a1a;
-  border-color: #333;
-  color: #ebebeb;
 }
 
 [data-theme="dark"] .search-overlay {
@@ -3368,10 +3233,10 @@ dialog.membership-dialog::backdrop {
 }
 
 /* ─── Utility: replace scattered inline styles ───────────────────────────── */
-.d-grid        { display: grid; }
+.d-grid { display: grid; }
 .border-top-sm { border-top: 1px solid var(--color-line); padding-top: 28px; }
-.gap-sm        { gap: 22px; }
-.mt-sm-top     { margin-top: 24px; }
+.gap-sm { gap: 22px; }
+.mt-sm-top { margin-top: 24px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ARABIC / RTL
@@ -3417,7 +3282,7 @@ dialog.membership-dialog::backdrop {
 
 /* Hero copy — mirror the negative margin */
 [dir="rtl"] .hero-copy,
-[dir="rtl"] .membership-card {
+[dir="rtl"] .briefing-card {
   margin-inline-start: 0;
   margin-inline-end: clamp(-120px, -7vw, -48px);
   border-left: 0;
@@ -3456,15 +3321,14 @@ dialog.membership-dialog::backdrop {
   padding-right: 20px;
 }
 
-/* Membership success + form success — mirror border */
-[dir="rtl"] .membership-success,
 [dir="rtl"] .form-success,
 [dir="rtl"] .toast {
   border-left: 0;
   border-right: 3px solid var(--color-gold);
 }
 
-/* News row list — already uses logical grid, no change needed */
+/* News row list — already uses logical grid,
+no change needed */
 
 /* Category strip — border direction */
 [dir="rtl"] .category-strip a {
@@ -3509,7 +3373,8 @@ dialog.membership-dialog::backdrop {
   order: 2;
 }
 
-/* In RTL the even item is now the left column, so flip border to right */
+/* In RTL the even item is now the left column,
+so flip border to right */
 [dir="rtl"] .most-read.landscape li:nth-child(even) {
   border-left: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.18);
@@ -4015,7 +3880,8 @@ a.ao-media:hover img {
   aspect-ratio: 10 / 7;
 }
 
-/* Dividers live in the grid gap (not as card padding, which would steal
+/* Dividers live in the grid gap (not as card padding,
+which would steal
    width from every card after the first and break column alignment). */
 .ao-card {
   position: relative;
@@ -4128,7 +3994,8 @@ blockquote {
   color: var(--color-paper);
 }
 
-/* Eyebrow labels become outlined pills, matching the card category pills. */
+/* Eyebrow labels become outlined pills,
+matching the card category pills. */
 .label.eyebrow {
   border: 1px solid currentColor;
   border-radius: 999px;
@@ -4189,7 +4056,9 @@ blockquote {
   background: var(--color-soft);
 }
 
-/* ── Dashboard DNA: rounded, floating, soft ─────────────────────────────── */
+/* ── Dashboard DNA: rounded,
+floating,
+soft ─────────────────────────────── */
 
 /* Floating rounded header bar */
 .site-header {
@@ -4228,17 +4097,11 @@ blockquote {
   overflow: hidden;
 }
 
-/* Cards and panels used on static pages */
-.tier,
-.membership-card,
+.briefing-card,
 .mobile-sheet,
 .contact-form,
 .stat-item {
   border-radius: 22px;
-}
-
-.tier {
-  box-shadow: 0 10px 32px rgba(20, 20, 22, 0.07);
 }
 
 .ao-cat-pill,
@@ -4246,7 +4109,8 @@ blockquote {
   box-shadow: 0 6px 18px rgba(20, 20, 22, 0.08);
 }
 
-/* Dark accent panel — fixed near-black like the admin's cards, so it stays
+/* Dark accent panel — fixed near-black like the admin's cards,
+so it stays
    dark in BOTH themes (the ink token would invert in dark mode). */
 .ao-dark-panel {
   background: #141416;
@@ -4385,7 +4249,7 @@ blockquote {
 }
 
 /* Author portrait is a circle (the global rounding pass squared it off),
-   and centering it against three lines of text balances the block. */
+and centering it against three lines of text balances the block. */
 .author-bio {
   align-items: center;
 }
@@ -4507,7 +4371,10 @@ blockquote {
   margin-top: calc(var(--frame-gap) - 4px);
 }
 
-/* ── Front-page slots (masthead, opener grid, briefs, feed + sidebar) ───── */
+/* ── Front-page slots (masthead,
+opener grid,
+briefs,
+feed + sidebar) ───── */
 
 .ao-masthead {
   display: flex;
@@ -4530,7 +4397,8 @@ blockquote {
   color: var(--color-gold);
 }
 
-/* Opener grid: 2 side columns flank the feature, hairlines in the gaps */
+/* Opener grid: 2 side columns flank the feature,
+hairlines in the gaps */
 .ao-slots {
   --row-gap: clamp(20px, 3vw, 40px);
   display: grid;
@@ -4927,7 +4795,9 @@ blockquote {
 }
 
 /* Front-page opener spans nearly the full frame instead of the reading
-   column — masthead, slot grid, and briefs strip share the same edges. */
+   column — masthead,
+slot grid,
+and briefs strip share the same edges. */
 .ao-masthead,
 .ao-slots,
 .ao-strip-wrap {
@@ -4946,7 +4816,8 @@ blockquote {
 }
 
 /* Footer: base .footer-social/.footer-legal rules sit after the old 420px
-   block in source order, so their grid-column placement was overriding the
+   block in source order,
+so their grid-column placement was overriding the
    mobile stack and squeezing everything into phantom columns. */
 @media (max-width: 640px) {
   .site-footer .container {

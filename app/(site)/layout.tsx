@@ -28,8 +28,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header categories={categories} />
       {children}
 
-      {/* Grand newsletter panel closing every public page */}
-      <section className="section container">
+      {/* Grand newsletter panel closing every public page. The id is the anchor
+          target for the "Sign up free" CTA on /subscribe, which deliberately
+          carries no form of its own rather than competing with this one. */}
+      <section className="section container" id="newsletter">
         <div className="newsletter-strip nl-grand reveal">
           <div>
             <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>

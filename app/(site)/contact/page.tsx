@@ -37,9 +37,9 @@ export default function ContactPage() {
         <div className="about-contact">
           <div className="reveal">
             <span className="label eyebrow" data-en="Contact" data-ar="تواصل معنا">Contact</span>
-            <h1 data-en="Editorial, partnerships, and membership inquiries." data-ar="استفسارات التحرير والشراكات والعضوية.">Editorial, partnerships, and membership inquiries.</h1>
-            <p className="deck" data-en="Send us editorial pitches, partnership requests, membership questions, and advertising enquiries. We read everything and reply to what we can." data-ar="أرسل إلينا مقترحات التحرير وطلبات الشراكة وأسئلة العضوية واستفسارات الإعلان. نقرأ كل رسالة ونرد على ما نستطيع.">
-              Send us editorial pitches, partnership requests, membership questions, and
+            <h1 data-en="Editorial, partnerships, and advertising inquiries." data-ar="استفسارات التحرير والشراكات والإعلان.">Editorial, partnerships, and advertising inquiries.</h1>
+            <p className="deck" data-en="Send us editorial pitches, partnership requests, newsletter questions, and advertising enquiries. We read everything and reply to what we can." data-ar="أرسل إلينا مقترحات التحرير وطلبات الشراكة وأسئلة النشرة واستفسارات الإعلان. نقرأ كل رسالة ونرد على ما نستطيع.">
+              Send us editorial pitches, partnership requests, newsletter questions, and
               advertising enquiries. We read everything and reply to what we can.
             </p>
             <div className="contact-detail">
@@ -82,9 +82,9 @@ export default function ContactPage() {
             <label>
               <span className="form-label" data-en="Inquiry Type" data-ar="نوع الاستفسار">Inquiry Type</span>
               <input type="text" name="type"
-                placeholder="Editorial, membership, advertising"
-                data-placeholder-en="Editorial, membership, advertising"
-                data-placeholder-ar="تحرير، عضوية، إعلان"
+                placeholder="Editorial, partnership, advertising"
+                data-placeholder-en="Editorial, partnership, advertising"
+                data-placeholder-ar="تحرير، شراكة، إعلان"
               />
             </label>
             <label>

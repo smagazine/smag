@@ -1,157 +1,101 @@
-"use client";
-import Link from "next/link";
+import type { Metadata } from "next";
 import Image from "next/image";
-import { useRef } from "react";
-import MembershipDialog, { type MembershipDialogHandle } from "@/components/MembershipDialog";
 
+export const metadata: Metadata = {
+  title: "Daily Briefing",
+  description:
+    "The free morning read for people following Saudi Arabia's culture, cities, and ideas — in English and Arabic, every weekday.",
+  alternates: { canonical: "/subscribe" },
+};
+
+export const revalidate = 3600;
+
+/**
+ * Newsletter landing page. This used to sell a paid membership with Digital
+ * and Print & Digital tiers; there is no print edition and no payment flow, so
+ * the tiers, the pricing and the signup dialog are gone. The briefing itself is
+ * real and free, so the route stays and explains it.
+ *
+ * No signup form here on purpose — app/(site)/layout.tsx already closes every
+ * public page with the newsletter panel, so the CTA below just anchors to it
+ * rather than putting a second, competing form on the same page.
+ */
 export default function SubscribePage() {
-  const dialogRef = useRef<MembershipDialogHandle>(null);
-
-  const selectTier = (tier: string) => dialogRef.current?.open(tier);
-
   return (
-    <>
-      <main className="page" id="main-content">
-        <section className="subscription-hero">
-          <div className="image-frame reveal">
-            <Image fill priority src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop&auto=format" alt="Editorial membership visual" sizes="100vw" />
+    <main className="page" id="main-content">
+      <section className="subscription-hero">
+        <div className="image-frame reveal">
+          <Image
+            fill
+            priority
+            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop&auto=format"
+            alt=""
+            sizes="100vw"
+          />
+        </div>
+        <div className="container d-grid">
+          <div className="briefing-card reveal">
+            <span className="label eyebrow" data-en="Daily Briefing" data-ar="النشرة اليومية">Daily Briefing</span>
+            <h1 data-en="Saudi Arabia, every weekday morning." data-ar="السعودية، كل صباح يوم عمل.">
+              Saudi Arabia, every weekday morning.
+            </h1>
+            <p className="deck" data-en="One email with what we published and what we are watching — culture, cities, food, sport, and the people behind them. Free, and written in both languages." data-ar="رسالة واحدة بما نشرناه وما نتابعه — الثقافة والمدن والطعام والرياضة والأشخاص خلفها. مجانية، ومكتوبة باللغتين.">
+              One email with what we published and what we are watching — culture, cities, food,
+              sport, and the people behind them. Free, and written in both languages.
+            </p>
+            <p className="mt-lg">
+              <a className="button" href="#newsletter" data-en="Sign up free" data-ar="اشترك مجاناً">
+                Sign up free
+              </a>
+            </p>
           </div>
-          <div className="container d-grid">
-            <div className="membership-card reveal">
-              <span className="label eyebrow" data-en="Membership" data-ar="العضوية">Membership</span>
-              <h1 data-en="Join the Reader's Majlis." data-ar="انضم إلى مجلس القراء.">
-                Join the Reader&apos;s Majlis.
-              </h1>
-              <p className="deck" data-en="Curated intelligence, thoughtful access, and editorial depth for readers following Saudi Arabia's cultural shift." data-ar="ذكاء انتقائي وعمق تحريري لقراء يتابعون التحول الثقافي في السعودية.">
-                Curated intelligence, thoughtful access, and editorial depth for readers following Saudi Arabia&apos;s cultural shift.
-              </p>
-              <p className="mt-lg">
-                <a className="button" href="#tiers" data-en="View membership tiers" data-ar="عرض مستويات العضوية">
-                  View membership tiers
-                </a>
-              </p>
-            </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="section container">
-          <div className="benefits">
-            <div className="benefit reveal">
-              <span className="material-symbols-outlined">auto_stories</span>
-              <h3 data-en="Unrestricted Access" data-ar="وصول غير محدود">Unrestricted Access</h3>
-              <p data-en="Unlimited reading across our digital archive, featuring long-form journalism and cultural commentary." data-ar="قراءة غير محدودة عبر أرشيفنا الرقمي، يتضمن الصحافة المطوّلة والتعليق الثقافي.">Unlimited reading across our digital archive, featuring long-form journalism and cultural commentary.</p>
-            </div>
-            <div className="benefit reveal">
-              <span className="material-symbols-outlined">workspace_premium</span>
-              <h3 data-en="Print Edition" data-ar="النسخة المطبوعة">Print Edition</h3>
-              <p data-en="A meticulously crafted print magazine delivered quarterly as a collectible editorial object." data-ar="مجلة مطبوعة مصنوعة بعناية تُسلَّم فصلياً كقطعة تحريرية للاقتناء.">A meticulously crafted print magazine delivered quarterly as a collectible editorial object.</p>
-            </div>
-            <div className="benefit reveal">
-              <span className="material-symbols-outlined">confirmation_number</span>
-              <h3 data-en="Curated Events" data-ar="فعاليات منتقاة">Curated Events</h3>
-              <p data-en="Priority invitations to private talks, cultural salons, and editorial gatherings." data-ar="دعوات ذات أولوية إلى المحادثات الخاصة والصالونات الثقافية والتجمعات التحريرية.">Priority invitations to private talks, cultural salons, and editorial gatherings.</p>
-            </div>
+      <section className="section container">
+        <div className="benefits">
+          <div className="benefit reveal">
+            <span className="material-symbols-outlined">auto_stories</span>
+            <h3 data-en="The Day's Reading" data-ar="قراءة اليوم">The Day&apos;s Reading</h3>
+            <p data-en="Every story we publish, gathered into one morning email so you do not have to check back." data-ar="كل قصة ننشرها، مجموعة في رسالة صباحية واحدة حتى لا تضطر للعودة والبحث.">Every story we publish, gathered into one morning email so you do not have to check back.</p>
           </div>
-        </section>
+          <div className="benefit reveal">
+            <span className="material-symbols-outlined">translate</span>
+            <h3 data-en="English and Arabic" data-ar="بالإنجليزية والعربية">English and Arabic</h3>
+            <p data-en="Read it in either language. Every story is written in both, not machine-translated from one into the other." data-ar="اقرأها بأي من اللغتين. كل قصة تُكتب بهما معاً، لا تُترجم آلياً من إحداهما إلى الأخرى.">Read it in either language. Every story is written in both, not machine-translated from one into the other.</p>
+          </div>
+          <div className="benefit reveal">
+            <span className="material-symbols-outlined">mark_email_read</span>
+            <h3 data-en="Free, and Only This" data-ar="مجانية، ولهذا فقط">Free, and Only This</h3>
+            <p data-en="No charge, no paywall, and no other mail. Your address is used for the briefing and nothing else, and we never pass it on." data-ar="بلا رسوم ولا جدار دفع ولا أي بريد آخر. يُستخدم عنوانك للنشرة فقط، ولا نمرره لأحد أبداً.">No charge, no paywall, and no other mail. Your address is used for the briefing and nothing else, and we never pass it on.</p>
+          </div>
+        </div>
+      </section>
 
-        <section className="section soft" id="tiers">
-          <div className="container">
-            <div className="stats-row reveal">
-              {/* Qualitative on purpose. The numbers that used to sit here
-                  (200+ stories, 12K+ readers, 4 issues a year) were not
-                  backed by anything in the data store. */}
-              <div className="stat-item">
-                <span className="stat-number" data-en="Daily" data-ar="يومياً">Daily</span>
-                <span className="stat-label" data-en="New Stories" data-ar="قصص جديدة">New Stories</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number" data-en="EN / AR" data-ar="إنجليزي / عربي">EN / AR</span>
-                <span className="stat-label" data-en="Every Story, Both Languages" data-ar="كل قصة، باللغتين">Every Story, Both Languages</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number" data-en="Independent" data-ar="مستقلة">Independent</span>
-                <span className="stat-label" data-en="Reader-Supported" data-ar="مدعومة من القراء">Reader-Supported</span>
-              </div>
+      <section className="section soft">
+        <div className="container">
+          <div className="stats-row reveal">
+            <div className="stat-item">
+              <span className="stat-number" data-en="Daily" data-ar="يومياً">Daily</span>
+              <span className="stat-label" data-en="Every Weekday Morning" data-ar="كل صباح يوم عمل">Every Weekday Morning</span>
             </div>
-            <div className="section-header reveal">
-              <div>
-                <span className="label eyebrow" data-en="Membership" data-ar="العضوية">Membership</span>
-                <h2 data-en="Select Your Tier" data-ar="اختر مستواك">Select Your Tier</h2>
-              </div>
+            <div className="stat-item">
+              <span className="stat-number" data-en="EN / AR" data-ar="إنجليزي / عربي">EN / AR</span>
+              <span className="stat-label" data-en="Every Story, Both Languages" data-ar="كل قصة، باللغتين">Every Story, Both Languages</span>
             </div>
-            <div className="tiers">
-              <article className="tier reveal">
-                <div>
-                  <span className="meta" data-en="Essential" data-ar="أساسي">Essential</span>
-                  <h3 data-en="Digital" data-ar="رقمي">Digital</h3>
-                  <span className="price" data-en="$15/month" data-ar="١٥$ شهرياً">$15/month</span>
-                  <ul>
-                    <li data-en="Unlimited digital articles" data-ar="مقالات رقمية غير محدودة">Unlimited digital articles</li>
-                    <li data-en="Daily briefing newsletter" data-ar="نشرة إخبارية يومية">Daily briefing newsletter</li>
-                    <li data-en="Ad-free reading experience" data-ar="تجربة قراءة بدون إعلانات">Ad-free reading experience</li>
-                  </ul>
-                </div>
-                <button
-                  className="button secondary"
-                  type="button"
-                  onClick={() => selectTier("Digital")}
-                  data-en="Select Digital"
-                  data-ar="اختر الرقمي"
-                >
-                  Select Digital
-                </button>
-              </article>
-              <article className="tier featured reveal">
-                <div>
-                  <span className="meta" data-en="Complete" data-ar="شامل">Complete</span>
-                  <h3 data-en="Print & Digital" data-ar="مطبوع ورقمي">Print &amp; Digital</h3>
-                  <span className="price" data-en="$45/month" data-ar="٤٥$ شهرياً">$45/month</span>
-                  <ul>
-                    <li data-en="Everything in Digital" data-ar="كل ما في الرقمي">Everything in Digital</li>
-                    <li data-en="Quarterly print edition delivered" data-ar="النسخة المطبوعة الفصلية تُسلَّم">Quarterly print edition delivered</li>
-                    <li data-en="Exclusive digital supplements" data-ar="ملاحق رقمية حصرية">Exclusive digital supplements</li>
-                    <li data-en="Archival print access" data-ar="الوصول إلى الأرشيف المطبوع">Archival print access</li>
-                  </ul>
-                </div>
-                <button
-                  className="button"
-                  type="button"
-                  onClick={() => selectTier("Print & Digital")}
-                  data-en="Select Print & Digital"
-                  data-ar="اختر المطبوع والرقمي"
-                >
-                  Select Print &amp; Digital
-                </button>
-              </article>
-              <article className="tier reveal">
-                <div>
-                  <span className="meta" data-en="Community" data-ar="مجتمع">Community</span>
-                  <h3 data-en="Majlis" data-ar="مجلس">Majlis</h3>
-                  <span className="price" data-en="Inquire" data-ar="استفسر">Inquire</span>
-                  <ul>
-                    <li data-en="Everything in Print & Digital" data-ar="كل ما في المطبوع والرقمي">Everything in Print &amp; Digital</li>
-                    <li data-en="Small-group editorial gatherings" data-ar="تجمعات تحريرية في مجموعات صغيرة">Small-group editorial gatherings</li>
-                    <li data-en="Research notes and city briefings" data-ar="ملاحظات البحث وإحاطات المدن">Research notes and city briefings</li>
-                    <li data-en="Invitations to cultural dinners" data-ar="دعوات لحفلات العشاء الثقافية">Invitations to cultural dinners</li>
-                  </ul>
-                </div>
-                <Link className="button secondary" href="/contact" data-en="Request invitation" data-ar="طلب دعوة">
-                  Request invitation
-                </Link>
-              </article>
+            <div className="stat-item">
+              <span className="stat-number" data-en="Free" data-ar="مجانية">Free</span>
+              <span className="stat-label" data-en="No Paywall, Ever" data-ar="بلا جدار دفع، أبداً">No Paywall, Ever</span>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section className="section container text-center">
-          <blockquote className="pullquote reveal" data-en="Independent journalism about Saudi Arabia, written in both of its reading languages. Membership is what keeps it that way." data-ar="صحافة مستقلة عن السعودية، تُكتب بلغتي القراءة فيها. العضوية هي ما يُبقيها كذلك.">
-            Independent journalism about Saudi Arabia, written in both of its reading languages.
-            Membership is what keeps it that way.
-          </blockquote>
-        </section>
-      </main>
-
-      <MembershipDialog ref={dialogRef} />
-    </>
+      <section className="section container text-center">
+        <blockquote className="pullquote reveal" data-en="Independent journalism about Saudi Arabia, written in both of its reading languages." data-ar="صحافة مستقلة عن السعودية، تُكتب بلغتي القراءة فيها.">
+          Independent journalism about Saudi Arabia, written in both of its reading languages.
+        </blockquote>
+      </section>
+    </main>
   );
 }

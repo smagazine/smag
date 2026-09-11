@@ -13,7 +13,7 @@ export default function Footer() {
           <Link href="/about" data-en="About" data-ar="عن المجلة">About</Link>
           <Link href="/search" data-en="Archives" data-ar="الأرشيف">Archives</Link>
           <Link href="/contact" data-en="Contact" data-ar="تواصل">Contact</Link>
-          <Link href="/subscribe" data-en="Membership" data-ar="العضوية">Membership</Link>
+          <Link href="/subscribe" data-en="Newsletter" data-ar="النشرة">Newsletter</Link>
           <Link href="/culture" data-en="Culture" data-ar="الثقافة">Culture</Link>
         </nav>
         <SocialLinks className="footer-social" />
