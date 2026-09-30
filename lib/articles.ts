@@ -4,6 +4,7 @@ import { safeEmbedUrl } from "@/lib/video";
 import { withLock } from "@/lib/file-lock";
 import { StorageError } from "@/lib/storage-error";
 import { kvConfigured, kvGetJson, kvSetJson } from "@/lib/firestore";
+import { getCategories } from "@/lib/categories";
 
 export { StorageError };
 
@@ -30,6 +31,9 @@ export interface BodyBlock {
 export interface Article {
   slug: string;
   category: string;
+  /** Arabic badge label — derived at read time from the matching desk's
+      `labelAr` (see withCategoryAr), never persisted. */
+  categoryAr?: string;
   title: string;
   /** Optional Arabic title; falls back to `title` when absent. */
   titleAr?: string;
@@ -133,7 +137,22 @@ export async function getPublishedArticles(): Promise<Article[]> {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const articles = await getArticles();
-  return articles.filter((a) => isLive(a, now) && inSponsoredWindow(a, today));
+  return withCategoryAr(articles.filter((a) => isLive(a, now) && inSponsoredWindow(a, today)));
+}
+
+/**
+ * Fills `categoryAr` from the desk whose English label matches the article's
+ * badge, so desks added in the admin show their Arabic label on the public
+ * site. Articles with no matching desk (legacy free-text badges) are left
+ * as-is for CatPill's own fallback.
+ */
+export async function withCategoryAr(articles: Article[]): Promise<Article[]> {
+  const labelAr = new Map<string, string>();
+  for (const c of await getCategories()) if (c.labelAr) labelAr.set(c.label, c.labelAr);
+  return articles.map((a) => {
+    const ar = labelAr.get(a.category);
+    return ar ? { ...a, categoryAr: ar } : a;
+  });
 }
 
 /**

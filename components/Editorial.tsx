@@ -43,9 +43,11 @@ export function excerptAr(a: Article): string {
   return stripInline(p?.textAr ?? a.subtitleAr ?? p?.text ?? a.subtitle);
 }
 
-export function CatPill({ category, dark = false }: { category: string; dark?: boolean }) {
+/** `categoryAr` is the desk's CMS label (Article.categoryAr); CAT_AR covers
+    legacy badges that don't match a desk. */
+export function CatPill({ category, categoryAr, dark = false }: { category: string; categoryAr?: string; dark?: boolean }) {
   return (
-    <span className={`ao-pill${dark ? " on-dark" : ""}`} data-en={category} data-ar={CAT_AR[category] ?? category}>
+    <span className={`ao-pill${dark ? " on-dark" : ""}`} data-en={category} data-ar={categoryAr ?? CAT_AR[category] ?? category}>
       {category}
     </span>
   );
@@ -86,7 +88,7 @@ export function AoCard({ a, sizes = "(min-width: 900px) 30vw, 100vw" }: { a: Art
       <Link className="ao-media" href={`/article/${a.slug}`}>
         <Image fill src={U(a.heroPhoto, 640, 460)} alt={a.title} sizes={sizes} />
       </Link>
-      <span className="ao-pill-row"><CatPill category={a.category} />{a.sponsored && <SponsoredPill />}</span>
+      <span className="ao-pill-row"><CatPill category={a.category} categoryAr={a.categoryAr} />{a.sponsored && <SponsoredPill />}</span>
       <h3 className="ao-card-title"><TitleLink a={a} /></h3>
       <Byline a={a} />
     </article>
@@ -102,7 +104,7 @@ export function AoLead({ a, flip = false, priority = false }: { a: Article; flip
         <Image fill priority={priority} src={U(a.heroPhoto, 900, 640)} alt={a.title} sizes="(min-width: 900px) 42vw, 100vw" />
       </Link>
       <div className="ao-desk-lead-copy">
-        <span className="ao-pill-row"><CatPill category={a.category} />{a.sponsored && <SponsoredPill />}</span>
+        <span className="ao-pill-row"><CatPill category={a.category} categoryAr={a.categoryAr} />{a.sponsored && <SponsoredPill />}</span>
         <h3 className="ao-card-title lg"><TitleLink a={a} /></h3>
         <p className="ao-excerpt" data-en={excerpt(a)} data-ar={excerptAr(a)}>{excerpt(a)}</p>
         <Byline a={a} />

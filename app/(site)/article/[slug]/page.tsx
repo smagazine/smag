@@ -2,12 +2,12 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticle, getPublishedArticles, isLive } from "@/lib/articles";
+import { getArticle, getPublishedArticles, isLive, withCategoryAr } from "@/lib/articles";
 import { safeEmbedUrl } from "@/lib/video";
 import ReadingProgress from "@/components/ReadingProgress";
 import ShareButtons from "@/components/ShareButtons";
 import Comments from "@/components/Comments";
-import { CatPill, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
+import { CatPill, CAT_AR, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
 import { getSponsor } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
 import { ORG_ID, SITE_NAME, SITE_URL, WEBSITE_ID } from "@/lib/site";
@@ -109,9 +109,10 @@ export default async function ArticleSlugPage(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const article = await getArticle(slug);
+  const found = await getArticle(slug);
   // isLive() covers drafts and scheduled posts whose publish time hasn't come.
-  if (!article || !isLive(article)) notFound();
+  if (!found || !isLive(found)) notFound();
+  const [article] = await withCategoryAr([found]);
 
   const sponsor = article.sponsored ? await getSponsor(article.sponsored.sponsorId) : null;
   const allArticles = await getPublishedArticles();
@@ -143,11 +144,11 @@ export default async function ArticleSlugPage(
       <ReadingProgress />
       <main className="page" id="main-content">
         <nav className="breadcrumb container" aria-label="Breadcrumb">
-          <Link href="/">Home</Link>
+          <Link href="/" data-en="Home" data-ar="الرئيسية">Home</Link>
           <span aria-hidden="true">›</span>
-          <Link href={`/${article.relatedCategory}`}>{article.category}</Link>
+          <Link href={`/${article.relatedCategory}`} data-en={article.category} data-ar={article.categoryAr ?? CAT_AR[article.category] ?? article.category}>{article.category}</Link>
           <span aria-hidden="true">›</span>
-          <span aria-current="page">{article.title}</span>
+          <span aria-current="page" data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</span>
         </nav>
 
         <article>
@@ -166,7 +167,7 @@ export default async function ArticleSlugPage(
 
           <header className="article-header container reveal">
             <div className="article-kicker">
-              <CatPill category={article.category} />
+              <CatPill category={article.category} categoryAr={article.categoryAr} />
               {article.sponsored && <SponsoredPill />}
             </div>
             <h1 data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</h1>

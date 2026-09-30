@@ -16,7 +16,7 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
         <Image fill src={U(a.heroPhoto, 520, 380)} alt={a.title} sizes={sizes} />
       </Link>
       <div className="ao-slot-meta">
-        <CatPill category={a.category} />
+        <CatPill category={a.category} categoryAr={a.categoryAr} />
         {a.sponsored && <SponsoredPill />}
         <span className="ao-slot-date">{date(a)}</span>
       </div>
@@ -143,7 +143,7 @@ export default async function HomePage() {
             <Image fill priority src={U(featured.heroPhoto, 1000, 720)} alt={featured.title} sizes="(min-width: 900px) 46vw, 100vw" />
           </Link>
           <div className="ao-slot-meta center">
-            <CatPill category={featured.category} />
+            <CatPill category={featured.category} categoryAr={featured.categoryAr} />
             {featured.sponsored && <SponsoredPill />}
             <span className="ao-slot-date">{date(featured)}</span>
           </div>
@@ -167,7 +167,7 @@ export default async function HomePage() {
                 <div>
                   <h3 className="ao-brief-title"><TitleLink a={a} /></h3>
                   <div className="ao-slot-meta">
-                    <CatPill category={a.category} />
+                    <CatPill category={a.category} categoryAr={a.categoryAr} />
                     {a.sponsored && <SponsoredPill />}
                     <span className="ao-slot-date">{date(a)}</span>
                   </div>
