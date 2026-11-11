@@ -1154,6 +1154,20 @@ p {
   margin-top: 32px;
 }
 
+/* Inline links editors add to body text ([label](url)); the share bar and
+   tag pills style their own anchors. */
+.article-body :is(p, h2, blockquote, figcaption) a {
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.article-body :is(p, h2, blockquote, figcaption) a:hover {
+  color: var(--color-gold);
+}
+
 .article-body h2 {
   font-size: clamp(2rem, 4vw, 3rem);
 }

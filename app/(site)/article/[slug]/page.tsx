@@ -53,7 +53,11 @@ function parseInline(text: string): React.ReactNode {
       const href = safeLinkHref(match[4]);
       parts.push(
         href ? (
-          <a key={i++} href={href} target="_blank" rel="noopener noreferrer">{match[3]}</a>
+          /^(\/(?!\/)|#)/.test(href) ? (
+            <a key={i++} href={href}>{match[3]}</a>
+          ) : (
+            <a key={i++} href={href} target="_blank" rel="noopener noreferrer">{match[3]}</a>
+          )
         ) : (
           <span key={i++}>{match[3]}</span>
         )
@@ -65,17 +69,23 @@ function parseInline(text: string): React.ReactNode {
   return parts.length === 0 ? text : parts.length === 1 ? parts[0] : <>{parts}</>;
 }
 
+/** Block text with the inline markdown removed — for alt text, titles and TOC links. */
+function stripInline(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g, (_m, b, i, l) => b ?? i ?? l ?? "");
+}
+
 /**
  * Bilingual block text: both languages render as sibling spans and CSS
  * toggles them on <html dir>. (The data-en/data-ar DOM swap only handles
  * leaf nodes, so it can't carry the inline markup paragraphs may contain.)
  */
-function BlockText({ text, textAr }: { text: string; textAr?: string }) {
-  if (!textAr) return <>{parseInline(text)}</>;
+function BlockText({ text, textAr, plain }: { text: string; textAr?: string; plain?: boolean }) {
+  const render = plain ? stripInline : parseInline;
+  if (!textAr) return <>{render(text)}</>;
   return (
     <>
-      <span className="lang-en">{parseInline(text)}</span>
-      <span className="lang-ar">{parseInline(textAr)}</span>
+      <span className="lang-en">{render(text)}</span>
+      <span className="lang-ar">{render(textAr)}</span>
     </>
   );
 }
@@ -204,7 +214,7 @@ export default async function ArticleSlugPage(
                   .filter((b) => b.type === "h2")
                   .map((b) => (
                     <li key={b.id}>
-                      <a href={`#${b.id}`}><BlockText text={b.text} textAr={b.textAr} /></a>
+                      <a href={`#${b.id}`}><BlockText text={b.text} textAr={b.textAr} plain /></a>
                     </li>
                   ))}
               </ul>
@@ -245,7 +255,7 @@ export default async function ArticleSlugPage(
                     <figure key={block.id} className="article-inline-image">
                       <Image
                         src={U(block.imageUrl, 1200, 800)}
-                        alt={block.text || ""}
+                        alt={stripInline(block.text || "")}
                         width={1200}
                         height={800}
                         sizes="(max-width: 720px) 100vw, 720px"

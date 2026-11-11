@@ -1019,6 +1019,164 @@ const BLOCK_COLORS: Record<string, string> = {
   image: "#0ea5e9",
 };
 
+// ── Hyperlinks in block text ───────────────────────────────────────────────
+// Block text stores links as inline markdown `[label](url)`, which the article
+// page's parseInline() renders as <a>. This textarea lets an editor select a
+// word and turn it into that markup without typing it by hand.
+
+const INLINE_LINK_RE = /\[([^\]\n]+?)\]\(([^)\s]+?)\)/g;
+
+function findLinkAt(text: string, start: number, end: number) {
+  for (const m of text.matchAll(INLINE_LINK_RE)) {
+    const s = m.index ?? 0;
+    const e = s + m[0].length;
+    if (s <= start && end <= e && start < e) return { start: s, end: e, label: m[1], url: m[2] };
+  }
+  return null;
+}
+
+/** Returns a safe href for the markup, or null with the reason it was rejected. */
+function normalizeLinkUrl(raw: string): { url: string } | { error: string } {
+  let url = raw.trim();
+  if (!url) return { error: "Enter a URL." };
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url)) {
+    if (!/^(https?:|mailto:)/i.test(url)) return { error: "Only http(s) and mailto links are allowed." };
+  } else if (!url.startsWith("/") && !url.startsWith("#")) {
+    if (url.includes("@") && !url.includes("/")) url = `mailto:${url}`;
+    else if (/^[^\s/]+\.[^\s/]+/.test(url)) url = `https://${url}`;
+    else return { error: "Use a full URL (https://…) or a site path (/culture)." };
+  }
+  // Characters that would end the `(url)` part early or split the markup.
+  url = url.replace(/\s/g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
+  return { url };
+}
+
+function LinkableTextarea({
+  value, onChange, ...rest
+}: Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> & {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const [link, setLink] = useState<{ start: number; end: number; label: string; url: string; existing: boolean } | null>(null);
+  const [msg, setMsg] = useState("");
+  const rtl = rest.dir === "rtl";
+
+  const reselect = (s: number, e: number) => requestAnimationFrame(() => {
+    const ta = ref.current;
+    if (!ta) return;
+    ta.focus();
+    ta.setSelectionRange(s, e);
+  });
+
+  const openLink = () => {
+    const ta = ref.current;
+    if (!ta) return;
+    setMsg("");
+    let s = ta.selectionStart;
+    let e = ta.selectionEnd;
+    const existing = findLinkAt(value, s, e);
+    if (existing) {
+      setLink({ ...existing, existing: true });
+      return;
+    }
+    // Drop surrounding whitespace a double-click may have grabbed.
+    while (s < e && /\s/.test(value[s])) s++;
+    while (e > s && /\s/.test(value[e - 1])) e--;
+    const label = value.slice(s, e);
+    if (!label) { setMsg("Select a word or phrase first, then click Link."); return; }
+    if (label.includes("\n")) { setMsg("A link can't span more than one line."); return; }
+    if (/[[\]]/.test(label) || findLinkAt(value, s, s) || findLinkAt(value, e, e)) {
+      setMsg("The selection overlaps an existing link — select inside it to edit it.");
+      return;
+    }
+    setLink({ start: s, end: e, label, url: "", existing: false });
+  };
+
+  const apply = () => {
+    if (!link) return;
+    const res = normalizeLinkUrl(link.url);
+    if ("error" in res) { setMsg(res.error); return; }
+    const md = `[${link.label}](${res.url})`;
+    onChange(value.slice(0, link.start) + md + value.slice(link.end));
+    setLink(null);
+    setMsg("");
+    reselect(link.start, link.start + md.length);
+  };
+
+  const remove = () => {
+    if (!link) return;
+    onChange(value.slice(0, link.start) + link.label + value.slice(link.end));
+    setLink(null);
+    setMsg("");
+    reselect(link.start, link.start + link.label.length);
+  };
+
+  const cancel = () => {
+    const l = link;
+    setLink(null);
+    setMsg("");
+    if (l) reselect(l.start, l.end);
+  };
+
+  const smallBtn: React.CSSProperties = { ...pillStyle, padding: "4px 11px", fontSize: 11 };
+
+  return (
+    <div>
+      <textarea
+        {...rest}
+        ref={ref}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            openLink();
+          }
+          rest.onKeyDown?.(e);
+        }}
+      />
+      <div dir="ltr" style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginTop: 6, justifyContent: rtl ? "flex-end" : "flex-start" }}>
+        {link ? (
+          <>
+            <span style={{ fontSize: 11, color: C.sub, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} dir="auto">
+              “{link.label}” →
+            </span>
+            <input
+              autoFocus
+              value={link.url}
+              onChange={(e) => setLink({ ...link, url: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); apply(); }
+                if (e.key === "Escape") { e.preventDefault(); cancel(); }
+              }}
+              placeholder="https://… or /culture"
+              style={{ ...inputStyle, background: C.card, width: "auto", flex: "1 1 180px", padding: "5px 10px", fontSize: 12 }}
+            />
+            <button type="button" onClick={apply} style={{ ...smallBtn, background: C.ink, color: "#fff", borderColor: C.ink }}>
+              {link.existing ? "Update" : "Apply"}
+            </button>
+            {link.existing && <button type="button" onClick={remove} style={{ ...smallBtn, color: C.red }}>Remove link</button>}
+            <button type="button" onClick={cancel} style={smallBtn}>Cancel</button>
+          </>
+        ) : (
+          <button
+            type="button"
+            // Keep the textarea's selection: don't let the click steal focus first.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={openLink}
+            title="Select text, then click to make it a link (⌘K / Ctrl+K)"
+            style={smallBtn}
+          >
+            🔗 Link
+          </button>
+        )}
+        {msg && <span style={{ fontSize: 11, color: C.red }}>{msg}</span>}
+      </div>
+    </div>
+  );
+}
+
 function BlockEditor({
   block, idx, total, onChange, onDelete, onMove,
 }: {
@@ -1053,9 +1211,15 @@ function BlockEditor({
         </div>
       </div>
 
-      <textarea
+      {block.type === "video" ? <textarea
         value={block.text}
         onChange={(e) => onChange({ ...block, text: e.target.value })}
+        rows={2}
+        placeholder="Embed title or description…"
+        style={{ ...textareaStyle, background: C.card, fontSize: 13 }}
+      /> : <LinkableTextarea
+        value={block.text}
+        onChange={(v) => onChange({ ...block, text: v })}
         rows={block.type === "p" ? 4 : 2}
         placeholder={
           block.type === "p" ? "Paragraph text…" :
@@ -1065,12 +1229,12 @@ function BlockEditor({
           "Embed title or description…"
         }
         style={{ ...textareaStyle, background: C.card, fontStyle: block.type === "blockquote" ? "italic" : "normal", fontWeight: block.type === "h2" ? 700 : 400, fontSize: block.type === "h2" ? 15 : 13 }}
-      />
+      />}
 
       {block.type !== "video" && (
-        <textarea
+        <LinkableTextarea
           value={block.textAr ?? ""}
-          onChange={(e) => onChange({ ...block, textAr: e.target.value || undefined })}
+          onChange={(v) => onChange({ ...block, textAr: v || undefined })}
           rows={block.type === "p" ? 4 : 2}
           dir="rtl"
           placeholder={
@@ -1085,7 +1249,7 @@ function BlockEditor({
 
       {block.type === "p" && (
         <p style={{ fontSize: 10, color: C.faint, marginTop: 6, lineHeight: 1.5 }}>
-          Markdown: <code style={{ color: C.sub }}>**bold**</code> · <code style={{ color: C.sub }}>*italic*</code> · <code style={{ color: C.sub }}>[link](url)</code> — Arabic field optional; English shows when empty.
+          Markdown: <code style={{ color: C.sub }}>**bold**</code> · <code style={{ color: C.sub }}>*italic*</code> · <code style={{ color: C.sub }}>[link](url)</code> — or select text and click Link (⌘K). Arabic field optional; English shows when empty.
         </p>
       )}
       {block.type === "video" && (
