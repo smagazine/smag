@@ -1051,13 +1051,20 @@ function normalizeLinkUrl(raw: string): { url: string } | { error: string } {
   return { url };
 }
 
+/** Inline markdown removed — for admin lists and slugs. */
+function plainText(s: string | undefined): string {
+  return (s ?? "").replace(/\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g, (_m, b, i, l) => b ?? i ?? l ?? "");
+}
+
 function LinkableTextarea({
-  value, onChange, ...rest
+  value, onChange, singleLine, ...rest
 }: Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> & {
   value: string;
   onChange: (v: string) => void;
+  /** Render a one-line <input> (titles) instead of a <textarea>. */
+  singleLine?: boolean;
 }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLTextAreaElement & HTMLInputElement>(null);
   const [link, setLink] = useState<{ start: number; end: number; label: string; url: string; existing: boolean } | null>(null);
   const [msg, setMsg] = useState("");
   const rtl = rest.dir === "rtl";
@@ -1123,19 +1130,36 @@ function LinkableTextarea({
 
   return (
     <div>
-      <textarea
-        {...rest}
-        ref={ref}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
+      {(() => {
+        const onKeyDown = (e: React.KeyboardEvent) => {
           if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
             e.preventDefault();
             openLink();
           }
-          rest.onKeyDown?.(e);
-        }}
-      />
+        };
+        if (singleLine) {
+          const { rows: _rows, ...inputProps } = rest;
+          void _rows;
+          return (
+            <input
+              {...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
+              ref={ref}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={onKeyDown}
+            />
+          );
+        }
+        return (
+          <textarea
+            {...rest}
+            ref={ref}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={onKeyDown}
+          />
+        );
+      })()}
       <div dir="ltr" style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center", marginTop: 6, justifyContent: rtl ? "flex-end" : "flex-start" }}>
         {link ? (
           <>
@@ -1728,7 +1752,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (isNew && !slugLocked && draft.title) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setDraft((d) => ({ ...d, slug: slugify(d.title) }));
+      setDraft((d) => ({ ...d, slug: slugify(plainText(d.title)) }));
     }
   }, [draft.title, isNew, slugLocked]);
 
@@ -1876,7 +1900,7 @@ export default function AdminPage() {
     const q = search.toLowerCase();
     return (
       (filterCat === "All" || a.category === filterCat) &&
-      (!q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q))
+      (!q || plainText(a.title).toLowerCase().includes(q) || a.author.toLowerCase().includes(q))
     );
   });
 
@@ -2149,7 +2173,7 @@ export default function AdminPage() {
                           )}
                         </div>
                         <span style={catChip(featured.category, true)}>{featured.category}</span>
-                        <p style={{ fontSize: 14.5, fontWeight: 700, lineHeight: 1.35, margin: "10px 0 4px" }}>{featured.title}</p>
+                        <p style={{ fontSize: 14.5, fontWeight: 700, lineHeight: 1.35, margin: "10px 0 4px" }}>{plainText(featured.title)}</p>
                         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", marginBottom: 14 }}>{featured.author} · {featured.meta.split("·")[0]?.trim()}</p>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button type="button" onClick={() => openEdit(featured)}
@@ -2202,7 +2226,7 @@ export default function AdminPage() {
                       <div key={a.slug} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderTop: i === 0 ? "none" : `1px solid ${C.line}` }}>
                         <Thumb photo={a.heroPhoto} size={34} />
                         <div style={{ minWidth: 0, flex: 1 }}>
-                          <p style={{ fontSize: 12.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.title}</p>
+                          <p style={{ fontSize: 12.5, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plainText(a.title)}</p>
                           <p style={{ fontSize: 10.5, color: C.sub, marginTop: 2 }}>
                             <span style={{ color: "#0369a1", fontWeight: 700 }}>{formatWhen(a.publishAt)}</span>
                             {" · "}{timeUntil(a.publishAt)}{" · "}{a.category}
@@ -2271,7 +2295,7 @@ export default function AdminPage() {
                               <span title={`Goes live ${formatWhen(a.publishAt)}`} style={{ fontSize: 9, fontWeight: 800, color: "#7cc7ec", letterSpacing: "0.08em" }}>SCHEDULED</span>
                             )}
                           </div>
-                          <p style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{a.title}</p>
+                          <p style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, marginBottom: 6, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{plainText(a.title)}</p>
                           <p style={{ fontSize: 10.5, color: "rgba(255,255,255,0.45)", marginBottom: 12 }}>{a.author}</p>
                           <button type="button" onClick={() => openEdit(a)}
                             style={{ ...pillStyle, marginTop: "auto", alignSelf: "flex-start", background: "transparent", border: "1px solid rgba(255,255,255,0.22)", color: "#fff", padding: "6px 14px", fontSize: 11 }}>
@@ -2332,7 +2356,7 @@ export default function AdminPage() {
                         )}
                       </div>
                       <div className="admin-row-body" style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{article.title}</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{plainText(article.title)}</p>
                         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                           <span style={catChip(article.category)}>{article.category}</span>
                           {(article.status ?? "published") === "draft" && (
@@ -2393,19 +2417,19 @@ export default function AdminPage() {
                 <p style={sectionLabel}>Identity</p>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Title</label>
-                  <input style={inputStyle} value={draft.title} onChange={S("title")} placeholder="Article headline…" />
+                  <LinkableTextarea singleLine style={inputStyle} value={draft.title} onChange={(v) => setDraft(d => ({ ...d, title: v }))} placeholder="Article headline…" />
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Title (Arabic)</label>
-                  <input style={inputStyle} dir="rtl" value={draft.titleAr ?? ""} onChange={(e) => setDraft(d => ({ ...d, titleAr: e.target.value || undefined }))} placeholder="العنوان بالعربية…" />
+                  <LinkableTextarea singleLine style={inputStyle} dir="rtl" value={draft.titleAr ?? ""} onChange={(v) => setDraft(d => ({ ...d, titleAr: v || undefined }))} placeholder="العنوان بالعربية…" />
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Subtitle / Deck</label>
-                  <textarea style={{ ...textareaStyle, height: 72 }} value={draft.subtitle} onChange={S("subtitle")} placeholder="One-paragraph summary shown below the title…" />
+                  <LinkableTextarea style={{ ...textareaStyle, height: 72 }} value={draft.subtitle} onChange={(v) => setDraft(d => ({ ...d, subtitle: v }))} placeholder="One-paragraph summary shown below the title…" />
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelStyle}>Subtitle (Arabic)</label>
-                  <textarea style={{ ...textareaStyle, height: 72 }} dir="rtl" value={draft.subtitleAr ?? ""} onChange={(e) => setDraft(d => ({ ...d, subtitleAr: e.target.value || undefined }))} placeholder="الوصف بالعربية…" />
+                  <LinkableTextarea style={{ ...textareaStyle, height: 72 }} dir="rtl" value={draft.subtitleAr ?? ""} onChange={(v) => setDraft(d => ({ ...d, subtitleAr: v || undefined }))} placeholder="الوصف بالعربية…" />
                 </div>
                 <div className="admin-grid-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                   <div>
@@ -2692,13 +2716,13 @@ export default function AdminPage() {
                 {articles
                   .filter((a) => {
                     const q = search.toLowerCase();
-                    return !q || a.title.toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
+                    return !q || plainText(a.title).toLowerCase().includes(q) || a.author.toLowerCase().includes(q);
                   })
                   .map((a) => (
                     <div key={a.slug} style={{ ...cardStyle, padding: 10, overflow: "hidden" }}>
                       <div style={{ aspectRatio: "16/9", overflow: "hidden", cursor: "pointer", borderRadius: 14, background: "#e4e5e9" }} onClick={() => openEdit(a)}>
                         {a.heroPhoto ? (
-                          <img src={U(pid(a.heroPhoto), 480, 270)} alt={a.title} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
+                          <img src={U(pid(a.heroPhoto), 480, 270)} alt={plainText(a.title)} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s", display: "block" }}
                             onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.04)")}
                             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                           />
@@ -2707,7 +2731,7 @@ export default function AdminPage() {
                         )}
                       </div>
                       <div style={{ padding: "12px 8px 6px" }}>
-                        <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 }}>{a.title}</p>
+                        <p style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 }}>{plainText(a.title)}</p>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <span style={catChip(a.category)}>{a.category}</span>
                           <button type="button" onClick={() => openEdit(a)} style={{ fontSize: 11, color: "#5f8c00", background: "none", border: "none", cursor: "pointer", fontWeight: 700, fontFamily: FONT }}>Edit →</button>
@@ -2875,11 +2899,11 @@ export default function AdminPage() {
                   </div>
                   <div style={{ gridColumn: "1 / -1" }}>
                     <label style={labelStyle}>Deck (page subhead)</label>
-                    <textarea style={{ ...textareaStyle, height: 60 }} value={categoryForm.deck} onChange={(e) => setCategoryForm(f => ({ ...f, deck: e.target.value }))} placeholder="One-line description shown on the category page…" />
+                    <LinkableTextarea style={{ ...textareaStyle, height: 60 }} value={categoryForm.deck} onChange={(v) => setCategoryForm(f => ({ ...f, deck: v }))} placeholder="One-line description shown on the category page…" />
                   </div>
                   <div style={{ gridColumn: "1 / -1" }}>
                     <label style={labelStyle}>Deck (Arabic)</label>
-                    <textarea style={{ ...textareaStyle, height: 60 }} dir="rtl" value={categoryForm.deckAr} onChange={(e) => setCategoryForm(f => ({ ...f, deckAr: e.target.value }))} placeholder="الوصف بالعربية…" />
+                    <LinkableTextarea style={{ ...textareaStyle, height: 60 }} dir="rtl" value={categoryForm.deckAr} onChange={(v) => setCategoryForm(f => ({ ...f, deckAr: v }))} placeholder="الوصف بالعربية…" />
                   </div>
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: categoryForm.italicTitle ? "#5f8c00" : C.sub, userSelect: "none" }}>
@@ -3186,7 +3210,7 @@ export default function AdminPage() {
           <div style={{ background: C.card, borderRadius: 24, padding: 28, maxWidth: 400, width: "90%", boxShadow: "0 30px 80px rgba(20,20,22,0.3)" }}>
             <h2 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8, fontFamily: FONT }}>Delete article?</h2>
             <p style={{ fontSize: 13, color: C.sub, marginBottom: 22, lineHeight: 1.6 }}>
-              This will permanently delete <strong style={{ color: C.text }}>{articles.find(a => a.slug === deleteConfirm)?.title}</strong>. This cannot be undone.
+              This will permanently delete <strong style={{ color: C.text }}>{plainText(articles.find(a => a.slug === deleteConfirm)?.title)}</strong>. This cannot be undone.
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button type="button" onClick={() => setDeleteConfirm(null)} style={{ ...pillStyle, padding: "10px 18px" }}>Cancel</button>

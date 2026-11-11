@@ -10,6 +10,7 @@ import Comments from "@/components/Comments";
 import { CatPill, CAT_AR, SponsoredPill, SeeAll, AoCard } from "@/components/Editorial";
 import { getSponsor } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
+import { InlineText as BlockText, stripInline } from "@/lib/inline";
 import { ORG_ID, SITE_NAME, SITE_URL, WEBSITE_ID } from "@/lib/site";
 import type { Metadata } from "next";
 
@@ -29,67 +30,6 @@ const U = (id: string, w: number, h: number) => {
   return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`;
 };
 
-const SAFE_LINK_SCHEMES = /^(https?:|mailto:)/i;
-
-function safeLinkHref(url: string): string | null {
-  const trimmed = url.trim();
-  if (SAFE_LINK_SCHEMES.test(trimmed)) return trimmed;
-  // Treat scheme-relative/relative URLs (no "javascript:"-style scheme) as safe too.
-  if (!/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
-  return null;
-}
-
-function parseInline(text: string): React.ReactNode {
-  const parts: React.ReactNode[] = [];
-  const re = /\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g;
-  let last = 0;
-  let i = 0;
-  let match;
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > last) parts.push(text.slice(last, match.index));
-    if (match[1] !== undefined) parts.push(<strong key={i++}>{match[1]}</strong>);
-    else if (match[2] !== undefined) parts.push(<em key={i++}>{match[2]}</em>);
-    else {
-      const href = safeLinkHref(match[4]);
-      parts.push(
-        href ? (
-          /^(\/(?!\/)|#)/.test(href) ? (
-            <a key={i++} href={href}>{match[3]}</a>
-          ) : (
-            <a key={i++} href={href} target="_blank" rel="noopener noreferrer">{match[3]}</a>
-          )
-        ) : (
-          <span key={i++}>{match[3]}</span>
-        )
-      );
-    }
-    last = match.index + match[0].length;
-  }
-  if (last < text.length) parts.push(text.slice(last));
-  return parts.length === 0 ? text : parts.length === 1 ? parts[0] : <>{parts}</>;
-}
-
-/** Block text with the inline markdown removed — for alt text, titles and TOC links. */
-function stripInline(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*|\*(.+?)\*|\[(.+?)\]\((.+?)\)/g, (_m, b, i, l) => b ?? i ?? l ?? "");
-}
-
-/**
- * Bilingual block text: both languages render as sibling spans and CSS
- * toggles them on <html dir>. (The data-en/data-ar DOM swap only handles
- * leaf nodes, so it can't carry the inline markup paragraphs may contain.)
- */
-function BlockText({ text, textAr, plain }: { text: string; textAr?: string; plain?: boolean }) {
-  const render = plain ? stripInline : parseInline;
-  if (!textAr) return <>{render(text)}</>;
-  return (
-    <>
-      <span className="lang-en">{render(text)}</span>
-      <span className="lang-ar">{render(textAr)}</span>
-    </>
-  );
-}
-
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -97,19 +37,21 @@ export async function generateMetadata(
   const article = await getArticle(slug);
   if (!article) return { title: "Article not found" };
   const heroUrl = U(article.heroPhoto, 1200, 630);
+  const title = stripInline(article.title);
+  const description = stripInline(article.subtitle);
   return {
-    title: article.title,
-    description: article.subtitle,
+    title,
+    description,
     openGraph: {
       type: "article",
-      title: article.title,
-      description: article.subtitle,
-      images: [{ url: heroUrl, width: 1200, height: 630, alt: article.title }],
+      title,
+      description,
+      images: [{ url: heroUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
-      title: article.title,
-      description: article.subtitle,
+      title,
+      description,
       images: [heroUrl],
     },
   };
@@ -135,8 +77,8 @@ export default async function ArticleSlugPage(
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: article.title,
-    description: article.subtitle,
+    headline: stripInline(article.title),
+    description: stripInline(article.subtitle),
     image: heroUrl,
     author: { "@type": "Person", name: article.author, jobTitle: article.authorRole },
     // @id resolves to the full Organization node emitted site-wide by
@@ -158,7 +100,7 @@ export default async function ArticleSlugPage(
           <span aria-hidden="true">›</span>
           <Link href={`/${article.relatedCategory}`} data-en={article.category} data-ar={article.categoryAr ?? CAT_AR[article.category] ?? article.category}>{article.category}</Link>
           <span aria-hidden="true">›</span>
-          <span aria-current="page" data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</span>
+          <span aria-current="page"><BlockText text={article.title} textAr={article.titleAr} plain /></span>
         </nav>
 
         <article>
@@ -166,7 +108,7 @@ export default async function ArticleSlugPage(
             <Image
               priority
               src={U(article.heroPhoto, 1920, 1080)}
-              alt={article.title}
+              alt={stripInline(article.title)}
               data-article-hero=""
               sizes="100vw"
               width={1920}
@@ -180,8 +122,8 @@ export default async function ArticleSlugPage(
               <CatPill category={article.category} categoryAr={article.categoryAr} />
               {article.sponsored && <SponsoredPill />}
             </div>
-            <h1 data-en={article.title} data-ar={article.titleAr ?? article.title}>{article.title}</h1>
-            <p className="article-subtitle" data-en={article.subtitle} data-ar={article.subtitleAr ?? article.subtitle}>{article.subtitle}</p>
+            <h1><BlockText text={article.title} textAr={article.titleAr} /></h1>
+            <p className="article-subtitle"><BlockText text={article.subtitle} textAr={article.subtitleAr} /></p>
             <div className="byline">
               <div className="author">
                 <Image src={U(article.authorPhoto, 200, 200)} alt={article.author} width={54} height={54} />
@@ -190,7 +132,7 @@ export default async function ArticleSlugPage(
                   <p>{article.meta}</p>
                 </div>
               </div>
-              <ShareButtons title={article.title} />
+              <ShareButtons title={stripInline(article.title)} />
             </div>
             {sponsor && (
               <p className="ao-disclosure">
@@ -242,7 +184,7 @@ export default async function ArticleSlugPage(
                     <div key={block.id} className="article-video">
                       <iframe
                         src={embed}
-                        title={block.text}
+                        title={stripInline(block.text)}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       />
@@ -294,7 +236,7 @@ export default async function ArticleSlugPage(
                 </div>
               </div>
 
-              <ShareButtons title={article.title} />
+              <ShareButtons title={stripInline(article.title)} />
 
               <Comments slug={article.slug} />
             </div>

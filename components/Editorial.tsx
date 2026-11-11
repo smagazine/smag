@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Article } from "@/lib/articles";
+import { stripInline } from "@/lib/inline";
 
 // Shared pieces of the AnOther-style editorial system (ao-* classes in
 // globals.css). Pure presentational components — safe in server and client
@@ -24,13 +25,6 @@ export const CAT_AR: Record<string, string> = {
   "Headlines": "الأخبار",
   "Architecture & Design": "العمارة والتصميم",
 };
-
-function stripInline(s: string): string {
-  return s
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/\[(.+?)\]\([^)]*\)/g, "$1");
-}
 
 /** First paragraph of the body with inline markdown stripped, for excerpts. */
 export function excerpt(a: Article): string {
@@ -66,8 +60,8 @@ export function Byline({ a }: { a: Article }) {
 
 export function TitleLink({ a }: { a: Article }) {
   return (
-    <Link href={`/article/${a.slug}`} data-en={a.title} data-ar={a.titleAr ?? a.title}>
-      {a.title}
+    <Link href={`/article/${a.slug}`} data-en={stripInline(a.title)} data-ar={stripInline(a.titleAr ?? a.title)}>
+      {stripInline(a.title)}
     </Link>
   );
 }
@@ -86,7 +80,7 @@ export function AoCard({ a, sizes = "(min-width: 900px) 30vw, 100vw" }: { a: Art
   return (
     <article className="ao-card">
       <Link className="ao-media" href={`/article/${a.slug}`}>
-        <Image fill src={U(a.heroPhoto, 640, 460)} alt={a.title} sizes={sizes} />
+        <Image fill src={U(a.heroPhoto, 640, 460)} alt={stripInline(a.title)} sizes={sizes} />
       </Link>
       <span className="ao-pill-row"><CatPill category={a.category} categoryAr={a.categoryAr} />{a.sponsored && <SponsoredPill />}</span>
       <h3 className="ao-card-title"><TitleLink a={a} /></h3>
@@ -101,7 +95,7 @@ export function AoLead({ a, flip = false, priority = false }: { a: Article; flip
   return (
     <article className={`ao-desk-lead${flip ? " flip" : ""} reveal`}>
       <Link className="ao-media" href={`/article/${a.slug}`}>
-        <Image fill priority={priority} src={U(a.heroPhoto, 900, 640)} alt={a.title} sizes="(min-width: 900px) 42vw, 100vw" />
+        <Image fill priority={priority} src={U(a.heroPhoto, 900, 640)} alt={stripInline(a.title)} sizes="(min-width: 900px) 42vw, 100vw" />
       </Link>
       <div className="ao-desk-lead-copy">
         <span className="ao-pill-row"><CatPill category={a.category} categoryAr={a.categoryAr} />{a.sponsored && <SponsoredPill />}</span>

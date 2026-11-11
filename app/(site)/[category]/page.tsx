@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import CategoryView from "@/components/CategoryView";
 import { getPublishedByCategory } from "@/lib/articles";
 import { getCategories, getCategory } from "@/lib/categories";
+import { stripInline } from "@/lib/inline";
 
 export const revalidate = 3600;
 
@@ -19,7 +20,7 @@ export async function generateMetadata(
   if (!cat) return {};
   return {
     title: `${cat.label} | SAUDI MAG`,
-    description: cat.deck,
+    description: stripInline(cat.deck),
   };
 }
 

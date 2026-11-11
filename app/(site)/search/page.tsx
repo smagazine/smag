@@ -3,10 +3,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { AoCard } from "@/components/Editorial";
 import type { Article } from "@/lib/articles";
+import { stripInline } from "@/lib/inline";
 
 function matches(a: Article, q: string): boolean {
   if (!q) return true;
-  const hay = [a.title, a.subtitle, a.author, a.category, ...(a.tags ?? [])]
+  const hay = [stripInline(a.title), stripInline(a.subtitle), a.author, a.category, ...(a.tags ?? [])]
     .join(" ")
     .toLowerCase();
   return hay.includes(q);

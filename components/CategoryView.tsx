@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { U, AoCard, AoLead } from "@/components/Editorial";
 import { getActiveSponsorship } from "@/lib/sponsors";
 import { safeJsonLd } from "@/lib/json-ld";
+import { InlineText, stripInline } from "@/lib/inline";
 import { ORG_ID, SITE_URL, WEBSITE_ID } from "@/lib/site";
 import type { Article } from "@/lib/articles";
 
@@ -46,7 +47,7 @@ export default async function CategoryView({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         name: config.title,
-        description: config.deck,
+        description: stripInline(config.deck),
         url: `${SITE_URL}/${route}`,
         // Reference the site-wide nodes emitted by app/(site)/layout.tsx
         // rather than restating the publisher on every category page.
@@ -58,7 +59,7 @@ export default async function CategoryView({
             "@type": "ListItem",
             position: i + 1,
             url: `${SITE_URL}/article/${a.slug}`,
-            name: a.title,
+            name: stripInline(a.title),
           })),
         },
         breadcrumb: {
@@ -93,8 +94,8 @@ export default async function CategoryView({
               >
                 {config.title}
               </h1>
-              <p className="deck" data-en={config.deck} data-ar={config.deckAr}>
-                {config.deck}
+              <p className="deck">
+                <InlineText text={config.deck} textAr={config.deckAr} />
               </p>
               {presenting && (() => {
                 const credit = (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getPublishedArticles, type Article } from "@/lib/articles";
 import { getCategories } from "@/lib/categories";
+import { stripInline } from "@/lib/inline";
 import { U, CatPill, SponsoredPill, Byline, TitleLink, SeeAll, AoLead } from "@/components/Editorial";
 
 export const revalidate = 3600;
@@ -13,7 +14,7 @@ function SlotCard({ a, sizes = "(min-width: 900px) 22vw, 100vw" }: { a: Article;
   return (
     <article className="ao-slot-card">
       <Link className="ao-media" href={`/article/${a.slug}`}>
-        <Image fill src={U(a.heroPhoto, 520, 380)} alt={a.title} sizes={sizes} />
+        <Image fill src={U(a.heroPhoto, 520, 380)} alt={stripInline(a.title)} sizes={sizes} />
       </Link>
       <div className="ao-slot-meta">
         <CatPill category={a.category} categoryAr={a.categoryAr} />
@@ -140,7 +141,7 @@ export default async function HomePage() {
         </div>
         <article className="ao-slot-feature">
           <Link className="ao-media" href={`/article/${featured.slug}`}>
-            <Image fill priority src={U(featured.heroPhoto, 1000, 720)} alt={featured.title} sizes="(min-width: 900px) 46vw, 100vw" />
+            <Image fill priority src={U(featured.heroPhoto, 1000, 720)} alt={stripInline(featured.title)} sizes="(min-width: 900px) 46vw, 100vw" />
           </Link>
           <div className="ao-slot-meta center">
             <CatPill category={featured.category} categoryAr={featured.categoryAr} />

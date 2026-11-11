@@ -1,6 +1,7 @@
 import { isAuthed } from "@/lib/auth";
 import { getAnalytics } from "@/lib/analytics";
 import { getArticles } from "@/lib/articles";
+import { stripInline } from "@/lib/inline";
 
 const DAYS_IN_SERIES = 30;
 
@@ -31,7 +32,7 @@ export async function GET() {
   const topArticles = Object.entries(articleViews)
     .map(([slug, views]) => {
       const article = articles.find((a) => a.slug === slug);
-      return { slug, views, title: article?.title ?? slug, category: article?.category ?? "" };
+      return { slug, views, title: article ? stripInline(article.title) : slug, category: article?.category ?? "" };
     })
     .sort((a, b) => b.views - a.views)
     .slice(0, 20);

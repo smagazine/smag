@@ -1156,7 +1156,9 @@ p {
 
 /* Inline links editors add to body text ([label](url)); the share bar and
    tag pills style their own anchors. */
-.article-body :is(p, h2, blockquote, figcaption) a {
+.article-body :is(p, h2, blockquote, figcaption) a,
+.article-header :is(h1, .article-subtitle) a,
+.section-header .deck a {
   text-decoration: underline;
   text-decoration-color: var(--color-gold);
   text-decoration-thickness: 2px;
@@ -1164,7 +1166,9 @@ p {
   transition: color 0.2s ease;
 }
 
-.article-body :is(p, h2, blockquote, figcaption) a:hover {
+.article-body :is(p, h2, blockquote, figcaption) a:hover,
+.article-header :is(h1, .article-subtitle) a:hover,
+.section-header .deck a:hover {
   color: var(--color-gold);
 }
 
